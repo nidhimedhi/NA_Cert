@@ -1,0 +1,67 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tahsildar Portal – LandScope</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'tahsildar/css/tahsildar.css' %}">
+</head>
+<body>
+
+<div class="t-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="t-sidebar">
+    <div class="t-sidebar-brand">
+      <span class="t-brand-icon">⚖️</span>
+      <div>
+        <div class="t-brand-name">LandScope</div>
+        <div class="t-brand-sub">Tahsildar Portal</div>
+      </div>
+    </div>
+
+    <nav class="t-nav">
+      <a href="/tahsildar/dashboard/" class="t-nav-item {% block nav_dashboard %}{% endblock %}">
+        <span class="t-nav-icon">📊</span> Dashboard
+      </a>
+      <a href="/tahsildar/upcoming/" class="t-nav-item {% block nav_upcoming %}{% endblock %}">
+        <span class="t-nav-icon">📋</span> Upcoming Applications
+      </a>
+      <a href="/tahsildar/approved/" class="t-nav-item {% block nav_approved %}{% endblock %}">
+        <span class="t-nav-icon">✅</span> Approved
+      </a>
+      <a href="/tahsildar/rejected/" class="t-nav-item {% block nav_rejected %}{% endblock %}">
+        <span class="t-nav-icon">❌</span> Rejected
+      </a>
+    </nav>
+
+    <div class="t-sidebar-footer">
+      <div class="t-user-info">
+        <div class="t-user-avatar">{{ request.user.username|first|upper }}</div>
+        <div>
+          <div class="t-user-name">{{ request.user.username }}</div>
+          <div class="t-user-role">Tahsildar</div>
+        </div>
+      </div>
+      <a href="/tahsildar/logout/" class="t-logout-btn">Logout →</a>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="t-main">
+    <div class="t-content">
+      {% block content %}{% endblock %}
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="t-footer">
+      <p>© 2026 LandScope Tahsildar Portal. All rights reserved.</p>
+    </footer>
+  </main>
+
+</div>
+
+</body>
+</html>

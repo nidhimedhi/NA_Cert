@@ -1,0 +1,454 @@
+{% extends 'portal/base.html' %}
+{% load static %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/upload.css' %}">
+
+<style>
+  /* DIGITAL SIGNATURE */
+  .signature-section {
+    background: #fffdf8;
+    border: 1px solid #e2cfa8;
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .signature-header {
+    padding: 16px 20px;
+    background: #fdf6ec;
+    border-bottom: 1px solid #e2cfa8;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .signature-header h4 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #5c3d1e;
+    margin: 0;
+  }
+  .signature-header span {
+    font-size: 11px;
+    color: #dc2626;
+    font-weight: 600;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .signature-body { padding: 20px; }
+  .signature-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .sig-tab {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid #e2cfa8;
+    background: #fdf6ec;
+    color: #7a6048;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+  }
+  .sig-tab.active {
+    background: #5c3d1e;
+    color: white;
+    border-color: #5c3d1e;
+  }
+
+  /* DRAW signature */
+  .sig-draw-panel { display: none; }
+  .sig-draw-panel.active { display: block; }
+  #signatureCanvas {
+    width: 100%;
+    height: 150px;
+    border: 2px dashed #e2cfa8;
+    border-radius: 10px;
+    cursor: crosshair;
+    background: #fff;
+    display: block;
+    touch-action: none;
+  }
+  #signatureCanvas.signed { border-color: #16a34a; border-style: solid; }
+  .sig-canvas-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .sig-clear-btn {
+    padding: 6px 14px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #dc2626;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  /* TYPE signature */
+  .sig-type-panel { display: none; }
+  .sig-type-panel.active { display: block; }
+  .sig-type-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #e2cfa8;
+    border-radius: 10px;
+    font-size: 24px;
+    font-family: 'Dancing Script', cursive, serif;
+    color: #2c1f0e;
+    background: #fdf6ec;
+    outline: none;
+    text-align: center;
+  }
+  .sig-type-input:focus { border-color: #c8922a; }
+  .sig-preview {
+    margin-top: 12px;
+    padding: 16px;
+    background: #fff;
+    border: 2px solid #e2cfa8;
+    border-radius: 10px;
+    min-height: 60px;
+    text-align: center;
+    font-size: 32px;
+    font-family: 'Dancing Script', cursive, serif;
+    color: #2c1f0e;
+  }
+
+  /* UPLOAD signature */
+  .sig-upload-panel { display: none; }
+  .sig-upload-panel.active { display: block; }
+  .sig-upload-zone {
+    border: 2px dashed #e2cfa8;
+    border-radius: 10px;
+    padding: 24px;
+    text-align: center;
+    cursor: pointer;
+    position: relative;
+    background: #fdf6ec;
+    transition: all 0.2s;
+  }
+  .sig-upload-zone:hover { border-color: #c8922a; background: #f5e6c8; }
+  .sig-upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .sig-upload-zone p { font-size: 13px; color: #7a6048; font-family: 'DM Sans', sans-serif; }
+
+  .sig-status {
+    margin-top: 10px;
+    font-size: 12px;
+    font-family: 'DM Sans', sans-serif;
+    color: #7a6048;
+    text-align: center;
+  }
+  .sig-status.done { color: #16a34a; font-weight: 600; }
+</style>
+
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+
+<div class="apply-page">
+
+  <div class="back-bar">
+    <a href="/upload/" class="back-btn">← Back to Land Types</a>
+  </div>
+
+  <div class="apply-header">
+    <div class="apply-icon">📋</div>
+    <h2>Upload Your Documents</h2>
+    <p>Applying for: <strong>{{ land_type }}</strong></p>
+    <p class="apply-subtext">Upload each document in its own section. All are <span class="req-badge">Required</span> before submitting.</p>
+  </div>
+
+  {% if success %}
+  <div class="success-box">
+    <div class="success-icon">🎉</div>
+    <h3>Application Submitted!</h3>
+    <p>Reference Number: <strong>{{ reference }}</strong></p>
+    <p>Category: <strong>{{ land_type }}</strong></p>
+    <p>You will receive a confirmation on your registered email within 15–30 working days.</p>
+    <a href="/upload/" class="back-home-btn">← Back to Land Types</a>
+  </div>
+
+  {% else %}
+
+  {% if documents %}
+  <form method="POST" enctype="multipart/form-data" action="/apply/?type={{ land_type }}">
+    {% csrf_token %}
+    <input type="hidden" name="land_type" value="{{ land_type }}">
+    <input type="hidden" name="signature_data" id="signatureDataInput">
+
+    <!-- DOCUMENT UPLOAD SECTIONS -->
+    <div class="doc-upload-grid">
+      {% for doc in documents %}
+      <div class="doc-upload-card">
+        <div class="doc-upload-header">
+          <div class="doc-upload-num">{{ forloop.counter }}</div>
+          <div class="doc-upload-info">
+            <h4>{{ doc }}</h4>
+            <span class="req-badge">Required</span>
+          </div>
+          <div class="doc-upload-status" id="status-{{ forloop.counter }}">⬜ Not uploaded</div>
+        </div>
+        <div class="doc-upload-zone" id="zone-{{ forloop.counter }}">
+          <input type="file" name="doc_{{ forloop.counter }}" accept=".pdf,.jpg,.jpeg,.png"
+            onchange="handleSingleFile(this, {{ forloop.counter }})">
+          <div class="duz-icon">📂</div>
+          <p class="duz-text">Click or drag file here</p>
+          <p class="duz-hint">PDF, JPG, PNG — max 5MB</p>
+        </div>
+        <div class="doc-file-preview" id="preview-{{ forloop.counter }}"></div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- DIGITAL SIGNATURE SECTION -->
+    <div class="signature-section">
+      <div class="signature-header">
+        <span style="font-size:20px;">✍️</span>
+        <h4>Digital Signature</h4>
+        <span>Required</span>
+      </div>
+      <div class="signature-body">
+        <p style="font-size:13px; color:#7a6048; font-family:'DM Sans',sans-serif; margin-bottom:14px;">
+          Your digital signature confirms that all submitted documents are genuine and accurate.
+          Choose your preferred method below.
+        </p>
+
+        <!-- TABS -->
+        <div class="signature-tabs">
+          <div class="sig-tab active" onclick="switchSigTab('draw', this)">✏️ Draw</div>
+          <div class="sig-tab" onclick="switchSigTab('type', this)">⌨️ Type</div>
+          <div class="sig-tab" onclick="switchSigTab('upload', this)">📁 Upload</div>
+        </div>
+
+        <!-- DRAW -->
+        <div class="sig-draw-panel active" id="sig-draw">
+          <p style="font-size:12px; color:#7a6048; font-family:'DM Sans',sans-serif; margin-bottom:8px;">
+            Draw your signature in the box below using mouse or touch:
+          </p>
+          <canvas id="signatureCanvas" width="600" height="150"></canvas>
+          <div class="sig-canvas-actions">
+            <button type="button" class="sig-clear-btn" onclick="clearSignature()">✕ Clear</button>
+          </div>
+          <div class="sig-status" id="drawStatus">⬜ Signature not drawn</div>
+        </div>
+
+        <!-- TYPE -->
+        <div class="sig-type-panel" id="sig-type">
+          <p style="font-size:12px; color:#7a6048; font-family:'DM Sans',sans-serif; margin-bottom:8px;">
+            Type your full name as signature:
+          </p>
+          <input type="text" class="sig-type-input" id="typeSignature"
+            placeholder="Type your name here..."
+            oninput="updateTypePreview(this.value)">
+          <div class="sig-preview" id="typePreview">Your signature will appear here</div>
+          <div class="sig-status" id="typeStatus">⬜ Signature not typed</div>
+        </div>
+
+        <!-- UPLOAD -->
+        <div class="sig-upload-panel" id="sig-upload">
+          <p style="font-size:12px; color:#7a6048; font-family:'DM Sans',sans-serif; margin-bottom:8px;">
+            Upload an image of your physical signature:
+          </p>
+          <div class="sig-upload-zone">
+            <input type="file" name="signature_file" accept=".jpg,.jpeg,.png"
+              onchange="handleSigUpload(this)">
+            <div style="font-size:28px; margin-bottom:8px;">🖊️</div>
+            <p>Click or drag your signature image here</p>
+            <p style="font-size:11px; margin-top:4px;">JPG, PNG accepted</p>
+          </div>
+          <div class="sig-status" id="uploadStatus">⬜ Signature not uploaded</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- PROGRESS BAR -->
+    <div class="upload-progress-bar">
+      <div class="upb-label">
+        <span>Documents Uploaded</span>
+        <span id="progress-count">0 / {{ documents|length }}</span>
+      </div>
+      <div class="upb-track">
+        <div class="upb-fill" id="progress-fill" style="width: 0%"></div>
+      </div>
+    </div>
+
+    <div class="apply-actions">
+      <a href="/upload/" class="cancel-btn">Cancel</a>
+      <button type="submit" class="submit-btn" onclick="return prepareSubmit()">
+        ✅ Submit Application
+      </button>
+    </div>
+  </form>
+
+  {% else %}
+  <div class="no-docs-box">
+    <p>⚠️ No documents found for "<strong>{{ land_type }}</strong>".</p>
+    <a href="/upload/" class="back-home-btn">← Go Back and Select Land Type</a>
+  </div>
+  {% endif %}
+
+  {% endif %}
+</div>
+
+<script>
+  const totalDocs = {{ documents|length }};
+  const uploadedDocs = new Set();
+  let currentSigTab = 'draw';
+  let isDrawing = false;
+  let hasDrawnSignature = false;
+
+  // ── DOCUMENT UPLOAD ──
+  function handleSingleFile(input, num) {
+    const file = input.files[0];
+    if (!file) return;
+    const zone    = document.getElementById(`zone-${num}`);
+    const preview = document.getElementById(`preview-${num}`);
+    const status  = document.getElementById(`status-${num}`);
+    zone.classList.add('has-file');
+    const size = file.size < 1024*1024
+      ? (file.size/1024).toFixed(1)+' KB'
+      : (file.size/1024/1024).toFixed(1)+' MB';
+    const icon = file.name.endsWith('.pdf') ? '📄' : '🖼️';
+    preview.innerHTML = `
+      <div class="file-preview-row">
+        <span class="file-icon">${icon}</span>
+        <span class="file-name">${file.name}</span>
+        <span class="file-size">${size}</span>
+        <button type="button" class="file-remove" onclick="removeFile(${num})">✕</button>
+      </div>`;
+    status.innerHTML = '✅ Uploaded';
+    status.classList.add('uploaded');
+    uploadedDocs.add(num);
+    updateProgress();
+  }
+
+  function removeFile(num) {
+    const zone    = document.getElementById(`zone-${num}`);
+    const preview = document.getElementById(`preview-${num}`);
+    const status  = document.getElementById(`status-${num}`);
+    zone.querySelector('input[type=file]').value = '';
+    preview.innerHTML = '';
+    zone.classList.remove('has-file');
+    status.innerHTML = '⬜ Not uploaded';
+    status.classList.remove('uploaded');
+    uploadedDocs.delete(num);
+    updateProgress();
+  }
+
+  function updateProgress() {
+    const count = uploadedDocs.size;
+    document.getElementById('progress-count').textContent = `${count} / ${totalDocs}`;
+    document.getElementById('progress-fill').style.width = `${(count/totalDocs)*100}%`;
+  }
+
+  document.querySelectorAll('.doc-upload-zone').forEach(zone => {
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+    zone.addEventListener('drop', e => {
+      e.preventDefault();
+      zone.classList.remove('drag-over');
+      const input = zone.querySelector('input[type=file]');
+      const dt = new DataTransfer();
+      dt.items.add(e.dataTransfer.files[0]);
+      input.files = dt.files;
+      const num = parseInt(zone.id.split('-')[1]);
+      handleSingleFile(input, num);
+    });
+  });
+
+  // ── SIGNATURE TABS ──
+  function switchSigTab(tab, el) {
+    currentSigTab = tab;
+    document.querySelectorAll('.sig-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.querySelectorAll('.sig-draw-panel, .sig-type-panel, .sig-upload-panel')
+      .forEach(p => p.classList.remove('active'));
+    document.getElementById(`sig-${tab}`).classList.add('active');
+  }
+
+  // ── DRAW SIGNATURE ──
+  const canvas = document.getElementById('signatureCanvas');
+  const ctx    = canvas.getContext('2d');
+  ctx.strokeStyle = '#2c1f0e';
+  ctx.lineWidth   = 2;
+  ctx.lineCap     = 'round';
+  ctx.lineJoin    = 'round';
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    if (e.touches) {
+      return {
+        x: (e.touches[0].clientX - rect.left) * scaleX,
+        y: (e.touches[0].clientY - rect.top)  * scaleY
+      };
+    }
+    return {
+      x: (e.clientX - rect.left) * scaleX,
+      y: (e.clientY - rect.top)  * scaleY
+    };
+  }
+
+  canvas.addEventListener('mousedown',  e => { isDrawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); });
+  canvas.addEventListener('mousemove',  e => { if (!isDrawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); hasDrawnSignature = true; canvas.classList.add('signed'); document.getElementById('drawStatus').textContent = '✅ Signature drawn'; document.getElementById('drawStatus').className = 'sig-status done'; });
+  canvas.addEventListener('mouseup',    () => { isDrawing = false; });
+  canvas.addEventListener('mouseleave', () => { isDrawing = false; });
+  canvas.addEventListener('touchstart', e => { e.preventDefault(); isDrawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }, {passive:false});
+  canvas.addEventListener('touchmove',  e => { e.preventDefault(); if (!isDrawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); hasDrawnSignature = true; canvas.classList.add('signed'); document.getElementById('drawStatus').textContent = '✅ Signature drawn'; document.getElementById('drawStatus').className = 'sig-status done'; }, {passive:false});
+  canvas.addEventListener('touchend',   () => { isDrawing = false; });
+
+  function clearSignature() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    hasDrawnSignature = false;
+    canvas.classList.remove('signed');
+    document.getElementById('drawStatus').textContent = '⬜ Signature not drawn';
+    document.getElementById('drawStatus').className = 'sig-status';
+  }
+
+  // ── TYPE SIGNATURE ──
+  function updateTypePreview(val) {
+    const preview = document.getElementById('typePreview');
+    const status  = document.getElementById('typeStatus');
+    preview.textContent = val || 'Your signature will appear here';
+    if (val.trim()) {
+      status.textContent  = '✅ Signature typed';
+      status.className    = 'sig-status done';
+    } else {
+      status.textContent  = '⬜ Signature not typed';
+      status.className    = 'sig-status';
+    }
+  }
+
+  // ── UPLOAD SIGNATURE ──
+  function handleSigUpload(input) {
+    if (input.files[0]) {
+      const status = document.getElementById('uploadStatus');
+      status.textContent = `✅ ${input.files[0].name} uploaded`;
+      status.className   = 'sig-status done';
+    }
+  }
+
+  // ── PREPARE SUBMIT ──
+  function prepareSubmit() {
+    // Collect signature data
+    if (currentSigTab === 'draw' && hasDrawnSignature) {
+      document.getElementById('signatureDataInput').value = canvas.toDataURL();
+    } else if (currentSigTab === 'type') {
+      const typed = document.getElementById('typeSignature').value.trim();
+      document.getElementById('signatureDataInput').value = 'typed:' + typed;
+    }
+    return true;
+  }
+</script>
+
+{% endblock %}

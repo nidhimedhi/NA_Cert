@@ -1,0 +1,50 @@
+{% extends 'collector/base.html' %}
+{% block nav_approved %}{% if not is_rejected %}active{% endif %}{% endblock %}
+{% block nav_rejected %}{% if is_rejected %}active{% endif %}{% endblock %}
+
+{% block content %}
+<div class="c-page-header">
+  <div>
+    <h1>{% if is_rejected %}Rejected Applications{% else %}Approved Applications{% endif %}</h1>
+    <p>{% if is_rejected %}Applications rejected by Collector{% else %}NA Certificates granted by Collector{% endif %}</p>
+  </div>
+  <div class="c-count-badge {% if is_rejected %}c-count-red{% else %}c-count-green{% endif %}">
+    {{ applications|length }} {% if is_rejected %}Rejected{% else %}Approved{% endif %}
+  </div>
+</div>
+
+<div class="c-table-box">
+  <table class="c-table">
+    <thead>
+      <tr>
+        <th>Reference No</th>
+        <th>Applicant</th>
+        <th>Land Type</th>
+        <th>Submitted</th>
+        <th>Reviewed</th>
+        {% if is_rejected %}<th>Reason</th>{% endif %}
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for app in applications %}
+      <tr>
+        <td><span class="c-ref">{{ app.reference_no }}</span></td>
+        <td>{{ app.user_email }}</td>
+        <td>{{ app.land_type }}</td>
+        <td>{{ app.submitted_at|slice:":10" }}</td>
+        <td>{{ app.reviewed_at|slice:":10" }}</td>
+        {% if is_rejected %}
+        <td style="max-width:200px; font-size:12px; color:#dc2626;">{{ app.rejection_reason }}</td>
+        {% endif %}
+        <td><span class="c-badge c-badge-{{ app.status }}">{{ app.status|title }}</span></td>
+        <td><a href="/collector/application/{{ app.id }}/" class="c-view-btn">🔍 View</a></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="8" class="c-empty">No applications found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Collector Portal – LandScope</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'collector/css/collector.css' %}">
+</head>
+<body>
+
+<div class="c-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="c-sidebar">
+    <div class="c-brand">
+      <span class="c-brand-icon">🏛️</span>
+      <div>
+        <div class="c-brand-name">LandScope</div>
+        <div class="c-brand-sub">Collector Portal</div>
+      </div>
+    </div>
+
+    <nav class="c-nav">
+      <a href="/collector/dashboard/"    class="c-nav-item {% block nav_dash %}{% endblock %}">
+        <span>📊</span> Dashboard
+      </a>
+      <a href="/collector/applications/" class="c-nav-item {% block nav_apps %}{% endblock %}">
+        <span>📋</span> Pending Review
+      </a>
+      <a href="/collector/approved/"     class="c-nav-item {% block nav_approved %}{% endblock %}">
+        <span>✅</span> Approved
+      </a>
+      <a href="/collector/rejected/"     class="c-nav-item {% block nav_rejected %}{% endblock %}">
+        <span>❌</span> Rejected
+      </a>
+    </nav>
+
+    <div class="c-sidebar-footer">
+      <div class="c-user">
+        <div class="c-avatar">{{ request.user.username|first|upper }}</div>
+        <div>
+          <div class="c-user-name">{{ request.user.username }}</div>
+          <div class="c-user-role">District Collector</div>
+        </div>
+      </div>
+      <a href="/collector/logout/" class="c-logout">Logout →</a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="c-main">
+    <div class="c-content">
+      {% block content %}{% endblock %}
+    </div>
+    <footer class="c-footer">
+      © 2026 LandScope Collector Portal. All rights reserved.
+    </footer>
+  </main>
+
+</div>
+</body>
+</html>

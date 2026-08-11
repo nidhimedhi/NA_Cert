@@ -1,0 +1,110 @@
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+from .supabase_client import (
+    select_all, select_filter, select_one, update, get_documents
+)
+
+
+def collector_login(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        if user:
+            login(request, user)
+            return redirect('/collector/dashboard/')
+        return render(request, 'collector/login.html', {
+            'error': 'Invalid username or password.'
+        })
+    return render(request, 'collector/login.html')
+
+
+def collector_logout(request):
+    logout(request)
+    return redirect('/collector/login/')
+
+
+@login_required(login_url='/collector/login/')
+def dashboard(request):
+    all_apps  = select_all('na_applications')
+    all_apps  = all_apps if isinstance(all_apps, list) else []
+
+    total        = len(all_apps)
+    pending_tah  = len([a for a in all_apps if a.get('status') == 'pending'])
+    approved_tah = len([a for a in all_apps if a.get('status') == 'approved'])
+    col_approved = len([a for a in all_apps if a.get('status') == 'collector_approved'])
+    col_rejected = len([a for a in all_apps if a.get('status') == 'collector_rejected'])
+    recent       = all_apps[:5]
+
+    return render(request, 'collector/dashboard.html', {
+        'total':        total,
+        'pending_tah':  pending_tah,
+        'approved_tah': approved_tah,
+        'col_approved': col_approved,
+        'col_rejected': col_rejected,
+        'recent':       recent,
+    })
+
+
+@login_required(login_url='/collector/login/')
+def applications(request):
+    # Collector sees only Tahsildar-approved applications
+    apps = select_filter('na_applications', 'status', 'approved')
+    apps = apps if isinstance(apps, list) else []
+    return render(request, 'collector/applications.html', {
+        'applications': apps
+    })
+
+
+@login_required(login_url='/collector/login/')
+def application_detail(request, app_id):
+    app  = select_one('na_applications', 'id', app_id)
+    docs = get_documents(app_id)
+    docs = docs if isinstance(docs, list) else []
+    return render(request, 'collector/application_detail.html', {
+        'app':       app,
+        'documents': docs,
+    })
+
+
+@login_required(login_url='/collector/login/')
+def approve_application(request, app_id):
+    if request.method == 'POST':
+        update('na_applications', 'id', app_id, {
+            'status':      'collector_approved',
+            'reviewed_at': timezone.now().isoformat(),
+        })
+    return redirect('/collector/applications/')
+
+
+@login_required(login_url='/collector/login/')
+def reject_application(request, app_id):
+    if request.method == 'POST':
+        reason = request.POST.get('reason', '')
+        update('na_applications', 'id', app_id, {
+            'status':           'collector_rejected',
+            'rejection_reason': reason,
+            'reviewed_at':      timezone.now().isoformat(),
+        })
+    return redirect('/collector/applications/')
+
+
+@login_required(login_url='/collector/login/')
+def approved(request):
+    apps = select_filter('na_applications', 'status', 'collector_approved')
+    apps = apps if isinstance(apps, list) else []
+    return render(request, 'collector/approved.html', {
+        'applications': apps
+    })
+
+
+@login_required(login_url='/collector/login/')
+def rejected(request):
+    apps = select_filter('na_applications', 'status', 'collector_rejected')
+    apps = apps if isinstance(apps, list) else []
+    return render(request, 'collector/approved.html', {
+        'applications': apps,
+        'is_rejected':  True,
+    })

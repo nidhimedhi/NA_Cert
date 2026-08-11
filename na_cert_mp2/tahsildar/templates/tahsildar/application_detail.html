@@ -1,0 +1,177 @@
+{% extends 'tahsildar/base.html' %}
+
+{% block content %}
+<div class="t-page-header">
+  <div>
+    <a href="/tahsildar/upcoming/" class="t-back-btn">← Back</a>
+    <h1>Application Detail</h1>
+    <p>Full details and uploaded documents</p>
+  </div>
+  {% if app %}
+  <span class="t-badge t-badge-{{ app.status }}">{{ app.status|title }}</span>
+  {% endif %}
+</div>
+
+{% if app %}
+
+<!-- APPLICATION INFO -->
+<div class="t-detail-card" style="margin-bottom: 24px;">
+  <div class="t-detail-card-title">📋 Application Info</div>
+  <div class="t-detail-rows">
+    <div class="t-detail-row">
+      <span class="t-detail-label">Reference No</span>
+      <span class="t-ref">{{ app.reference_no }}</span>
+    </div>
+    <div class="t-detail-row">
+      <span class="t-detail-label">Applicant Email</span>
+      <span class="t-detail-value">{{ app.user_email }}</span>
+    </div>
+    <div class="t-detail-row">
+      <span class="t-detail-label">Land Type</span>
+      <span class="t-detail-value">{{ app.land_type }}</span>
+    </div>
+    <div class="t-detail-row">
+      <span class="t-detail-label">Status</span>
+      <span class="t-badge t-badge-{{ app.status }}">{{ app.status|title }}</span>
+    </div>
+    <div class="t-detail-row">
+      <span class="t-detail-label">Submitted On</span>
+      <span class="t-detail-value">{{ app.submitted_at|slice:":10" }}</span>
+    </div>
+    {% if app.reviewed_at %}
+    <div class="t-detail-row">
+      <span class="t-detail-label">Reviewed On</span>
+      <span class="t-detail-value">{{ app.reviewed_at|slice:":10" }}</span>
+    </div>
+    {% endif %}
+    {% if app.rejection_reason %}
+    <div class="t-detail-row">
+      <span class="t-detail-label">Rejection Reason</span>
+      <span class="t-detail-value" style="color:#dc2626;">{{ app.rejection_reason }}</span>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- UPLOADED DOCUMENTS -->
+<div class="t-section">
+  <div class="t-section-header">
+    <h2>📁 Uploaded Documents</h2>
+    <span class="t-count-badge">{{ documents|length }} Documents</span>
+  </div>
+
+  {% if documents %}
+  <div class="t-docs-grid">
+    {% for doc in documents %}
+    <div class="t-doc-card">
+
+      <!-- DOC HEADER -->
+      <div class="t-doc-card-header">
+        <div class="t-doc-icon">📄</div>
+        <div>
+          <div class="t-doc-name">{{ doc.document_name }}</div>
+          <div class="t-doc-date">{{ doc.uploaded_at|slice:":10" }}</div>
+        </div>
+        {% if doc.file_url %}
+        <a href="{{ doc.file_url }}" target="_blank" class="t-view-file-btn">
+          📥 View File
+        </a>
+        {% endif %}
+      </div>
+
+      <!-- EXTRACTED 7/12 FIELDS -->
+      {% if doc.village or doc.taluka or doc.district or doc.satbara_no or doc.gat_no or doc.owner_names %}
+      <div class="t-extracted-section">
+        <div class="t-extracted-title">🔍 Extracted Data</div>
+        <div class="t-extracted-grid">
+          {% if doc.village %}
+          <div class="t-extracted-item">
+            <span class="t-extracted-label">Village (गाव)</span>
+            <span class="t-extracted-value">{{ doc.village }}</span>
+          </div>
+          {% endif %}
+          {% if doc.taluka %}
+          <div class="t-extracted-item">
+            <span class="t-extracted-label">Taluka (तालुका)</span>
+            <span class="t-extracted-value">{{ doc.taluka }}</span>
+          </div>
+          {% endif %}
+          {% if doc.district %}
+          <div class="t-extracted-item">
+            <span class="t-extracted-label">District (जिल्हा)</span>
+            <span class="t-extracted-value">{{ doc.district }}</span>
+          </div>
+          {% endif %}
+          {% if doc.gat_no %}
+          <div class="t-extracted-item">
+            <span class="t-extracted-label">Gat No. (गट नंबर)</span>
+            <span class="t-extracted-value">{{ doc.gat_no }}</span>
+          </div>
+          {% endif %}
+          {% if doc.satbara_no %}
+          <div class="t-extracted-item">
+            <span class="t-extracted-label">Satbara No.</span>
+            <span class="t-extracted-value">{{ doc.satbara_no }}</span>
+          </div>
+          {% endif %}
+          {% if doc.owner_names %}
+          <div class="t-extracted-item" style="grid-column: 1/-1;">
+            <span class="t-extracted-label">Owner Names (नाव)</span>
+            <span class="t-extracted-value">{{ doc.owner_names }}</span>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- RAW TEXT -->
+      {% if doc.raw_json %}
+      <div class="t-raw-section">
+        <div class="t-raw-title">📝 Full Extracted Text</div>
+        <pre class="t-raw-text">{{ doc.raw_json }}</pre>
+      </div>
+      {% endif %}
+
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div class="t-empty-state">
+    <div class="t-empty-icon">📂</div>
+    <h3>No documents found</h3>
+    <p>No documents were uploaded for this application.</p>
+  </div>
+  {% endif %}
+</div>
+
+<!-- ACTION BUTTONS -->
+{% if app.status == 'pending' %}
+<div class="t-action-section">
+  <form method="POST" action="/tahsildar/approve/{{ app.id }}/">
+    {% csrf_token %}
+    <button type="submit" class="t-approve-btn-large">✅ Approve Application</button>
+  </form>
+
+  <div class="t-reject-section" style="margin-top: 20px;">
+    <div class="t-reject-section-title">❌ Reject this Application</div>
+    <p class="t-reject-section-sub">Write the reason clearly. The applicant will be notified.</p>
+    <form method="POST" action="/tahsildar/reject/{{ app.id }}/">
+      {% csrf_token %}
+      <textarea name="reason" class="t-reject-textarea"
+        placeholder="Write rejection reason here..." rows="4" required></textarea>
+      <button type="submit" class="t-reject-submit-btn">❌ Submit Rejection</button>
+    </form>
+  </div>
+</div>
+{% endif %}
+
+{% else %}
+<div class="t-empty-state">
+  <div class="t-empty-icon">⚠️</div>
+  <h3>Application not found</h3>
+  <a href="/tahsildar/upcoming/" class="back-home-btn">← Go Back</a>
+</div>
+{% endif %}
+
+{% endblock %}

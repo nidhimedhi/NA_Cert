@@ -1,0 +1,58 @@
+{% extends 'tahsildar/base.html' %}
+{% block nav_rejected %}active{% endblock %}
+
+{% block content %}
+<div class="t-page-header">
+  <div>
+    <h1>Rejected Applications</h1>
+    <p>Applications that were rejected with reasons</p>
+  </div>
+  <div class="t-count-badge t-count-red">{{ applications|length }} Rejected</div>
+</div>
+
+<div class="t-cards-grid">
+  {% for app in applications %}
+  <div class="t-app-card t-app-card-rejected">
+
+    <div class="t-app-card-header">
+      <div>
+        <span class="t-ref">{{ app.reference_no }}</span>
+        <span class="t-badge t-badge-rejected">Rejected</span>
+      </div>
+      <div class="t-app-date">{{ app.reviewed_at|date:"d M Y" }}</div>
+    </div>
+
+    <div class="t-app-body">
+      <div class="t-app-row">
+        <span class="t-app-label">Applicant</span>
+        <span class="t-app-value">{{ app.applicant_name }}</span>
+      </div>
+      <div class="t-app-row">
+        <span class="t-app-label">Email</span>
+        <span class="t-app-value">{{ app.email }}</span>
+      </div>
+      <div class="t-app-row">
+        <span class="t-app-label">Land Type</span>
+        <span class="t-app-value">{{ app.land_type }}</span>
+      </div>
+      <div class="t-app-row">
+        <span class="t-app-label">Submitted</span>
+        <span class="t-app-value">{{ app.submitted_at|date:"d M Y" }}</span>
+      </div>
+    </div>
+
+    <div class="t-rejection-reason">
+      <div class="t-reason-label">📝 Rejection Reason</div>
+      <div class="t-reason-text">{{ app.rejection_reason|default:"No reason provided." }}</div>
+    </div>
+
+  </div>
+  {% empty %}
+  <div class="t-empty-state">
+    <div class="t-empty-icon">✅</div>
+    <h3>No rejections!</h3>
+    <p>No applications have been rejected yet.</p>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

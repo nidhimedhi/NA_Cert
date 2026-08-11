@@ -1,0 +1,81 @@
+{% extends 'tahsildar/base.html' %}
+{% block nav_upcoming %}active{% endblock %}
+
+{% block content %}
+<div class="t-page-header">
+  <div>
+    <h1>Upcoming Applications</h1>
+    <p>Review and action pending NA Certificate applications</p>
+  </div>
+  <div class="t-count-badge">{{ applications|length }} Pending</div>
+</div>
+
+<div class="t-cards-grid">
+  {% for app in applications %}
+  <div class="t-app-card">
+
+    <div class="t-app-card-header">
+      <div>
+        <span class="t-ref">{{ app.reference_no }}</span>
+        <span class="t-badge t-badge-pending">Pending</span>
+      </div>
+      <div class="t-app-date">{{ app.submitted_at|slice:":10" }}</div>
+    </div>
+
+    <div class="t-app-body">
+      <div class="t-app-row">
+        <span class="t-app-label">Applicant Email</span>
+        <span class="t-app-value">{{ app.user_email }}</span>
+      </div>
+      <div class="t-app-row">
+        <span class="t-app-label">Land Type</span>
+        <span class="t-app-value">{{ app.land_type }}</span>
+      </div>
+      <div class="t-app-row">
+        <span class="t-app-label">Submitted</span>
+        <span class="t-app-value">{{ app.submitted_at|slice:":10" }}</span>
+      </div>
+    </div>
+
+    <!-- VIEW DETAILS BUTTON -->
+    <div style="padding: 0 20px 12px;">
+      <a href="/tahsildar/application/{{ app.id }}/" class="t-detail-btn">
+        🔍 View Documents & Extracted Data
+      </a>
+    </div>
+
+    <!-- APPROVE -->
+    <div class="t-app-actions">
+      <form method="POST" action="/tahsildar/approve/{{ app.id }}/" style="flex:1">
+        {% csrf_token %}
+        <button type="submit" class="t-approve-btn">✅ Approve</button>
+      </form>
+    </div>
+
+    <!-- REJECT SECTION -->
+    <div class="t-reject-section">
+      <div class="t-reject-section-title">❌ Reject this Application</div>
+      <p class="t-reject-section-sub">Write the reason clearly. The applicant will be notified.</p>
+      <form method="POST" action="/tahsildar/reject/{{ app.id }}/">
+        {% csrf_token %}
+        <textarea
+          name="reason"
+          class="t-reject-textarea"
+          placeholder="e.g. Incomplete documents. The 7/12 Utara document is missing or unclear..."
+          rows="4"
+          required
+        ></textarea>
+        <button type="submit" class="t-reject-submit-btn">❌ Submit Rejection</button>
+      </form>
+    </div>
+
+  </div>
+  {% empty %}
+  <div class="t-empty-state">
+    <div class="t-empty-icon">🎉</div>
+    <h3>All caught up!</h3>
+    <p>No pending applications at the moment.</p>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

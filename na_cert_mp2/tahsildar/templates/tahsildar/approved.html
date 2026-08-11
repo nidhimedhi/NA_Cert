@@ -1,0 +1,43 @@
+{% extends 'tahsildar/base.html' %}
+{% block nav_approved %}active{% endblock %}
+
+{% block content %}
+<div class="t-page-header">
+  <div>
+    <h1>Approved Applications</h1>
+    <p>All successfully approved NA Certificate applications</p>
+  </div>
+  <div class="t-count-badge t-count-green">{{ applications|length }} Approved</div>
+</div>
+
+<div class="t-table-box">
+  <table class="t-table">
+    <thead>
+      <tr>
+        <th>Reference No</th>
+        <th>Applicant</th>
+        <th>Email</th>
+        <th>Land Type</th>
+        <th>Submitted</th>
+        <th>Approved On</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for app in applications %}
+      <tr>
+        <td><span class="t-ref">{{ app.reference_no }}</span></td>
+        <td>{{ app.applicant_name }}</td>
+        <td>{{ app.email }}</td>
+        <td>{{ app.land_type }}</td>
+        <td>{{ app.submitted_at|date:"d M Y" }}</td>
+        <td>{{ app.reviewed_at|date:"d M Y" }}</td>
+        <td><span class="t-badge t-badge-approved">Approved</span></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7" class="t-empty">No approved applications yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

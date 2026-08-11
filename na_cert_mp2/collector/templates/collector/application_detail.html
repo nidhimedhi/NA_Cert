@@ -1,0 +1,118 @@
+{% extends 'collector/base.html' %}
+
+{% block content %}
+<div class="c-page-header">
+  <div>
+    <a href="/collector/applications/" class="c-back-btn">← Back</a>
+    <h1>Application Detail</h1>
+    <p>Full documents and extracted 7/12 data</p>
+  </div>
+  {% if app %}
+  <span class="c-badge c-badge-{{ app.status }}">{{ app.status|title }}</span>
+  {% endif %}
+</div>
+
+{% if app %}
+<!-- APP INFO -->
+<div class="c-detail-card" style="margin-bottom:24px;">
+  <div class="c-detail-title">📋 Application Info</div>
+  <div class="c-detail-rows">
+    <div class="c-detail-row"><span class="c-detail-label">Reference No</span><span class="c-ref">{{ app.reference_no }}</span></div>
+    <div class="c-detail-row"><span class="c-detail-label">Applicant</span><span class="c-detail-value">{{ app.user_email }}</span></div>
+    <div class="c-detail-row"><span class="c-detail-label">Land Type</span><span class="c-detail-value">{{ app.land_type }}</span></div>
+    <div class="c-detail-row"><span class="c-detail-label">Status</span><span class="c-badge c-badge-{{ app.status }}">{{ app.status|title }}</span></div>
+    <div class="c-detail-row"><span class="c-detail-label">Submitted</span><span class="c-detail-value">{{ app.submitted_at|slice:":10" }}</span></div>
+    {% if app.reviewed_at %}
+    <div class="c-detail-row"><span class="c-detail-label">Reviewed</span><span class="c-detail-value">{{ app.reviewed_at|slice:":10" }}</span></div>
+    {% endif %}
+    {% if app.rejection_reason %}
+    <div class="c-detail-row"><span class="c-detail-label">Rejection Reason</span><span class="c-detail-value" style="color:#dc2626;">{{ app.rejection_reason }}</span></div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- DOCUMENTS -->
+<div class="c-section">
+  <div class="c-section-header">
+    <h2>📁 Uploaded Documents</h2>
+    <span class="c-count-badge">{{ documents|length }} Documents</span>
+  </div>
+
+  {% if documents %}
+  <div style="display:flex; flex-direction:column; gap:20px;">
+    {% for doc in documents %}
+    <div class="c-doc-card">
+
+      <div class="c-doc-header">
+        <div style="font-size:28px;">📄</div>
+        <div>
+          <div class="c-doc-name">{{ doc.document_name }}</div>
+          <div class="c-doc-date">{{ doc.uploaded_at|slice:":10" }}</div>
+        </div>
+        {% if doc.file_url %}
+        <a href="{{ doc.file_url }}" target="_blank" class="c-file-btn">📥 View File</a>
+        {% endif %}
+      </div>
+
+      {% if doc.village or doc.taluka or doc.satbara_no %}
+      <div class="c-extracted">
+        <div class="c-extracted-title">🔍 Extracted 7/12 Data</div>
+        <div class="c-extracted-grid">
+          {% if doc.village %}<div class="c-ext-item"><span class="c-ext-label">Village</span><span class="c-ext-value">{{ doc.village }}</span></div>{% endif %}
+          {% if doc.taluka %}<div class="c-ext-item"><span class="c-ext-label">Taluka</span><span class="c-ext-value">{{ doc.taluka }}</span></div>{% endif %}
+          {% if doc.district %}<div class="c-ext-item"><span class="c-ext-label">District</span><span class="c-ext-value">{{ doc.district }}</span></div>{% endif %}
+          {% if doc.gat_no %}<div class="c-ext-item"><span class="c-ext-label">Gat No.</span><span class="c-ext-value">{{ doc.gat_no }}</span></div>{% endif %}
+          {% if doc.satbara_no %}<div class="c-ext-item"><span class="c-ext-label">Satbara No.</span><span class="c-ext-value">{{ doc.satbara_no }}</span></div>{% endif %}
+          {% if doc.owner_names %}<div class="c-ext-item" style="grid-column:1/-1;"><span class="c-ext-label">Owner Names</span><span class="c-ext-value">{{ doc.owner_names }}</span></div>{% endif %}
+          {% if doc.total_area %}<div class="c-ext-item"><span class="c-ext-label">Total Area</span><span class="c-ext-value">{{ doc.total_area }}</span></div>{% endif %}
+          {% if doc.assessment %}<div class="c-ext-item"><span class="c-ext-label">Assessment</span><span class="c-ext-value">{{ doc.assessment }}</span></div>{% endif %}
+        </div>
+      </div>
+      {% endif %}
+
+      {% if doc.raw_json %}
+      <div class="c-raw">
+        <div class="c-raw-title">📝 Full Extracted Text</div>
+        <pre class="c-raw-text">{{ doc.raw_json }}</pre>
+      </div>
+      {% endif %}
+
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="c-empty-state">
+    <div class="c-empty-icon">📂</div>
+    <h3>No documents uploaded</h3>
+  </div>
+  {% endif %}
+</div>
+
+<!-- ACTION BUTTONS -->
+{% if app.status == 'approved' %}
+<div class="c-action-section">
+  <form method="POST" action="/collector/approve/{{ app.id }}/">
+    {% csrf_token %}
+    <button type="submit" class="c-approve-btn-large">✅ Grant NA Certificate</button>
+  </form>
+  <div class="c-reject-section" style="margin-top:20px;">
+    <div class="c-reject-title">❌ Reject Application</div>
+    <p class="c-reject-sub">Write a clear reason. The applicant will be notified.</p>
+    <form method="POST" action="/collector/reject/{{ app.id }}/">
+      {% csrf_token %}
+      <textarea name="reason" class="c-reject-textarea"
+        placeholder="Write rejection reason here..." rows="4" required></textarea>
+      <button type="submit" class="c-reject-submit">❌ Submit Rejection</button>
+    </form>
+  </div>
+</div>
+{% endif %}
+
+{% else %}
+<div class="c-empty-state">
+  <div class="c-empty-icon">⚠️</div>
+  <h3>Application not found</h3>
+  <a href="/collector/applications/" class="c-back-btn">← Go Back</a>
+</div>
+{% endif %}
+{% endblock %}

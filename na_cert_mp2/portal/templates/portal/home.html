@@ -1,0 +1,76 @@
+{% extends 'portal/base.html' %}
+{% load static %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+
+<!-- HERO -->
+<section class="home-hero">
+  <div class="home-hero-inner">
+    <div class="home-hero-text">
+      <div class="hero-badge">Maharashtra Land Portal</div>
+      <h1>Non Agricultural<br><span>Land Certificate</span></h1>
+      <p>Non-agricultural land refers to any land area that has been designated or legally converted for purposes other than farming. Using land for these purposes usually requires an official NA certificate from local authorities. Start your journey with us today and secure your piece of the earth.</p>
+      <a href="/about/" class="hero-cta">Explore Listings →</a>
+    </div>
+    <div class="home-hero-img">
+      <img src="{% static 'images/1.jpeg' %}" alt="Land">
+    </div>
+  </div>
+</section>
+
+<!-- VISION MISSION BELIEF -->
+<section class="vmb-section">
+  <div class="vmb-grid">
+
+    <div class="vmb-card">
+      <div class="vmb-icon">💡</div>
+      <h3>Our Vision</h3>
+      <p>To facilitate sustainable urban development and economic growth by efficiently transforming land use while maintaining ecological balance.</p>
+    </div>
+
+    <div class="vmb-card vmb-card--center">
+      <div class="vmb-icon">🏁</div>
+      <h3>Our Mission</h3>
+      <p>To provide a legal, transparent, and structured process for converting agricultural land into productive residential, commercial, or industrial assets.</p>
+    </div>
+
+    <div class="vmb-card">
+      <div class="vmb-icon">📜</div>
+      <h3>Our Belief</h3>
+      <p>Grounded in legal integrity, public utility, and planned urbanisation, ensuring that land development benefits both the owner and the community.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- GRAPH SECTION -->
+<section class="graph-section">
+  <div class="graph-inner">
+
+    <div class="graph-img-box">
+      <img src="{% static 'images/graph.png' %}" alt="Graph">
+    </div>
+
+    <div class="graph-text-box">
+      <div class="graph-badge">Maharashtra Data</div>
+      <h2>Trend of Non-Agricultural Land</h2>
+      <p>The provided graph illustrates a consistent and significant increase in non-agricultural land area in Maharashtra over the span of 52 years, rising from 864,000 hectares in 1971 to 1,768,000 hectares in 2023.</p>
+      <p>This steady upward trajectory reflects the state's aggressive shift from a purely agrarian economy toward a modernized landscape dominated by industrialization and urban expansion.</p>
+      <p>The data shows a notable acceleration in land conversion after 1991, coinciding with India's economic liberalization, continuing into the most recent year where the area grew from 1,744,000 to 1,768,000 hectares between 2022 and 2023.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- CTA BANNER -->
+<section class="cta-banner">
+  <div class="cta-inner">
+    <h2>Ready to Convert Your Land?</h2>
+    <p>Apply for your NA Certificate today and unlock the full potential of your property.</p>
+    <a href="/upload/" class="cta-btn">Apply for NA Certificate →</a>
+  </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends 'collector/base.html' %}
+{% block nav_dash %}active{% endblock %}
+
+{% block content %}
+<div class="c-page-header">
+  <div>
+    <h1>Dashboard</h1>
+    <p>Final review authority for NA Certificate applications</p>
+  </div>
+  <div class="c-header-badge">{{ request.user.username }} · District Collector</div>
+</div>
+
+<!-- STATS -->
+<div class="c-stats-grid">
+  <div class="c-stat-card c-blue">
+    <div class="c-stat-icon">📋</div>
+    <div class="c-stat-num">{{ total }}</div>
+    <div class="c-stat-label">Total Applications</div>
+  </div>
+  <div class="c-stat-card c-yellow">
+    <div class="c-stat-icon">⏳</div>
+    <div class="c-stat-num">{{ pending_tah }}</div>
+    <div class="c-stat-label">With Tahsildar</div>
+  </div>
+  <div class="c-stat-card c-orange">
+    <div class="c-stat-icon">📨</div>
+    <div class="c-stat-num">{{ approved_tah }}</div>
+    <div class="c-stat-label">Awaiting Your Review</div>
+  </div>
+  <div class="c-stat-card c-green">
+    <div class="c-stat-icon">✅</div>
+    <div class="c-stat-num">{{ col_approved }}</div>
+    <div class="c-stat-label">You Approved</div>
+  </div>
+  <div class="c-stat-card c-red">
+    <div class="c-stat-icon">❌</div>
+    <div class="c-stat-num">{{ col_rejected }}</div>
+    <div class="c-stat-label">You Rejected</div>
+  </div>
+</div>
+
+<!-- RECENT -->
+<div class="c-section">
+  <div class="c-section-header">
+    <h2>Recent Applications</h2>
+    <a href="/collector/applications/" class="c-view-all">View All →</a>
+  </div>
+  <div class="c-table-box">
+    <table class="c-table">
+      <thead>
+        <tr>
+          <th>Reference No</th>
+          <th>Applicant Email</th>
+          <th>Land Type</th>
+          <th>Submitted</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for app in recent %}
+        <tr>
+          <td><span class="c-ref">{{ app.reference_no }}</span></td>
+          <td>{{ app.user_email }}</td>
+          <td>{{ app.land_type }}</td>
+          <td>{{ app.submitted_at|slice:":10" }}</td>
+          <td><span class="c-badge c-badge-{{ app.status }}">{{ app.status|title }}</span></td>
+          <td><a href="/collector/application/{{ app.id }}/" class="c-view-btn">🔍 View</a></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="c-empty">No applications yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

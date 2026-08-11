@@ -1,0 +1,272 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tahsildar Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #ffffff;
+      font-family: 'DM Sans', sans-serif;
+      padding: 20px;
+    }
+
+    .login-card {
+      display: flex;
+      flex-direction: row !important;
+      width: 860px;
+      min-height: 520px;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+    }
+
+    /* LEFT — LIGHT CREAM */
+    .login-left {
+      width: 40% !important;
+      min-width: 40% !important;
+      background: #fdf6ec !important;
+      padding: 50px 36px !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: center !important;
+      position: relative !important;
+      border-right: 1px solid #e2cfa8;
+    }
+    .login-brand {
+      position: absolute;
+      top: 24px; left: 24px;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      color: #c8922a;
+      font-weight: 700;
+    }
+    .login-seal {
+      font-size: 50px;
+      margin-bottom: 20px;
+    }
+    .login-left h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      color: #5c3d1e;
+      line-height: 1.2;
+      margin-bottom: 14px;
+    }
+    .login-left p {
+      color: #7a6048;
+      font-size: 14px;
+      line-height: 1.7;
+      margin-bottom: 24px;
+    }
+    .login-badges {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .login-badges span {
+      background: rgba(200,146,42,0.15);
+      color: #5c3d1e;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      width: fit-content;
+    }
+
+    /* RIGHT — WHITE */
+    .login-right {
+      flex: 1 !important;
+      background: #ffffff !important;
+      padding: 50px 48px !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: center !important;
+    }
+    .login-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .login-header .icon { font-size: 40px; margin-bottom: 12px; }
+    .login-header h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.7rem;
+      color: #5c3d1e;
+      margin-bottom: 6px;
+    }
+    .login-header p {
+      font-size: 13px;
+      color: #7a6048;
+    }
+
+    .error-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #dc2626;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
+
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .input-group label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #8b6340;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .input-wrap {
+      background: #fdf6ec;
+      border: 1px solid #e2cfa8;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .input-wrap:focus-within {
+      border-color: #c8922a;
+      box-shadow: 0 0 0 3px rgba(200,146,42,0.12);
+    }
+    .input-group input {
+      width: 100%;
+      padding: 13px 16px;
+      border: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: #2c1f0e;
+      background: transparent;
+      outline: none;
+      display: block;
+    }
+    .input-group input::placeholder { color: #b09a7a; }
+
+    /* Nuclear autofill fix */
+    .input-group input:-webkit-autofill,
+    .input-group input:-webkit-autofill:hover,
+    .input-group input:-webkit-autofill:focus,
+    .input-group input:-webkit-autofill:active {
+      transition: background-color 99999s ease-in-out 0s,
+                  color 99999s ease-in-out 0s !important;
+      -webkit-text-fill-color: #2c1f0e !important;
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #5c3d1e, #c8922a);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 6px;
+    }
+    .login-btn:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(92,61,30,0.3);
+    }
+
+    .login-note {
+      margin-top: 20px;
+      padding: 12px 16px;
+      background: #fdf6ec;
+      border: 1px solid #e2cfa8;
+      border-radius: 8px;
+      font-size: 12px;
+      color: #8b6340;
+      text-align: center;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+<div class="login-card">
+
+  <!-- LEFT — LIGHT CREAM -->
+  <div class="login-left">
+    <div class="login-brand">⚖️ LandScope</div>
+    <div class="login-seal">🏛️</div>
+    <h2>Tahsildar<br>Portal</h2>
+    <p>Official government interface for managing and reviewing NA Certificate applications.</p>
+    <div class="login-badges">
+      <span>🔒 Secure Access</span>
+      <span>📋 Official Use Only</span>
+      <span>⚡ Real-time Updates</span>
+    </div>
+  </div>
+
+  <!-- RIGHT — WHITE -->
+  <div class="login-right">
+    <div class="login-header">
+      <div class="icon">⚖️</div>
+      <h3>Official Sign In</h3>
+      <p>Enter your government credentials to access the portal.</p>
+    </div>
+
+    {% if error %}
+    <div class="error-box">⚠️ {{ error }}</div>
+    {% endif %}
+
+    <form method="POST" class="login-form" autocomplete="off">
+      {% csrf_token %}
+
+      <div class="input-group">
+        <label>Username</label>
+        <div class="input-wrap">
+          <input
+            type="text"
+            name="username"
+            placeholder="Enter your username"
+            required
+            autocomplete="new-password"
+          >
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label>Password</label>
+        <div class="input-wrap">
+          <input
+            type="password"
+            name="password"
+            placeholder="Enter your password"
+            required
+            autocomplete="new-password"
+          >
+        </div>
+      </div>
+
+      <button type="submit" class="login-btn">Sign In to Portal →</button>
+    </form>
+
+    <div class="login-note">
+      🔒 This portal is for authorized Tahsildar officials only.
+      Unauthorized access is strictly prohibited.
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

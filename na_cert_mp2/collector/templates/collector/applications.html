@@ -1,0 +1,75 @@
+{% extends 'collector/base.html' %}
+{% block nav_apps %}active{% endblock %}
+
+{% block content %}
+<div class="c-page-header">
+  <div>
+    <h1>Pending Review</h1>
+    <p>Applications approved by Tahsildar — awaiting your final decision</p>
+  </div>
+  <div class="c-count-badge">{{ applications|length }} Awaiting Review</div>
+</div>
+
+<div class="c-cards-grid">
+  {% for app in applications %}
+  <div class="c-app-card">
+
+    <div class="c-app-header">
+      <div>
+        <span class="c-ref">{{ app.reference_no }}</span>
+        <span class="c-badge c-badge-approved">Tahsildar Approved</span>
+      </div>
+      <div class="c-app-date">{{ app.submitted_at|slice:":10" }}</div>
+    </div>
+
+    <div class="c-app-body">
+      <div class="c-app-row">
+        <span class="c-app-label">Applicant</span>
+        <span class="c-app-value">{{ app.user_email }}</span>
+      </div>
+      <div class="c-app-row">
+        <span class="c-app-label">Land Type</span>
+        <span class="c-app-value">{{ app.land_type }}</span>
+      </div>
+      <div class="c-app-row">
+        <span class="c-app-label">Submitted</span>
+        <span class="c-app-value">{{ app.submitted_at|slice:":10" }}</span>
+      </div>
+    </div>
+
+    <div style="padding: 0 20px 12px;">
+      <a href="/collector/application/{{ app.id }}/" class="c-detail-btn">
+        🔍 View Documents & Extracted Data
+      </a>
+    </div>
+
+    <!-- APPROVE -->
+    <div class="c-app-actions">
+      <form method="POST" action="/collector/approve/{{ app.id }}/" style="flex:1">
+        {% csrf_token %}
+        <button type="submit" class="c-approve-btn">✅ Grant NA Certificate</button>
+      </form>
+    </div>
+
+    <!-- REJECT -->
+    <div class="c-reject-section">
+      <div class="c-reject-title">❌ Reject Application</div>
+      <p class="c-reject-sub">Provide a clear reason. The applicant will be notified.</p>
+      <form method="POST" action="/collector/reject/{{ app.id }}/">
+        {% csrf_token %}
+        <textarea name="reason" class="c-reject-textarea"
+          placeholder="Write rejection reason here..." rows="4" required></textarea>
+        <button type="submit" class="c-reject-submit">❌ Submit Rejection</button>
+      </form>
+    </div>
+
+  </div>
+  {% empty %}
+  <div class="c-empty-state">
+    <div class="c-empty-icon">🎉</div>
+    <h3>All cleared!</h3>
+    <p>No applications pending your review.</p>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

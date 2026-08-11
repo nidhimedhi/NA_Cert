@@ -1,0 +1,114 @@
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+from django.views.decorators.http import require_POST
+from .supabase_client import (
+    select, select_all, update,
+    select_with_filter, select_documents_for_application
+)
+
+
+def tahsildar_login(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect('/tahsildar/dashboard/')
+        else:
+            return render(request, 'tahsildar/login.html', {
+                'error': 'Invalid username or password.'
+            })
+    return render(request, 'tahsildar/login.html')
+
+
+def tahsildar_logout(request):
+    logout(request)
+    return redirect('/tahsildar/login/')
+
+
+@login_required(login_url='/tahsildar/login/')
+def dashboard(request):
+    all_apps  = select_all('na_applications')
+    all_apps  = all_apps if isinstance(all_apps, list) else []
+
+    total    = len(all_apps)
+    pending  = len([a for a in all_apps if a.get('status') == 'pending'])
+    approved = len([a for a in all_apps if a.get('status') == 'approved'])
+    rejected = len([a for a in all_apps if a.get('status') == 'rejected'])
+    recent   = all_apps[:5]
+
+    return render(request, 'tahsildar/dashboard.html', {
+        'total':    total,
+        'pending':  pending,
+        'approved': approved,
+        'rejected': rejected,
+        'recent':   recent,
+    })
+
+
+@login_required(login_url='/tahsildar/login/')
+def upcoming(request):
+    applications = select_with_filter('na_applications', 'status', 'pending')
+    applications = applications if isinstance(applications, list) else []
+    return render(request, 'tahsildar/upcoming.html', {
+        'applications': applications
+    })
+
+
+@login_required(login_url='/tahsildar/login/')
+def application_detail(request, app_id):
+    # Get application
+    app_result = select('na_applications', {'id': app_id})
+    app = app_result[0] if isinstance(app_result, list) and app_result else None
+
+    # Get all uploaded documents for this application
+    documents = select_documents_for_application(app_id)
+    documents = documents if isinstance(documents, list) else []
+
+    return render(request, 'tahsildar/application_detail.html', {
+        'app':       app,
+        'documents': documents,
+    })
+
+
+@login_required(login_url='/tahsildar/login/')
+def approve_application(request, app_id):
+    if request.method == 'POST':
+        update('na_applications', {'id': app_id}, {
+            'status':      'approved',
+            'reviewed_at': timezone.now().isoformat(),
+        })
+    return redirect('/tahsildar/upcoming/')
+
+
+@login_required(login_url='/tahsildar/login/')
+def reject_application(request, app_id):
+    if request.method == 'POST':
+        reason = request.POST.get('reason', '')
+        update('na_applications', {'id': app_id}, {
+            'status':           'rejected',
+            'rejection_reason': reason,
+            'reviewed_at':      timezone.now().isoformat(),
+        })
+    return redirect('/tahsildar/upcoming/')
+
+
+@login_required(login_url='/tahsildar/login/')
+def approved(request):
+    applications = select_with_filter('na_applications', 'status', 'approved')
+    applications = applications if isinstance(applications, list) else []
+    return render(request, 'tahsildar/approved.html', {
+        'applications': applications
+    })
+
+
+@login_required(login_url='/tahsildar/login/')
+def rejected(request):
+    applications = select_with_filter('na_applications', 'status', 'rejected')
+    applications = applications if isinstance(applications, list) else []
+    return render(request, 'tahsildar/rejected.html', {
+        'applications': applications
+    })

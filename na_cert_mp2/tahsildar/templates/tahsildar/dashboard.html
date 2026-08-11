@@ -1,0 +1,82 @@
+{% extends 'tahsildar/base.html' %}
+{% block nav_dashboard %}active{% endblock %}
+
+{% block content %}
+<div class="t-page-header">
+  <div>
+    <h1>Dashboard</h1>
+    <p>Overview of all NA Certificate applications</p>
+  </div>
+  <div class="t-date">{{ request.user.username }} · Tahsildar</div>
+</div>
+
+<!-- STATS -->
+<div class="t-stats-grid">
+  <div class="t-stat-card t-stat-blue">
+    <div class="t-stat-icon">📋</div>
+    <div class="t-stat-num">{{ total }}</div>
+    <div class="t-stat-label">Total Applications</div>
+  </div>
+  <div class="t-stat-card t-stat-yellow">
+    <div class="t-stat-icon">⏳</div>
+    <div class="t-stat-num">{{ pending }}</div>
+    <div class="t-stat-label">Pending Review</div>
+  </div>
+  <div class="t-stat-card t-stat-green">
+    <div class="t-stat-icon">✅</div>
+    <div class="t-stat-num">{{ approved }}</div>
+    <div class="t-stat-label">Approved</div>
+  </div>
+  <div class="t-stat-card t-stat-red">
+    <div class="t-stat-icon">❌</div>
+    <div class="t-stat-num">{{ rejected }}</div>
+    <div class="t-stat-label">Rejected</div>
+  </div>
+</div>
+
+<!-- RECENT -->
+<div class="t-section">
+  <div class="t-section-header">
+    <h2>Recent Applications</h2>
+    <a href="/tahsildar/upcoming/" class="t-view-all">View All →</a>
+  </div>
+  <div class="t-table-box">
+    <table class="t-table">
+      <thead>
+        <tr>
+          <th>Reference No</th>
+          <th>Applicant Email</th>
+          <th>Land Type</th>
+          <th>Submitted</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for app in recent %}
+        <tr>
+          <td><span class="t-ref">{{ app.reference_no }}</span></td>
+          <td>{{ app.user_email }}</td>
+          <td>{{ app.land_type }}</td>
+          <td>{{ app.submitted_at|slice:":10" }}</td>
+          <td>
+            <span class="t-badge t-badge-{{ app.status }}">
+              {{ app.status|title }}
+            </span>
+          </td>
+          <td>
+            <a href="/tahsildar/application/{{ app.id }}/" class="t-view-btn">
+              🔍 View
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="t-empty">No applications yet.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
