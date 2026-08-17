@@ -2,577 +2,230 @@
 {% load static %}
 
 {% block content %}
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{% static 'css/upload.css' %}">
-
-<style>
-  /* INSTRUCTION MODAL */
-  .instruction-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.6);
-    z-index: 9999;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  }
-  .instruction-overlay.open { display: flex; }
-
-  .instruction-modal {
-    background: #fffdf8;
-    border-radius: 20px;
-    width: 100%;
-    max-width: 680px;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 30px 80px rgba(0,0,0,0.3);
-    animation: modalIn 0.25s ease;
-  }
-  @keyframes modalIn {
-    from { opacity:0; transform: scale(0.95); }
-    to   { opacity:1; transform: none; }
-  }
-
-  .instr-header {
-    background: linear-gradient(135deg, #5c3d1e, #c8922a);
-    padding: 28px 32px;
-    border-radius: 20px 20px 0 0;
-    text-align: center;
-  }
-  .instr-header h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.5rem;
-    color: #fff;
-    margin-bottom: 6px;
-  }
-  .instr-header p {
-    color: rgba(255,255,255,0.75);
-    font-size: 13px;
-    font-family: 'DM Sans', sans-serif;
-  }
-
-  .instr-body { padding: 28px 32px; }
-
-  .instr-land-info {
-    background: #fdf6ec;
-    border: 1px solid #e2cfa8;
-    border-radius: 10px;
-    padding: 14px 18px;
-    margin-bottom: 24px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    color: #5c3d1e;
-    font-weight: 600;
-  }
-  .instr-land-info span { color: #c8922a; }
-
-  .instr-section { margin-bottom: 20px; }
-  .instr-section-title {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: #8b6340;
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .instr-section-title::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: #e2cfa8;
-  }
-
-  .instr-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .instr-list li {
-    display: flex;
-    gap: 10px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    color: #2c1f0e;
-    line-height: 1.6;
-    padding: 8px 12px;
-    background: #fdf6ec;
-    border-radius: 8px;
-    border-left: 3px solid #c8922a;
-  }
-  .instr-list li .num {
-    font-weight: 700;
-    color: #c8922a;
-    flex-shrink: 0;
-  }
-
-  .instr-warning {
-    background: #fef2f2;
-    border: 1px solid #fecaca;
-    border-radius: 10px;
-    padding: 14px 18px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    color: #dc2626;
-    line-height: 1.6;
-    margin-bottom: 20px;
-  }
-
-  .instr-accept {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 16px;
-    background: #f0fdf4;
-    border: 1px solid #bbf7d0;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    cursor: pointer;
-  }
-  .instr-accept input[type=checkbox] {
-    width: 18px;
-    height: 18px;
-    margin-top: 2px;
-    cursor: pointer;
-    accent-color: #16a34a;
-    flex-shrink: 0;
-  }
-  .instr-accept label {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    color: #2c1f0e;
-    line-height: 1.6;
-    cursor: pointer;
-  }
-  .instr-accept label strong { color: #16a34a; }
-
-  .instr-actions {
-    display: flex;
-    gap: 12px;
-  }
-  .instr-cancel {
-    flex: 1;
-    padding: 12px;
-    background: #f1f5f9;
-    border: 1px solid #e2cfa8;
-    border-radius: 10px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    color: #7a6048;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .instr-cancel:hover { background: #e2cfa8; }
-  .instr-proceed {
-    flex: 2;
-    padding: 12px;
-    background: #c8922a;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    opacity: 0.5;
-    pointer-events: none;
-  }
-  .instr-proceed.active {
-    opacity: 1;
-    pointer-events: all;
-  }
-  .instr-proceed.active:hover {
-    background: #5c3d1e;
-    transform: translateY(-1px);
-  }
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/upload.css' %}?v={% now 'U' %}">
 
 <!-- HERO -->
 <div class="upload-hero">
-  <div class="hero-badge">Maharashtra Government Portal</div>
-  <h1>Non-Agricultural Land<br><span>Certificate Application</span></h1>
-  <p>Review the required documents for your land type, then click Apply to submit your application.</p>
+  <div class="hero-badge">Document Repository</div>
+  <h1>Required Documents <span>List</span></h1>
+  <p>Select your land category to view the list of required documents for the Non-Agricultural Land Certificate application.</p>
 </div>
 
-<!-- MAIN -->
-<div class="upload-main">
-  <div class="section-intro">
-    <h2>Select Your Land Category</h2>
-    <p>Each section lists the documents required. Click "Apply for NA Certificate" to proceed to upload.</p>
-  </div>
-
-  <div class="land-grid">
-
-    <!-- RESIDENTIAL -->
-    <div class="land-card residential">
-      <div class="card-header">
-        <div class="card-icon">🏡</div>
-        <div class="card-title">
-          <h3>Residential Non-Agricultural Land</h3>
-          <p>For housing, plots & residential developments</p>
-        </div>
-        <span class="card-tag">Residential</span>
-      </div>
-      <div class="subtypes-tabs">
-        <div class="sub-tab active" onclick="switchTab('res','individual',this)">Individual</div>
-        <div class="sub-tab" onclick="switchTab('res','partnership',this)">Partnership</div>
-      </div>
-
-      <div class="panel active" id="res-individual">
-        <div class="docs-section">
-          <div class="docs-section-title">Required Documents</div>
-          <ul class="doc-list">
-            <li class="doc-item"><div class="doc-num">1</div><div class="doc-name">Ownership Document</div></li>
-            <li class="doc-item"><div class="doc-num">2</div><div class="doc-name">7/12 Utara (Satbara)</div></li>
-            <li class="doc-item"><div class="doc-num">3</div><div class="doc-name">Holding Certificate</div></li>
-            <li class="doc-item"><div class="doc-num">4</div><div class="doc-name">Proposed Layout Plan</div></li>
-          </ul>
-        </div>
-        <button class="apply-btn" onclick="openInstructions('Residential - Individual')">📋 Apply for NA Certificate</button>
-      </div>
-
-      <div class="panel" id="res-partnership">
-        <div class="docs-section">
-          <div class="docs-section-title">Required Documents</div>
-          <ul class="doc-list">
-            <li class="doc-item"><div class="doc-num">1</div><div class="doc-name">Ownership Document</div></li>
-            <li class="doc-item"><div class="doc-num">2</div><div class="doc-name">7/12 Utara (Satbara)</div></li>
-            <li class="doc-item"><div class="doc-num">3</div><div class="doc-name">Holding Certificate</div></li>
-            <li class="doc-item"><div class="doc-num">4</div><div class="doc-name">Proposed Layout Plan</div></li>
-            <li class="doc-item"><div class="doc-num">5</div><div class="doc-name">Partnership Agreement Deed</div></li>
-            <li class="doc-item"><div class="doc-num">6</div><div class="doc-name">Return on a Set (Tax Returns)</div></li>
-          </ul>
-        </div>
-        <button class="apply-btn" onclick="openInstructions('Residential - Partnership')">📋 Apply for NA Certificate</button>
-      </div>
-    </div>
-
-    <!-- EDUCATIONAL -->
-    <div class="land-card educational">
-      <div class="card-header">
-        <div class="card-icon">🎓</div>
-        <div class="card-title">
-          <h3>Educational Non-Agricultural Land</h3>
-          <p>For schools, colleges & educational institutions</p>
-        </div>
-        <span class="card-tag">Educational</span>
-      </div>
-      <div class="subtypes-tabs">
-        <div class="sub-tab active" onclick="switchTab('edu','granted',this)">Granted</div>
-        <div class="sub-tab" onclick="switchTab('edu','semi',this)">Semi-Granted</div>
-        <div class="sub-tab" onclick="switchTab('edu','private',this)">Private</div>
-      </div>
-
-      <div class="panel active" id="edu-granted">
-        <div class="info-box"><span class="info-icon">ℹ️</span><span>Land granted by the government for educational purposes.</span></div>
-        <div class="docs-section">
-          <div class="docs-section-title">Required Documents</div>
-          <ul class="doc-list">
-            <li class="doc-item"><div class="doc-num">1</div><div class="doc-name">Town Pleasure Reservation Declaration</div></li>
-            <li class="doc-item"><div class="doc-num">2</div><div class="doc-name">Reservation Report (for Collector)</div></li>
-            <li class="doc-item"><div class="doc-num">3</div><div class="doc-name">State Government Referral (via Collector)</div></li>
-            <li class="doc-item"><div class="doc-num">4</div><div class="doc-name">Solving Conditions Proof – Educational Use</div></li>
-            <li class="doc-item"><div class="doc-num">5</div><div class="doc-name">Street Government Document (Collector Signed)</div></li>
-          </ul>
-        </div>
-        <button class="apply-btn" onclick="openInstructions('Educational - Granted')">📋 Apply for NA Certificate</button>
-      </div>
-
-      <div class="panel" id="edu-semi">
-        <div class="info-box"><span class="info-icon">ℹ️</span><span>Semi-granted educational land with partial government allocation.</span></div>
-        <div class="docs-section">
-          <div class="docs-section-title">Required Documents</div>
-          <ul class="doc-list">
-            <li class="doc-item"><div class="doc-num">1</div><div class="doc-name">Town Pleasure Reservation Declaration</div></li>
-            <li class="doc-item"><div class="doc-num">2</div><div class="doc-name">Reservation Report (for Collector)</div></li>
-            <li class="doc-item"><div class="doc-num">3</div><div class="doc-name">State Government Referral (via Collector)</div></li>
-            <li class="doc-item"><div class="doc-num">4</div><div class="doc-name">Solving Conditions Proof – Educational Use</div></li>
-            <li class="doc-item"><div class="doc-num">5</div><div class="doc-name">Street Government Document (Collector Signed)</div></li>
-          </ul>
-        </div>
-        <button class="apply-btn" onclick="openInstructions('Educational - Semi-Granted')">📋 Apply for NA Certificate</button>
-      </div>
-
-      <div class="panel" id="edu-private">
-        <div class="info-box"><span class="info-icon">ℹ️</span><span>Privately owned land for educational institution setup.</span></div>
-        <div class="docs-section">
-          <div class="docs-section-title">Required Documents</div>
-          <ul class="doc-list">
-            <li class="doc-item"><div class="doc-num">1</div><div class="doc-name">Town Pleasure Reservation Declaration</div></li>
-            <li class="doc-item"><div class="doc-num">2</div><div class="doc-name">Reservation Report (for Collector)</div></li>
-            <li class="doc-item"><div class="doc-num">3</div><div class="doc-name">State Government Referral (via Collector)</div></li>
-            <li class="doc-item"><div class="doc-num">4</div><div class="doc-name">Solving Conditions Proof – Educational Use</div></li>
-            <li class="doc-item"><div class="doc-num">5</div><div class="doc-name">Street Government Document (Collector Signed)</div></li>
-          </ul>
-        </div>
-        <button class="apply-btn" onclick="openInstructions('Educational - Private')">📋 Apply for NA Certificate</button>
-      </div>
-    </div>
-
-    <!-- INDUSTRIAL -->
-    <div class="land-card industrial">
-      <div class="card-header">
-        <div class="card-icon">🏭</div>
-        <div class="card-title">
-          <h3>Industrial Non-Agricultural Land</h3>
-          <p>For factories, warehouses & industrial zones</p>
-        </div>
-        <span class="card-tag">Industrial</span>
-      </div>
-      <div class="subtypes-tabs">
-        <div class="sub-tab active" onclick="switchTab('ind','granted',this)">Granted</div>
-        <div class="sub-tab" onclick="switchTab('ind','semi',this)">Semi-Granted</div>
-        <div class="sub-tab" onclick="switchTab('ind','private',this)">Private</div>
-      </div>
-
-      <div class="panel active" id="ind-granted">
-        <div class="info-box"><span class="info-icon">ℹ️</span><span>Government-granted land designated for industrial use.</span></div>
-        <div class="docs-section">
-          <div class="docs-section-title">Required Documents</div>
-          <ul class="doc-list">
-            <li class="doc-item"><div class="doc-num">1</div><div class="doc-name">Town Pleasure Reservation Declaration</div></li>
-            <li class="doc-item"><div class="doc-num">2</div><div class="doc-name">Reservation Report (for Collector)</div></li>
-            <li class="doc-item"><div class="doc-num">3</div><div class="doc-name">State Government Referral (via Collector)</div></li>
-            <li class="doc-item"><div class="doc-num">4</div><div class="doc-name">Solving Conditions Proof – Industrial Use</div></li>
-            <li class="doc-item"><div class="doc-num">5</div><div class="doc-name">Street Government Document (Collector Signed)</div></li>
-          </ul>
-        </div>
-        <button class="apply-btn" onclick="openInstructions('Industrial - Granted')">📋 Apply for NA Certificate</button>
-      </div>
-
-      <div class="panel" id="ind-semi">
-        <div class="info-box"><span class="info-icon">ℹ️</span><span>Semi-granted industrial land with partial government allocation.</span></div>
-        <div class="docs-section">
-          <div class="docs-section-title">Required Documents</div>
-          <ul class="doc-list">
-            <li class="doc-item"><div class="doc-num">1</div><div class="doc-name">Town Pleasure Reservation Declaration</div></li>
-            <li class="doc-item"><div class="doc-num">2</div><div class="doc-name">Reservation Report (for Collector)</div></li>
-            <li class="doc-item"><div class="doc-num">3</div><div class="doc-name">State Government Referral (via Collector)</div></li>
-            <li class="doc-item"><div class="doc-num">4</div><div class="doc-name">Solving Conditions Proof – Industrial Use</div></li>
-            <li class="doc-item"><div class="doc-num">5</div><div class="doc-name">Street Government Document (Collector Signed)</div></li>
-          </ul>
-        </div>
-        <button class="apply-btn" onclick="openInstructions('Industrial - Semi-Granted')">📋 Apply for NA Certificate</button>
-      </div>
-
-      <div class="panel" id="ind-private">
-        <div class="info-box"><span class="info-icon">ℹ️</span><span>Privately owned land being converted for industrial purpose.</span></div>
-        <div class="docs-section">
-          <div class="docs-section-title">Required Documents</div>
-          <ul class="doc-list">
-            <li class="doc-item"><div class="doc-num">1</div><div class="doc-name">Town Pleasure Reservation Declaration</div></li>
-            <li class="doc-item"><div class="doc-num">2</div><div class="doc-name">Reservation Report (for Collector)</div></li>
-            <li class="doc-item"><div class="doc-num">3</div><div class="doc-name">State Government Referral (via Collector)</div></li>
-            <li class="doc-item"><div class="doc-num">4</div><div class="doc-name">Solving Conditions Proof – Industrial Use</div></li>
-            <li class="doc-item"><div class="doc-num">5</div><div class="doc-name">Street Government Document (Collector Signed)</div></li>
-          </ul>
-        </div>
-        <button class="apply-btn" onclick="openInstructions('Industrial - Private')">📋 Apply for NA Certificate</button>
-      </div>
-    </div>
-
-    <!-- COMMERCIAL -->
-    <div class="land-card commercial">
-      <div class="card-header">
-        <div class="card-icon">🏢</div>
-        <div class="card-title">
-          <h3>Commercial Non-Agricultural Land</h3>
-          <p>For shops, offices & commercial establishments</p>
-        </div>
-        <span class="card-tag">Commercial</span>
-      </div>
-      <div class="subtypes-tabs">
-        <div class="sub-tab active" onclick="switchTab('com','granted',this)">Granted</div>
-        <div class="sub-tab" onclick="switchTab('com','semi',this)">Semi-Granted</div>
-        <div class="sub-tab" onclick="switchTab('com','private',this)">Private</div>
-      </div>
-
-      <div class="panel active" id="com-granted">
-        <div class="info-box"><span class="info-icon">ℹ️</span><span>Government-granted land designated for commercial use.</span></div>
-        <div class="docs-section">
-          <div class="docs-section-title">Required Documents</div>
-          <ul class="doc-list">
-            <li class="doc-item"><div class="doc-num">1</div><div class="doc-name">Town Pleasure Reservation Declaration</div></li>
-            <li class="doc-item"><div class="doc-num">2</div><div class="doc-name">Reservation Report (for Collector)</div></li>
-            <li class="doc-item"><div class="doc-num">3</div><div class="doc-name">State Government Referral (via Collector)</div></li>
-            <li class="doc-item"><div class="doc-num">4</div><div class="doc-name">Solving Conditions Proof – Commercial Use</div></li>
-            <li class="doc-item"><div class="doc-num">5</div><div class="doc-name">Street Government Document (Collector Signed)</div></li>
-          </ul>
-        </div>
-        <button class="apply-btn" onclick="openInstructions('Commercial - Granted')">📋 Apply for NA Certificate</button>
-      </div>
-
-      <div class="panel" id="com-semi">
-        <div class="info-box"><span class="info-icon">ℹ️</span><span>Semi-granted commercial land with partial state allocation.</span></div>
-        <div class="docs-section">
-          <div class="docs-section-title">Required Documents</div>
-          <ul class="doc-list">
-            <li class="doc-item"><div class="doc-num">1</div><div class="doc-name">Town Pleasure Reservation Declaration</div></li>
-            <li class="doc-item"><div class="doc-num">2</div><div class="doc-name">Reservation Report (for Collector)</div></li>
-            <li class="doc-item"><div class="doc-num">3</div><div class="doc-name">State Government Referral (via Collector)</div></li>
-            <li class="doc-item"><div class="doc-num">4</div><div class="doc-name">Solving Conditions Proof – Commercial Use</div></li>
-            <li class="doc-item"><div class="doc-num">5</div><div class="doc-name">Street Government Document (Collector Signed)</div></li>
-          </ul>
-        </div>
-        <button class="apply-btn" onclick="openInstructions('Commercial - Semi-Granted')">📋 Apply for NA Certificate</button>
-      </div>
-
-      <div class="panel" id="com-private">
-        <div class="info-box"><span class="info-icon">ℹ️</span><span>Private commercial land conversion requiring Collector approval.</span></div>
-        <div class="docs-section">
-          <div class="docs-section-title">Required Documents</div>
-          <ul class="doc-list">
-            <li class="doc-item"><div class="doc-num">1</div><div class="doc-name">Town Pleasure Reservation Declaration</div></li>
-            <li class="doc-item"><div class="doc-num">2</div><div class="doc-name">Reservation Report (for Collector)</div></li>
-            <li class="doc-item"><div class="doc-num">3</div><div class="doc-name">State Government Referral (via Collector)</div></li>
-            <li class="doc-item"><div class="doc-num">4</div><div class="doc-name">Solving Conditions Proof – Commercial Use</div></li>
-            <li class="doc-item"><div class="doc-num">5</div><div class="doc-name">Street Government Document (Collector Signed)</div></li>
-          </ul>
-        </div>
-        <button class="apply-btn" onclick="openInstructions('Commercial - Private')">📋 Apply for NA Certificate</button>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<!-- INSTRUCTION MODAL -->
-<div class="instruction-overlay" id="instrModal">
-  <div class="instruction-modal">
-
-    <div class="instr-header">
-      <div style="font-size:36px; margin-bottom:10px;">📜</div>
-      <h2>Important Instructions</h2>
-      <p>Please read all instructions carefully before proceeding</p>
-    </div>
-
-    <div class="instr-body">
-
-      <div class="instr-land-info">
-        Applying for: <span id="instrLandType">—</span>
-      </div>
-
-      <!-- DOCUMENT INSTRUCTIONS -->
-      <div class="instr-section">
-        <div class="instr-section-title">📁 Document Requirements</div>
-        <ul class="instr-list">
-          <li><span class="num">1.</span> All documents must be clear, legible, and complete. Blurred or incomplete documents will be rejected.</li>
-          <li><span class="num">2.</span> Accepted file formats are PDF, JPG, and PNG only. Maximum file size is 5MB per document.</li>
-          <li><span class="num">3.</span> Each document must be uploaded in its designated section. Do not upload multiple documents in one section.</li>
-          <li><span class="num">4.</span> All documents must be self-attested. Government-issued documents must be valid and not expired.</li>
-          <li><span class="num">5.</span> The 7/12 Utara (Satbara) must be the latest copy downloaded from the Maharashtra government portal.</li>
+<!-- MAIN LAYOUT -->
+<div class="docs-container">
+  
+  <!-- SIDEBAR (UIDAI Style Categories) -->
+  <aside class="docs-sidebar">
+    <div class="sidebar-title">Quick Access</div>
+    <ul class="sidebar-menu">
+      
+      <!-- Residential -->
+      <li class="sidebar-item expanded" id="menu-res">
+        <a class="sidebar-link" onclick="toggleMenu('menu-res')">
+          <span>🏡 Residential</span>
+          <span class="badge">2 Subtypes</span>
+        </a>
+        <ul class="sub-menu">
+          <li><a onclick="showDocs('Residential - Individual', this)" class="active">Individual</a></li>
+          <li><a onclick="showDocs('Residential - Partnership', this)">Partnership</a></li>
         </ul>
-      </div>
+      </li>
 
-      <!-- DIGITAL SIGNATURE -->
-      <div class="instr-section">
-        <div class="instr-section-title">✍️ Digital Signature</div>
-        <ul class="instr-list">
-          <li><span class="num">6.</span> You will be required to provide a digital signature on the application upload page.</li>
-          <li><span class="num">7.</span> Your digital signature confirms that all documents submitted are genuine and accurate.</li>
-          <li><span class="num">8.</span> Providing a false digital signature is a punishable offence under the Information Technology Act, 2000.</li>
+      <!-- Educational -->
+      <li class="sidebar-item" id="menu-edu">
+        <a class="sidebar-link" onclick="toggleMenu('menu-edu')">
+          <span>🎓 Educational</span>
+          <span class="badge">3 Subtypes</span>
+        </a>
+        <ul class="sub-menu">
+          <li><a onclick="showDocs('Educational - Granted', this)">Granted</a></li>
+          <li><a onclick="showDocs('Educational - Semi-Granted', this)">Semi-Granted</a></li>
+          <li><a onclick="showDocs('Educational - Private', this)">Private</a></li>
         </ul>
-      </div>
+      </li>
 
-      <!-- APPLICATION PROCESS -->
-      <div class="instr-section">
-        <div class="instr-section-title">⚙️ Application Process</div>
-        <ul class="instr-list">
-          <li><span class="num">9.</span> Once submitted, your application will be reviewed by the Tahsildar within 15–30 working days.</li>
-          <li><span class="num">10.</span> You will receive a unique reference number after submission. Keep it safe for tracking.</li>
-          <li><span class="num">11.</span> If your application is rejected, the reason will be communicated and you may reapply.</li>
-          <li><span class="num">12.</span> Do not submit duplicate applications. Multiple submissions for the same land will be rejected.</li>
+      <!-- Industrial -->
+      <li class="sidebar-item" id="menu-ind">
+        <a class="sidebar-link" onclick="toggleMenu('menu-ind')">
+          <span>🏭 Industrial</span>
+          <span class="badge">3 Subtypes</span>
+        </a>
+        <ul class="sub-menu">
+          <li><a onclick="showDocs('Industrial - Granted', this)">Granted</a></li>
+          <li><a onclick="showDocs('Industrial - Semi-Granted', this)">Semi-Granted</a></li>
+          <li><a onclick="showDocs('Industrial - Private', this)">Private</a></li>
         </ul>
-      </div>
+      </li>
 
-      <!-- WARNING -->
-      <div class="instr-warning">
-        ⚠️ <strong>Legal Warning:</strong> Submission of forged, altered, or false documents is a criminal offence punishable under IPC Section 420 and the Maharashtra Land Revenue Code. All submitted documents are subject to verification by government authorities.
-      </div>
+      <!-- Commercial -->
+      <li class="sidebar-item" id="menu-com">
+        <a class="sidebar-link" onclick="toggleMenu('menu-com')">
+          <span>🏢 Commercial</span>
+          <span class="badge">3 Subtypes</span>
+        </a>
+        <ul class="sub-menu">
+          <li><a onclick="showDocs('Commercial - Granted', this)">Granted</a></li>
+          <li><a onclick="showDocs('Commercial - Semi-Granted', this)">Semi-Granted</a></li>
+          <li><a onclick="showDocs('Commercial - Private', this)">Private</a></li>
+        </ul>
+      </li>
 
-      <!-- ACCEPT CHECKBOX -->
-      <div class="instr-accept" onclick="toggleAccept()">
-        
-        <label for="acceptCheck">
-          I have read and understood all the above instructions. I confirm that all documents I will submit are genuine and accurate. I accept full legal responsibility for the authenticity of the submitted documents.<br><input type="checkbox" id="acceptCheck" onchange="toggleProceed()"> <strong>I ACCEPT</strong>
-        </label>
-      </div>
+    </ul>
+  </aside>
 
-      <!-- ACTIONS -->
-      <div class="instr-actions">
-        <button class="instr-cancel" onclick="closeInstructions()">← Go Back</button>
-        <button class="instr-proceed" id="proceedBtn" onclick="proceedToApply()">
-          Proceed to Upload Documents →
-        </button>
-      </div>
-
+  <!-- MAIN CONTENT -->
+  <main class="docs-main">
+    
+    <div class="category-header">
+      <h2 id="currentCategoryTitle">Residential - Individual</h2>
+      <p>Please review the list of required documents. You must upload all of them during the application process.</p>
     </div>
-  </div>
+
+    <div class="doc-list" id="docListContainer">
+      <!-- Documents will be injected here by JS -->
+    </div>
+
+    <button class="btn-primary" onclick="proceedToApply()">
+      Proceed to Upload Documents ➔
+    </button>
+
+  </main>
+
 </div>
 
 <script>
-  let currentLandType = '';
+  // Document Data Map
+  const DOC_DATA = {
+    'Residential - Individual': [
+      'Ownership Document',
+      '7/12 Utara (Satbara)',
+      'Holding Certificate',
+      'Proposed Layout Plan'
+    ],
+    'Residential - Partnership': [
+      'Ownership Document',
+      '7/12 Utara (Satbara)',
+      'Holding Certificate',
+      'Proposed Layout Plan',
+      'Partnership Agreement Deed',
+      'Return on a Set (Tax Returns)'
+    ],
+    'Educational - Granted': [
+      'Town Pleasure Reservation Declaration',
+      'Reservation Report (for Collector)',
+      'State Government Referral (via Collector)',
+      'Solving Conditions Proof - Educational Use',
+      'Street Government Document (Collector Signed)'
+    ],
+    'Educational - Semi-Granted': [
+      'Town Pleasure Reservation Declaration',
+      'Reservation Report (for Collector)',
+      'State Government Referral (via Collector)',
+      'Solving Conditions Proof - Educational Use',
+      'Street Government Document (Collector Signed)'
+    ],
+    'Educational - Private': [
+      'Town Pleasure Reservation Declaration',
+      'Reservation Report (for Collector)',
+      'State Government Referral (via Collector)',
+      'Solving Conditions Proof - Educational Use',
+      'Street Government Document (Collector Signed)'
+    ],
+    'Industrial - Granted': [
+      'Town Pleasure Reservation Declaration',
+      'Reservation Report (for Collector)',
+      'State Government Referral (via Collector)',
+      'Solving Conditions Proof - Industrial Use',
+      'Street Government Document (Collector Signed)'
+    ],
+    'Industrial - Semi-Granted': [
+      'Town Pleasure Reservation Declaration',
+      'Reservation Report (for Collector)',
+      'State Government Referral (via Collector)',
+      'Solving Conditions Proof - Industrial Use',
+      'Street Government Document (Collector Signed)'
+    ],
+    'Industrial - Private': [
+      'Town Pleasure Reservation Declaration',
+      'Reservation Report (for Collector)',
+      'State Government Referral (via Collector)',
+      'Solving Conditions Proof - Industrial Use',
+      'Street Government Document (Collector Signed)'
+    ],
+    'Commercial - Granted': [
+      'Town Pleasure Reservation Declaration',
+      'Reservation Report (for Collector)',
+      'State Government Referral (via Collector)',
+      'Solving Conditions Proof - Commercial Use',
+      'Street Government Document (Collector Signed)'
+    ],
+    'Commercial - Semi-Granted': [
+      'Town Pleasure Reservation Declaration',
+      'Reservation Report (for Collector)',
+      'State Government Referral (via Collector)',
+      'Solving Conditions Proof - Commercial Use',
+      'Street Government Document (Collector Signed)'
+    ],
+    'Commercial - Private': [
+      'Town Pleasure Reservation Declaration',
+      'Reservation Report (for Collector)',
+      'State Government Referral (via Collector)',
+      'Solving Conditions Proof - Commercial Use',
+      'Street Government Document (Collector Signed)'
+    ]
+  };
 
-  function switchTab(prefix, tabId, el) {
-    document.querySelectorAll(`[id^="${prefix}-"]`).forEach(p => {
-      if (p.classList.contains('panel')) p.classList.remove('active');
+  let currentLandType = 'Residential - Individual';
+
+  function toggleMenu(menuId) {
+    document.querySelectorAll('.sidebar-item').forEach(el => {
+      if(el.id !== menuId) el.classList.remove('expanded');
     });
-    el.closest('.subtypes-tabs').querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
-    document.getElementById(`${prefix}-${tabId}`).classList.add('active');
-    el.classList.add('active');
+    document.getElementById(menuId).classList.toggle('expanded');
   }
 
-  function openInstructions(landType) {
+  function showDocs(landType, el) {
     currentLandType = landType;
-    document.getElementById('instrLandType').textContent = landType;
-    document.getElementById('acceptCheck').checked = false;
-    document.getElementById('proceedBtn').classList.remove('active');
-    document.getElementById('instrModal').classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }
+    document.getElementById('currentCategoryTitle').textContent = landType;
+    
+    // Update active state
+    document.querySelectorAll('.sub-menu a').forEach(a => a.classList.remove('active'));
+    el.classList.add('active');
 
-  function closeInstructions() {
-    document.getElementById('instrModal').classList.remove('open');
-    document.body.style.overflow = '';
-  }
+    // Render Docs
+    const docs = DOC_DATA[landType] || [];
+    const container = document.getElementById('docListContainer');
+    container.innerHTML = '';
 
-  function toggleAccept() {
-    const cb = document.getElementById('acceptCheck');
-    cb.checked = !cb.checked;
-    toggleProceed();
-  }
-
-  function toggleProceed() {
-    const cb  = document.getElementById('acceptCheck');
-    const btn = document.getElementById('proceedBtn');
-    if (cb.checked) {
-      btn.classList.add('active');
-    } else {
-      btn.classList.remove('active');
-    }
+    docs.forEach(doc => {
+      const card = document.createElement('div');
+      card.className = 'doc-card panel active';
+      card.innerHTML = `
+        <div class="doc-icon">📄</div>
+        <div class="doc-info">
+          <div class="doc-title">${doc}</div>
+          <div class="doc-meta">
+            <span>Doc Type: PDF, JPG, PNG</span>
+            <div class="dot"></div>
+            <span>Size: Max 5MB</span>
+            <div class="dot"></div>
+            <span class="doc-badge">Required</span>
+          </div>
+        </div>
+      `;
+      container.appendChild(card);
+    });
   }
 
   function proceedToApply() {
-    if (!document.getElementById('acceptCheck').checked) return;
-    closeInstructions();
-    // Navigate to apply page with land type
     const encoded = encodeURIComponent(currentLandType);
     window.location.href = `/apply/?type=${encoded}`;
   }
 
-  // Close on outside click
-  document.getElementById('instrModal').addEventListener('click', function(e) {
-    if (e.target === this) closeInstructions();
-  });
+  // Init
+  showDocs('Residential - Individual', document.querySelector('.sub-menu a.active'));
+
 </script>
 
 {% endblock %}

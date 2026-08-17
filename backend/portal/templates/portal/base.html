@@ -1,9 +1,10 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <title>LandScope | UIDAI Style</title>
+    <title>LandScope</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -26,7 +27,19 @@
             padding: 0;
         }
 
-        a { text-decoration: none; }
+        a {
+            text-decoration: none;
+        }
+
+        /* Hide Google Translate Toolbar */
+        body {
+            top: 0 !important;
+        }
+
+        .skiptranslate,
+        #google_translate_element {
+            display: none !important;
+        }
 
         /* 1. Top Bar */
         .top-nav-bar {
@@ -36,38 +49,51 @@
             padding: 5px 0;
             border-bottom: 2px solid var(--uidai-orange);
         }
+
         .top-nav-bar a {
             color: #ffffff;
             margin-right: 15px;
         }
+
         .top-nav-bar a:hover {
             color: var(--uidai-orange);
         }
-        .font-resize { margin-right: 15px; cursor: pointer; }
+
+        .font-resize {
+            margin-right: 15px;
+            cursor: pointer;
+        }
+
         .lang-select {
             background: transparent;
             color: white;
-            border: 1px solid rgba(255,255,255,0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             padding: 2px 5px;
             font-size: 12px;
             border-radius: 3px;
         }
-        .lang-select option { color: #333; }
+
+        .lang-select option {
+            color: #333;
+        }
 
         /* 2. Middle Header Logo Section */
         .middle-header {
             background-color: #ffffff;
             padding: 15px 0;
         }
+
         .logo-box {
             display: flex;
             align-items: center;
             gap: 15px;
         }
+
         .emblem-icon {
             font-size: 40px;
             color: var(--uidai-orange);
         }
+
         .site-name-box h1 {
             margin: 0;
             font-size: 26px;
@@ -75,11 +101,13 @@
             color: var(--uidai-blue);
             line-height: 1.2;
         }
+
         .site-name-box span {
             font-size: 12px;
             color: #666;
             font-weight: 600;
         }
+
         .digital-india-logo {
             font-size: 24px;
             color: var(--uidai-blue);
@@ -92,17 +120,19 @@
         /* 3. Main Navigation */
         .main-menu {
             background-color: var(--uidai-dark-blue);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             position: relative;
             z-index: 100;
         }
+
         .nav-list {
             display: flex;
             list-style: none;
             margin: 0;
             padding: 0;
         }
-        .nav-list > li > a {
+
+        .nav-list>li>a {
             display: block;
             padding: 14px 20px;
             color: #ffffff;
@@ -110,15 +140,18 @@
             font-size: 15px;
             transition: all 0.3s ease;
         }
-        .nav-list > li > a:hover {
+
+        .nav-list>li>a:hover {
             background-color: var(--uidai-orange);
             color: #ffffff;
         }
+
         .nav-right {
             display: flex;
             align-items: center;
             margin-left: auto;
         }
+
         .auth-btn {
             background-color: var(--uidai-orange);
             color: white !important;
@@ -127,50 +160,60 @@
             margin-left: 10px;
             font-weight: bold !important;
         }
+
         .auth-btn:hover {
             background-color: #d95316;
         }
 
         /* Footer Update based on user request */
         .uidai-footer {
-            background-color: #203360; /* Darker blue from screenshot */
+            background-color: #203360;
+            /* Darker blue from screenshot */
             color: #d1d5db;
             padding: 40px 0 60px;
             margin-top: 50px;
             font-family: 'Open Sans', sans-serif;
         }
+
         .footer-heading {
             color: #ffffff;
             font-size: 15px;
             font-weight: 600;
             margin-bottom: 25px;
         }
+
         .footer-links {
             list-style: none;
             padding: 0;
             margin: 0;
         }
+
         .footer-links li {
             margin-bottom: 15px;
         }
+
         .footer-links a {
             color: #d1d5db;
             font-size: 13px;
             transition: color 0.3s;
         }
+
         .footer-links a:hover {
             color: #ffffff;
             text-decoration: underline;
         }
+
         .footer-social {
             display: flex;
             gap: 15px;
             margin: 15px 0 30px;
         }
+
         .footer-social a {
             color: #ffffff;
             font-size: 18px;
         }
+
         .footer-gov-logo {
             display: flex;
             align-items: center;
@@ -178,8 +221,27 @@
             color: white;
             margin-bottom: 30px;
         }
+
+        /* High Contrast Mode CSS */
+        body.high-contrast {
+            background-color: #000000 !important;
+            color: #ffffff !important;
+        }
+
+        body.high-contrast * {
+            background-color: #000000 !important;
+            color: #ffff00 !important;
+            border-color: #ffffff !important;
+        }
+
+        body.high-contrast a,
+        body.high-contrast button {
+            color: #00ffff !important;
+            border: 1px solid #00ffff !important;
+        }
     </style>
 </head>
+
 <body>
 
     <!-- 1. Top Nav Bar -->
@@ -190,10 +252,11 @@
             </div>
             <div class="d-flex align-items-center">
                 <a href="#main-content">Skip to Main Content</a>
-                <a href="#"><i class="fa-solid fa-wheelchair me-1"></i> Accessibility Options</a>
-                <span class="font-resize">A-</span>
-                <span class="font-resize">A</span>
-                <span class="font-resize">A+</span>
+                <a href="javascript:void(0)" onclick="toggleHighContrast()"><i class="fa-solid fa-wheelchair me-1"></i>
+                    High Contrast</a>
+                <span class="font-resize" onclick="resizeFont(-1)" title="Decrease Font Size">A-</span>
+                <span class="font-resize" onclick="resizeFont(0)" title="Reset Font Size">A</span>
+                <span class="font-resize" onclick="resizeFont(1)" title="Increase Font Size">A+</span>
                 <select class="lang-select" onchange="changeLang(this.value)">
                     <option value="English">English</option>
                     <option value="मराठी">मराठी</option>
@@ -214,7 +277,7 @@
                 </div>
             </div>
             <div class="digital-india-logo d-none d-md-flex">
-                <i class="fa-solid fa-laptop-code" style="color:var(--uidai-orange);"></i> 
+                <i class="fa-solid fa-laptop-code" style="color:var(--uidai-orange);"></i>
                 <span>Digital <span style="color:var(--uidai-orange);">Maharashtra</span></span>
             </div>
         </div>
@@ -226,21 +289,22 @@
             <ul class="nav-list">
                 <li><a href="/" id="txt-home"><i class="fa-solid fa-house me-2"></i>Home</a></li>
                 {% if request.session.user_email %}
-                    <li><a href="/upload/" id="txt-apply">Apply for NA</a></li>
-                    <li><a href="#" id="txt-track">Track Application</a></li>
+                <li><a href="/upload/" id="txt-apply">Apply for NA</a></li>
+                <li><a href="#" id="txt-track">Track Application</a></li>
                 {% endif %}
                 <li><a href="/about/" id="txt-about">About Portal</a></li>
                 <li><a href="/resources/">Resources & Rules</a></li>
                 <li><a href="/contact/">Contact Us</a></li>
             </ul>
-            
+
             <ul class="nav-list nav-right">
                 {% if request.session.user_email %}
-                    <li><a href="#" style="color:#FF9933;"><i class="fa-solid fa-user me-2"></i>{{ request.session.user_name }}</a></li>
-                    <li><a href="/logout/" class="auth-btn">Logout</a></li>
+                <li><a href="#" style="color:#FF9933;"><i class="fa-solid fa-user me-2"></i>{{ request.session.user_name
+                        }}</a></li>
+                <li><a href="/logout/" class="auth-btn">Logout</a></li>
                 {% else %}
-                    <li><a href="/login/" id="txt-login">Login</a></li>
-                    <li><a href="/register/" class="auth-btn" id="txt-signup">Register</a></li>
+                <li><a href="/login/" id="txt-login">Login</a></li>
+                <li><a href="/register/" class="auth-btn" id="txt-signup">Register</a></li>
                 {% endif %}
             </ul>
         </div>
@@ -316,16 +380,20 @@
                 <!-- Column 5 -->
                 <div class="col-lg-3">
                     <p style="font-size: 13px; color:#d1d5db; line-height: 1.6; margin-bottom:20px;">
-                        This is the official website of the Department of Revenue, Ministry of Finance, Government of India.
+                        This is the official website of the Department of Revenue, Ministry of Finance, Government of
+                        India.
                     </p>
                     <div class="d-flex gap-2">
                         <!-- Badge 1: India Code -->
-                        <div style="background:white; color:black; padding:8px 12px; border-radius:4px; border:1px solid #ddd; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                        <div
+                            style="background:white; color:black; padding:8px 12px; border-radius:4px; border:1px solid #ddd; display:flex; flex-direction:column; align-items:center; justify-content:center;">
                             <i class="fa-solid fa-gavel mb-1"></i>
-                            <span style="font-weight:900; font-size:12px; font-family:serif; color:#900;">INDIA CODE</span>
+                            <span style="font-weight:900; font-size:12px; font-family:serif; color:#900;">INDIA
+                                CODE</span>
                         </div>
                         <!-- Badge 2: India.gov.in -->
-                        <div style="background:white; padding:8px 12px; border-radius:4px; border:1px solid #ddd; display:flex; align-items:center; justify-content:center;">
+                        <div
+                            style="background:white; padding:8px 12px; border-radius:4px; border:1px solid #ddd; display:flex; align-items:center; justify-content:center;">
                             <span style="font-weight:bold; font-size:14px; color:#666;">
                                 <span style="color:#d95316;">india</span><span style="color:#203360;">.gov.in</span>
                             </span>
@@ -336,25 +404,79 @@
         </div>
     </footer>
 
+    <!-- Google Translate Element -->
+    <div id="google_translate_element" style="display:none;"></div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Google Translate Script -->
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'en',
+                includedLanguages: 'en,mr,hi',
+                autoDisplay: false
+            }, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript"
+        src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
     <script>
-        const t = {
-            'English': { title: "LandScope", subtitle: "Non-Agricultural Land Governance", home: "Home", apply: "Apply for NA", track: "Track Application", about: "About Portal", login: "Login", signup: "Register" },
-            'मराठी': { title: "लँडस्कोप", subtitle: "अकृषिक जमीन प्रशासन", home: "मुख्य पृष्ठ", apply: "NA साठी अर्ज", track: "अर्जाचा मागोवा", about: "पोर्टलबद्दल", login: "लॉगिन", signup: "नोंदणी" },
-            'हिन्दी': { title: "लैंडस्कोप", subtitle: "गैर-कृषि भूमि प्रशासन", home: "होम", apply: "NA के लिए आवेदन", track: "आवेदन ट्रैक करें", about: "पोर्टल के बारे में", login: "लॉगिन", signup: "रजिस्टर" }
-        };
         function changeLang(lang) {
-            if(!t[lang]) return;
-            const set = (id, txt) => { let e = document.getElementById(id); if(e) e.innerText = txt; };
-            set('txt-title', t[lang].title);
-            set('txt-subtitle', t[lang].subtitle);
-            set('txt-home', t[lang].home);
-            set('txt-apply', t[lang].apply);
-            set('txt-track', t[lang].track);
-            set('txt-about', t[lang].about);
-            set('txt-login', t[lang].login);
-            set('txt-signup', t[lang].signup);
+            let langCode = 'en';
+            if (lang === 'मराठी') langCode = 'mr';
+            if (lang === 'हिन्दी') langCode = 'hi';
+
+            // Set the Google Translate cookie
+            document.cookie = `googtrans=/en/${langCode}; path=/`;
+            document.cookie = `googtrans=/en/${langCode}; path=/; domain=${location.hostname}`;
+
+            // Reload to apply translation
+            window.location.reload();
+        }
+
+        // Set the dropdown to the currently selected language on load
+        window.onload = function () {
+            let match = document.cookie.match(new RegExp('(^| )googtrans=([^;]+)'));
+            let currentLang = match ? match[2] : null;
+            let select = document.querySelector('.lang-select');
+
+            if (currentLang && currentLang.endsWith('/mr')) {
+                select.value = 'मराठी';
+            } else if (currentLang && currentLang.endsWith('/hi')) {
+                select.value = 'हिन्दी';
+            } else {
+                select.value = 'English';
+            }
+
+            // Restore High Contrast if saved
+            if (localStorage.getItem('highContrast') === 'true') {
+                document.body.classList.add('high-contrast');
+            }
+        };
+
+        // Accessibility: Font Resizer
+        let fontSizeLevel = 100;
+        function resizeFont(step) {
+            if (step === 0) {
+                fontSizeLevel = 100;
+            } else if (step > 0 && fontSizeLevel < 120) {
+                fontSizeLevel += 10;
+            } else if (step < 0 && fontSizeLevel > 80) {
+                fontSizeLevel -= 10;
+            }
+
+            // Setting zoom on document element scales everything properly in most modern browsers
+            document.documentElement.style.zoom = (fontSizeLevel / 100);
+        }
+
+        // Accessibility: High Contrast Toggle
+        function toggleHighContrast() {
+            const isHighContrast = document.body.classList.toggle('high-contrast');
+            localStorage.setItem('highContrast', isHighContrast);
         }
     </script>
 </body>
+
 </html>
