@@ -1,0 +1,320 @@
+{% extends 'portal/base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+  /* UIDAI Inspired About Page Styles */
+  .breadcrumb-wrap {
+    background-color: var(--uidai-gray);
+    padding: 10px 0;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 13px;
+    margin-bottom: 30px;
+  }
+  .breadcrumb-wrap a {
+    color: var(--uidai-blue);
+    text-decoration: none;
+  }
+  .breadcrumb-wrap a:hover {
+    color: var(--uidai-orange);
+    text-decoration: underline;
+  }
+  .breadcrumb-wrap span {
+    color: #666;
+  }
+
+  /* Sidebar Navigation */
+  .sidebar-menu {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    margin-bottom: 30px;
+  }
+  .sidebar-header {
+    background-color: var(--uidai-blue);
+    color: white;
+    padding: 15px 20px;
+    font-weight: bold;
+    font-size: 16px;
+    border-radius: 4px 4px 0 0;
+  }
+  .sidebar-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .sidebar-list li {
+    border-bottom: 1px solid #eee;
+  }
+  .sidebar-list li:last-child {
+    border-bottom: none;
+  }
+  .sidebar-list a {
+    display: block;
+    padding: 12px 20px;
+    color: #444;
+    font-size: 14px;
+    text-decoration: none;
+    transition: all 0.3s;
+    border-left: 3px solid transparent;
+  }
+  .sidebar-list a:hover, .sidebar-list a.active {
+    background-color: var(--uidai-light-blue);
+    color: var(--uidai-orange);
+    border-left-color: var(--uidai-orange);
+    font-weight: 600;
+  }
+
+  /* Main Content Area */
+  .page-title {
+    color: var(--uidai-blue);
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .title-underline {
+    width: 60px;
+    height: 3px;
+    background-color: var(--uidai-orange);
+    margin-bottom: 25px;
+  }
+  
+  .content-section {
+    margin-bottom: 40px;
+    background: white;
+  }
+  .content-section h3 {
+    color: var(--uidai-blue);
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+  }
+  .content-section p {
+    font-size: 15px;
+    line-height: 1.7;
+    color: #444;
+    margin-bottom: 15px;
+  }
+  
+  /* UIDAI Bullet Lists */
+  .uidai-list {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 20px;
+  }
+  .uidai-list li {
+    position: relative;
+    padding-left: 25px;
+    margin-bottom: 12px;
+    font-size: 15px;
+    color: #444;
+    line-height: 1.6;
+  }
+  .uidai-list li::before {
+    content: '\f105'; /* FontAwesome right arrow */
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    left: 0;
+    top: 2px;
+    color: var(--uidai-orange);
+  }
+  .uidai-list strong {
+    color: var(--uidai-blue);
+  }
+
+  /* Info Cards for Land Types (Mimicking UIDAI Information blocks) */
+  .info-block {
+    background-color: var(--uidai-light-blue);
+    border: 1px solid #dbe6ee;
+    border-left: 4px solid var(--uidai-blue);
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 0 4px 4px 0;
+  }
+  .info-block.residential { border-left-color: #2e7d32; }
+  .info-block.educational { border-left-color: #1565c0; }
+  .info-block.industrial  { border-left-color: #d84315; }
+  .info-block.commercial  { border-left-color: #6a1b9a; }
+  
+  .info-block h4 {
+    font-size: 18px;
+    color: var(--uidai-dark-blue);
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+  
+  .sub-types {
+    background: white;
+    padding: 15px;
+    margin-top: 15px;
+    border: 1px dashed #ccc;
+    border-radius: 4px;
+  }
+  .sub-types h5 {
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--uidai-orange);
+    margin-bottom: 5px;
+  }
+  .sub-types p {
+    font-size: 13px;
+    margin-bottom: 10px;
+  }
+</style>
+
+<!-- Breadcrumbs -->
+<div class="breadcrumb-wrap">
+  <div class="container">
+    <a href="/"><i class="fa-solid fa-house me-1"></i> Home</a> 
+    <span class="mx-2">></span> 
+    <span>About LandScope</span>
+  </div>
+</div>
+
+<div class="container mb-5">
+  <div class="row">
+    
+    <!-- Left Sidebar -->
+    <div class="col-md-3">
+      <div class="sidebar-menu">
+        <div class="sidebar-header">
+          About LandScope
+        </div>
+        <ul class="sidebar-list">
+          <li><a href="#vision" class="active">Vision & Mission</a></li>
+          <li><a href="#why-na">Why NA Certificate?</a></li>
+          <li><a href="#process">The Generation Process</a></li>
+          <li><a href="#rules">Rules & Guidelines</a></li>
+          <li><a href="#documents">Essential Documents</a></li>
+          <li><a href="#land-types">Types of NA Land</a></li>
+        </ul>
+      </div>
+
+      <!-- Quick Contact Box (UIDAI style left widget) -->
+      <div class="sidebar-menu">
+        <div class="sidebar-header" style="background-color: var(--uidai-orange);">
+          Need Help?
+        </div>
+        <div class="p-3" style="font-size: 14px; color: #444;">
+          <strong>Toll Free:</strong> 1947<br><br>
+          <strong>Email:</strong> help@landscope.gov.in<br><br>
+          <a href="/upload/" class="btn btn-sm text-white" style="background-color: var(--uidai-blue); width: 100%;">Apply Now</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Main Content -->
+    <div class="col-md-9">
+      <h2 class="page-title">About Non-Agricultural Land Governance</h2>
+      <div class="title-underline"></div>
+      
+      <!-- Section: Vision -->
+      <div id="vision" class="content-section">
+        <p>Non-agricultural land refers to any land area that has been designated or legally converted for purposes other than farming. Using land for these purposes usually requires an official NA certificate from local authorities. Start your journey with us today and secure your piece of the earth.</p>
+        <p>Our vision is to facilitate sustainable urban development and economic growth by efficiently transforming land use while maintaining ecological balance. We aim to provide a legal, transparent, and structured process for converting agricultural land into productive residential, commercial, or industrial assets.</p>
+      </div>
+
+      <!-- Section: Why NA -->
+      <div id="why-na" class="content-section">
+        <h3>Why Do We Need an NA Certificate?</h3>
+        <p>A Non Agricultural (NA) certificate is the legal backbone for land development. It is crucial for legalization, financing, and utility benefits. The primary reasons include:</p>
+        <ul class="uidai-list">
+          <li><strong>Legalization:</strong> It officially converts land from farming to residential/commercial use, preventing government penalties.</li>
+          <li><strong>Financing:</strong> Banks only approve construction loans and mortgages for NA certified plots.</li>
+          <li><strong>Utilities:</strong> It is mandatory for obtaining permanent water, drainage, and electricity connections.</li>
+          <li><strong>Market Value:</strong> Certified land carries a higher resale value and a "clear title" for buyers.</li>
+        </ul>
+      </div>
+
+      <!-- Section: Process -->
+      <div id="process" class="content-section">
+        <h3>The Generation Process</h3>
+        <p>The conversion process is handled by the Revenue Department through these standard legal steps:</p>
+        <ul class="uidai-list">
+          <li><strong>Application:</strong> Submit a formal request to the District Collector or SDO with land records.</li>
+          <li><strong>Verification:</strong> The Tahasildar conducts a site visit to verify boundaries and land titles.</li>
+          <li><strong>NOC Clearance:</strong> Approvals are gathered from Town Planning and the Healthcare Departments.</li>
+          <li><strong>Premium Payment:</strong> Pay the conversion tax (NA Premium) based on the land's size and location.</li>
+          <li><strong>Final Order:</strong> The Collector issues the formal NA Certificate and updates the land records.</li>
+        </ul>
+      </div>
+
+      <!-- Section: Rules -->
+      <div id="rules" class="content-section">
+        <h3>Rules & Guidelines</h3>
+        <p>Strict rules are implemented to ensure safe and planned development across Maharashtra:</p>
+        <ul class="uidai-list">
+          <li><strong>Zoning Compliance:</strong> The land must fall within a "convertible zone" as defined by the regional Development Plan (DP).</li>
+          <li><strong>Clear Marketable Title:</strong> The applicant must be the sole legal owner, free from any disputes.</li>
+          <li><strong>Access & Connectivity:</strong> The plot must have a sanctioned approach road of a minimum width.</li>
+          <li><strong>No-Objection Certificates (NOCs):</strong> Applicants must obtain clearances from Fire, Pollution Control, and Water Resources.</li>
+          <li><strong>Time-Bound Construction:</strong> Once granted, construction must begin within 1–3 years.</li>
+        </ul>
+      </div>
+
+      <!-- Section: Documents -->
+      <div id="documents" class="content-section">
+        <h3>Essential Documents</h3>
+        <p>Non compliance with documentation leads to legal and financial issues. You must prepare:</p>
+        <ul class="uidai-list">
+          <li><strong>7/12 Extract:</strong> Updated government record proving current ownership, survey number, and area.</li>
+          <li><strong>Mutation Entry (Ferfar):</strong> Historical records (Form VI) documenting chain of ownership.</li>
+          <li><strong>Village Form VI:</strong> Details regarding the land's history, cultivation status, and liabilities.</li>
+          <li><strong>Certified Site Plan:</strong> A professional blueprint showing boundaries and surrounding roads.</li>
+          <li><strong>Zone Certificate:</strong> Official proof from Town Planning confirming a developable zone.</li>
+        </ul>
+      </div>
+
+      <!-- Section: Land Types -->
+      <div id="land-types" class="content-section">
+        <h3>Types of Non-Agricultural Land</h3>
+        <p>Understanding each land category helps you choose the right NA Certificate application process.</p>
+
+        <div class="info-block residential">
+          <h4><i class="fa-solid fa-house me-2" style="color:#2e7d32;"></i> Residential Non-Agricultural Land</h4>
+          <p>Used for constructing houses, apartments, plotted developments, and housing societies. Once converted, the land can be legally used for building permanent residential structures.</p>
+          <div class="sub-types">
+            <h5>Individual</h5><p class="mb-2">Single owner applying for personal residential development.</p>
+            <h5>Partnership</h5><p class="mb-0">Two or more co-owners applying jointly. Requires all individual documents plus partnership agreement deed.</p>
+          </div>
+        </div>
+
+        <div class="info-block educational">
+          <h4><i class="fa-solid fa-graduation-cap me-2" style="color:#1565c0;"></i> Educational Non-Agricultural Land</h4>
+          <p>Designated for building schools, colleges, universities, coaching centres, and other educational institutions.</p>
+          <div class="sub-types">
+            <h5>Granted</h5><p class="mb-2">Land directly granted by the government for educational purposes.</p>
+            <h5>Semi-Granted & Private</h5><p class="mb-0">Partially government-aided or entirely privately owned land converted for educational use.</p>
+          </div>
+        </div>
+
+        <div class="info-block industrial">
+          <h4><i class="fa-solid fa-industry me-2" style="color:#d84315;"></i> Industrial Non-Agricultural Land</h4>
+          <p>Used for factories, manufacturing plants, warehouses, processing units, and industrial estates. Conversion requires strict compliance with environmental norms.</p>
+        </div>
+
+        <div class="info-block commercial">
+          <h4><i class="fa-solid fa-store me-2" style="color:#6a1b9a;"></i> Commercial Non-Agricultural Land</h4>
+          <p>Used for shops, offices, malls, hotels, restaurants, and commercial complexes. This is the most common type of conversion in urban areas.</p>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // Simple script to highlight the active sidebar link based on scroll or click
+  document.querySelectorAll('.sidebar-list a').forEach(link => {
+    link.addEventListener('click', function() {
+      document.querySelectorAll('.sidebar-list a').forEach(l => l.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+</script>
+
+{% endblock %}

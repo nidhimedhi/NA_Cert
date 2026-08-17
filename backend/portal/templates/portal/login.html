@@ -1,0 +1,326 @@
+{% extends 'portal/base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .auth-page {
+      min-height: 80vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #e8f0fe 0%, #f0f6ff 50%, #dbeafe 100%);
+      font-family: 'Times New Roman', Times, serif;
+      padding: 20px;
+    }
+
+    .auth-card {
+      display: flex;
+      width: 920px;
+      min-height: 540px;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 32px 80px rgba(37,99,235,0.18), 0 4px 24px rgba(0,0,0,0.08);
+      background: white;
+    }
+
+    /* ── LEFT PANEL ── */
+    .auth-left {
+      width: 42%;
+      background: linear-gradient(160deg, #1e40af 0%, #1d4ed8 45%, #2563eb 100%);
+      padding: 52px 42px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* subtle dot-grid texture */
+    .auth-left::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+      background-size: 24px 24px;
+      pointer-events: none;
+    }
+
+    /* glowing circle accent */
+    .auth-left::after {
+      content: '';
+      position: absolute;
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(96,165,250,0.25) 0%, transparent 70%);
+      bottom: -60px; right: -60px;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .auth-brand {
+      position: absolute;
+      top: 26px; left: 28px;
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 1.25rem;
+      color: #bfdbfe;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .auth-left-img {
+      width: 190px;
+      height: 190px;
+      object-fit: cover;
+      border-radius: 20px;
+      margin-bottom: 28px;
+      position: relative;
+      z-index: 1;
+      border: 3px solid rgba(147,197,253,0.4);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+      /* Apply a blue tint filter to eliminate any brown shades from the original image */
+      filter: sepia(100%) hue-rotate(190deg) saturate(300%) contrast(1.1) brightness(0.9);
+    }
+
+    .auth-left h2 {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 1.85rem;
+      color: #fff;
+      margin-bottom: 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .auth-left p {
+      color: rgba(191,219,254,0.85);
+      font-size: 14px;
+      line-height: 1.7;
+      position: relative;
+      z-index: 1;
+      max-width: 230px;
+    }
+
+    .auth-left-divider {
+      width: 40px;
+      height: 3px;
+      background: rgba(147,197,253,0.5);
+      border-radius: 2px;
+      margin: 18px auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── RIGHT PANEL ── */
+    .auth-right {
+      flex: 1;
+      background: #ffffff;
+      padding: 52px 50px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .auth-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #eff6ff;
+      color: #2563eb;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 20px;
+      border: 1px solid #bfdbfe;
+      margin-bottom: 18px;
+      width: fit-content;
+    }
+
+    .auth-right h2 {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 2rem;
+      color: #1e3a8a;
+      margin-bottom: 6px;
+      line-height: 1.2;
+    }
+
+    .auth-sub {
+      color: #64748b;
+      font-size: 14px;
+      margin-bottom: 32px;
+      line-height: 1.5;
+    }
+
+    /* ── FORM ── */
+    .auth-form { display: flex; flex-direction: column; gap: 14px; }
+
+    .input-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: #475569;
+      margin-bottom: 6px;
+    }
+
+    .input-wrap {
+      background: #f8faff;
+      border: 1.5px solid #dbeafe;
+      border-radius: 10px;
+      overflow: hidden;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .input-wrap:focus-within {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+      background: #fff;
+    }
+
+    .auth-input {
+      width: 100%;
+      padding: 13px 16px;
+      border: none;
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 14px;
+      color: #1e293b;
+      background: transparent;
+      outline: none;
+      display: block;
+    }
+
+    .auth-input::placeholder { color: #94a3b8; }
+
+    .auth-forgot {
+      text-align: right;
+      font-size: 12px;
+      color: #3b82f6;
+      text-decoration: none;
+      font-weight: 600;
+      margin-top: -4px;
+      transition: color 0.2s;
+    }
+    .auth-forgot:hover { color: #1d4ed8; }
+
+    .auth-submit {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 60%, #3b82f6 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.22s;
+      margin-top: 6px;
+      letter-spacing: 0.3px;
+      box-shadow: 0 4px 16px rgba(37,99,235,0.3);
+    }
+    .auth-submit:hover {
+      background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(37,99,235,0.38);
+    }
+
+    .auth-switch {
+      text-align: center;
+      font-size: 13px;
+      color: #64748b;
+      margin-top: 22px;
+    }
+    .auth-switch a {
+      color: #2563eb;
+      font-weight: 700;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .auth-switch a:hover { color: #1d4ed8; text-decoration: underline; }
+
+    .error-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #dc2626;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    @media (max-width: 720px) {
+      .auth-card { flex-direction: column; width: 100%; max-width: 480px; }
+      .auth-left { width: 100%; padding: 40px 30px; min-height: 220px; }
+      .auth-left-img { width: 120px; height: 120px; margin-bottom: 16px; }
+      .auth-right { padding: 36px 28px; }
+    }
+</style>
+
+<div class="auth-page">
+<div class="auth-card">
+
+  <!-- LEFT -->
+  <div class="auth-left">
+    <div class="auth-brand">🏛 LandScope</div>
+    <img src="{% static 'images/login.jpeg' %}" class="auth-left-img" alt="Login">
+    <h2>Welcome Back</h2>
+    <div class="auth-left-divider"></div>
+    <p>Manage your NA land certificates and property records with ease.</p>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="auth-right">
+    <span class="auth-badge">🔒 Secure Login</span>
+    <h2>Sign In</h2>
+    <p class="auth-sub">Enter your credentials to access your dashboard.</p>
+
+    {% if error %}
+    <div class="error-box">⚠️ {{ error }}</div>
+    {% endif %}
+
+    <form method="POST" class="auth-form" autocomplete="off">
+      {% csrf_token %}
+
+      <div>
+        <label class="input-label">Email Address</label>
+        <div class="input-wrap">
+          <input
+            class="auth-input"
+            type="text"
+            name="username"
+            placeholder="you@example.com"
+            required
+            autocomplete="new-password"
+          >
+        </div>
+      </div>
+
+      <div>
+        <label class="input-label">Password</label>
+        <div class="input-wrap">
+          <input
+            class="auth-input"
+            type="password"
+            name="password"
+            placeholder="Enter your password"
+            required
+            autocomplete="new-password"
+          >
+        </div>
+      </div>
+
+      <a href="#" class="auth-forgot">Forgot password?</a>
+      <button type="submit" class="auth-submit">Sign In →</button>
+    </form>
+
+    <p class="auth-switch">Don't have an account? <a href="/register/">Sign Up</a></p>
+  </div>
+
+</div>
+</div>
+{% endblock %}

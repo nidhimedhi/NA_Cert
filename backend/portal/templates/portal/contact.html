@@ -1,0 +1,361 @@
+{% extends 'portal/base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+  /* UIDAI Inspired Contact & Support Styles */
+  .breadcrumb-wrap {
+    background-color: var(--uidai-gray);
+    padding: 10px 0;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 13px;
+    margin-bottom: 30px;
+  }
+
+  .breadcrumb-wrap a {
+    color: var(--uidai-blue);
+    text-decoration: none;
+  }
+
+  .breadcrumb-wrap a:hover {
+    color: var(--uidai-orange);
+    text-decoration: underline;
+  }
+
+  .breadcrumb-wrap span {
+    color: #666;
+  }
+
+  .page-title {
+    color: var(--uidai-blue);
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  .title-underline {
+    width: 60px;
+    height: 3px;
+    background-color: var(--uidai-orange);
+    margin-bottom: 30px;
+  }
+
+  /* Toll Free Banner */
+  .toll-free-banner {
+    background-color: var(--uidai-blue);
+    color: white;
+    padding: 40px 20px;
+    border-radius: 8px;
+    text-align: center;
+    margin-bottom: 40px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .toll-free-banner::after {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 200px;
+    height: 200px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+  }
+
+  .toll-free-number {
+    font-size: 60px;
+    font-weight: 900;
+    color: var(--uidai-orange);
+    line-height: 1;
+    margin: 15px 0;
+    letter-spacing: 2px;
+  }
+
+  .toll-free-desc {
+    font-size: 16px;
+    color: #d1e5f5;
+  }
+
+  /* Contact Cards Grid */
+  .contact-card {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 30px 25px;
+    height: 100%;
+    transition: box-shadow 0.3s;
+    text-align: center;
+    border-top: 4px solid var(--uidai-blue);
+  }
+
+  .contact-card:hover {
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    border-top-color: var(--uidai-orange);
+  }
+
+  .contact-icon {
+    width: 60px;
+    height: 60px;
+    background-color: var(--uidai-light-blue);
+    color: var(--uidai-blue);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+
+  .contact-card h4 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--uidai-dark-blue);
+    margin-bottom: 15px;
+  }
+
+  .contact-card p {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 10px;
+  }
+
+  .contact-card a {
+    color: var(--uidai-orange);
+    font-weight: bold;
+    text-decoration: none;
+  }
+
+  .contact-card a:hover {
+    text-decoration: underline;
+  }
+
+  /* Regional Offices Section */
+  .offices-section {
+    background-color: var(--uidai-gray);
+    padding: 50px 0;
+    margin-top: 50px;
+  }
+
+  .office-box {
+    background: white;
+    padding: 20px;
+    border-radius: 4px;
+    border-left: 4px solid var(--uidai-blue);
+    margin-bottom: 20px;
+  }
+
+  .office-box h5 {
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--uidai-blue);
+    margin-bottom: 10px;
+  }
+
+  .office-box p {
+    font-size: 14px;
+    color: #444;
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  /* Support Form Section */
+  .support-form-container {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 30px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  }
+
+  .form-label {
+    font-weight: 600;
+    font-size: 14px;
+    color: #444;
+  }
+
+  .form-control,
+  .form-select {
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    padding: 10px 12px;
+  }
+
+  .form-control:focus,
+  .form-select:focus {
+    border-color: var(--uidai-orange);
+    box-shadow: 0 0 0 0.2rem rgba(242, 101, 34, 0.25);
+  }
+
+  .btn-submit {
+    background-color: var(--uidai-orange);
+    color: white;
+    font-weight: bold;
+    padding: 10px 25px;
+    border: none;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+  }
+
+  .btn-submit:hover {
+    background-color: #d95316;
+  }
+</style>
+
+<!-- Breadcrumbs -->
+<div class="breadcrumb-wrap">
+  <div class="container">
+    <a href="/"><i class="fa-solid fa-house me-1"></i> Home</a>
+    <span class="mx-2">></span>
+    <span>Contact & Support</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <h2 class="page-title">Contact & Support</h2>
+  <div class="title-underline"></div>
+
+  <!-- Toll Free Banner -->
+  <div class="toll-free-banner shadow-sm">
+    <div style="font-size: 20px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Helpdesk Toll Free
+      Number</div>
+    <div class="toll-free-number">1947</div>
+    <div class="toll-free-desc">Available 24x7 in English, Marathi, and Hindi to assist you with LandScope services.
+    </div>
+  </div>
+
+  <!-- Contact Cards Grid -->
+  <div class="row g-4 mb-5">
+
+    <!-- Email Support -->
+    <div class="col-md-4">
+      <div class="contact-card">
+        <div class="contact-icon">
+          <i class="fa-solid fa-envelope"></i>
+        </div>
+        <h4>Email Support</h4>
+        <p>For technical queries, application status, and document verification issues.</p>
+        <p style="font-size: 16px; font-weight: bold; color: var(--uidai-dark-blue);">help@landscope.gov.in</p>
+      </div>
+    </div>
+
+    <!-- Grievance Redressal -->
+    <div class="col-md-4">
+      <div class="contact-card">
+        <div class="contact-icon" style="background-color: rgba(242, 101, 34, 0.1); color: var(--uidai-orange);">
+          <i class="fa-solid fa-scale-balanced"></i>
+        </div>
+        <h4>Grievance Redressal</h4>
+        <p>If your NA Certificate application is delayed beyond the citizen charter limit, file a grievance.</p>
+        <a href="#grievance-form">File a Grievance <i class="fa-solid fa-arrow-right ms-1"></i></a>
+      </div>
+    </div>
+
+    <!-- Headquarters -->
+    <div class="col-md-4">
+      <div class="contact-card">
+        <div class="contact-icon">
+          <i class="fa-solid fa-building"></i>
+        </div>
+        <h4>State Headquarters</h4>
+        <p>Revenue Department,<br>Mantralaya, Mumbai - 400032<br>Maharashtra, India</p>
+        <a href="#"><i class="fa-solid fa-map-location-dot me-1"></i> View on Map</a>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Interactive Support Form Section -->
+<div class="container mb-5" id="grievance-form">
+  <div class="row">
+    <div class="col-lg-8 mx-auto">
+      <div class="support-form-container">
+        <h3
+          style="color: var(--uidai-blue); font-weight: 700; margin-bottom: 25px; border-bottom: 2px solid #eee; padding-bottom: 10px;">
+          Submit a Query / Grievance
+        </h3>
+
+        <form>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Full Name <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" placeholder="Enter your full name">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Mobile Number <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" placeholder="10-digit mobile number">
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Email ID <span class="text-danger">*</span></label>
+              <input type="email" class="form-control" placeholder="Enter valid email">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Application Reference No. (If applicable)</label>
+              <input type="text" class="form-control" placeholder="e.g. NA-2026-123456">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Category of Query <span class="text-danger">*</span></label>
+            <select class="form-select">
+              <option selected disabled>Select Category</option>
+              <option>Delay in Certificate Issuance</option>
+              <option>Technical Issue on Portal</option>
+              <option>Payment / Fee Related</option>
+              <option>Document Verification</option>
+              <option>Other Information</option>
+            </select>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label">Description / Message <span class="text-danger">*</span></label>
+            <textarea class="form-control" rows="4"
+              placeholder="Briefly describe your query or grievance..."></textarea>
+          </div>
+
+          <div class="text-end">
+            <button type="submit" class="btn-submit">Submit Request</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Regional Offices -->
+<section class="offices-section">
+  <div class="container">
+    <h3 style="color: var(--uidai-blue); font-weight: 700; margin-bottom: 30px; text-align: center;">Regional Land
+      Offices</h3>
+    <div class="row">
+      <div class="col-md-4">
+        <div class="office-box">
+          <h5>Pune Division</h5>
+          <p>Office of the Divisional Commissioner,<br>Council Hall Area, Pune - 411001<br>Phone: 020-2612xxxx</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="office-box">
+          <h5>Nagpur Division</h5>
+          <p>Office of the Divisional Commissioner,<br>Civil Lines, Nagpur - 440001<br>Phone: 0712-256xxxx</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="office-box">
+          <h5>Nashik Division</h5>
+          <p>Office of the Divisional Commissioner,<br>Nashik Road, Nashik - 422101<br>Phone: 0253-246xxxx</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

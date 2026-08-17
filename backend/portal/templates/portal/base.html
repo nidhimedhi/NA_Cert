@@ -1,0 +1,360 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LandScope | UIDAI Style</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* UIDAI Color Palette & Typography */
+        :root {
+            --uidai-blue: #0b3c61;
+            --uidai-dark-blue: #093252;
+            --uidai-light-blue: #eef5f9;
+            --uidai-orange: #f26522;
+            --uidai-gray: #f5f5f5;
+            --uidai-text: #333333;
+            --uidai-footer: #2b2b2b;
+        }
+
+        body {
+            font-family: 'Open Sans', 'Helvetica Neue', Arial, sans-serif;
+            color: var(--uidai-text);
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+        }
+
+        a { text-decoration: none; }
+
+        /* 1. Top Bar */
+        .top-nav-bar {
+            background-color: var(--uidai-blue);
+            color: #ffffff;
+            font-size: 13px;
+            padding: 5px 0;
+            border-bottom: 2px solid var(--uidai-orange);
+        }
+        .top-nav-bar a {
+            color: #ffffff;
+            margin-right: 15px;
+        }
+        .top-nav-bar a:hover {
+            color: var(--uidai-orange);
+        }
+        .font-resize { margin-right: 15px; cursor: pointer; }
+        .lang-select {
+            background: transparent;
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 2px 5px;
+            font-size: 12px;
+            border-radius: 3px;
+        }
+        .lang-select option { color: #333; }
+
+        /* 2. Middle Header Logo Section */
+        .middle-header {
+            background-color: #ffffff;
+            padding: 15px 0;
+        }
+        .logo-box {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .emblem-icon {
+            font-size: 40px;
+            color: var(--uidai-orange);
+        }
+        .site-name-box h1 {
+            margin: 0;
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--uidai-blue);
+            line-height: 1.2;
+        }
+        .site-name-box span {
+            font-size: 12px;
+            color: #666;
+            font-weight: 600;
+        }
+        .digital-india-logo {
+            font-size: 24px;
+            color: var(--uidai-blue);
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* 3. Main Navigation */
+        .main-menu {
+            background-color: var(--uidai-dark-blue);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 100;
+        }
+        .nav-list {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        .nav-list > li > a {
+            display: block;
+            padding: 14px 20px;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+        .nav-list > li > a:hover {
+            background-color: var(--uidai-orange);
+            color: #ffffff;
+        }
+        .nav-right {
+            display: flex;
+            align-items: center;
+            margin-left: auto;
+        }
+        .auth-btn {
+            background-color: var(--uidai-orange);
+            color: white !important;
+            padding: 6px 15px !important;
+            border-radius: 4px;
+            margin-left: 10px;
+            font-weight: bold !important;
+        }
+        .auth-btn:hover {
+            background-color: #d95316;
+        }
+
+        /* Footer Update based on user request */
+        .uidai-footer {
+            background-color: #203360; /* Darker blue from screenshot */
+            color: #d1d5db;
+            padding: 40px 0 60px;
+            margin-top: 50px;
+            font-family: 'Open Sans', sans-serif;
+        }
+        .footer-heading {
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 25px;
+        }
+        .footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .footer-links li {
+            margin-bottom: 15px;
+        }
+        .footer-links a {
+            color: #d1d5db;
+            font-size: 13px;
+            transition: color 0.3s;
+        }
+        .footer-links a:hover {
+            color: #ffffff;
+            text-decoration: underline;
+        }
+        .footer-social {
+            display: flex;
+            gap: 15px;
+            margin: 15px 0 30px;
+        }
+        .footer-social a {
+            color: #ffffff;
+            font-size: 18px;
+        }
+        .footer-gov-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. Top Nav Bar -->
+    <div class="top-nav-bar">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div class="fw-bold">
+                <i class="fa-solid fa-building-flag me-2"></i> Government of Maharashtra
+            </div>
+            <div class="d-flex align-items-center">
+                <a href="#main-content">Skip to Main Content</a>
+                <a href="#"><i class="fa-solid fa-wheelchair me-1"></i> Accessibility Options</a>
+                <span class="font-resize">A-</span>
+                <span class="font-resize">A</span>
+                <span class="font-resize">A+</span>
+                <select class="lang-select" onchange="changeLang(this.value)">
+                    <option value="English">English</option>
+                    <option value="मराठी">मराठी</option>
+                    <option value="हिन्दी">हिन्दी</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Middle Header -->
+    <div class="middle-header">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div class="logo-box">
+                <i class="fa-solid fa-landmark emblem-icon"></i>
+                <div class="site-name-box">
+                    <h1 id="txt-title">LandScope</h1>
+                    <span id="txt-subtitle">Non-Agricultural Land Governance & Authorization</span>
+                </div>
+            </div>
+            <div class="digital-india-logo d-none d-md-flex">
+                <i class="fa-solid fa-laptop-code" style="color:var(--uidai-orange);"></i> 
+                <span>Digital <span style="color:var(--uidai-orange);">Maharashtra</span></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Main Navigation -->
+    <nav class="main-menu">
+        <div class="container d-flex">
+            <ul class="nav-list">
+                <li><a href="/" id="txt-home"><i class="fa-solid fa-house me-2"></i>Home</a></li>
+                {% if request.session.user_email %}
+                    <li><a href="/upload/" id="txt-apply">Apply for NA</a></li>
+                    <li><a href="#" id="txt-track">Track Application</a></li>
+                {% endif %}
+                <li><a href="/about/" id="txt-about">About Portal</a></li>
+                <li><a href="/resources/">Resources & Rules</a></li>
+                <li><a href="/contact/">Contact Us</a></li>
+            </ul>
+            
+            <ul class="nav-list nav-right">
+                {% if request.session.user_email %}
+                    <li><a href="#" style="color:#FF9933;"><i class="fa-solid fa-user me-2"></i>{{ request.session.user_name }}</a></li>
+                    <li><a href="/logout/" class="auth-btn">Logout</a></li>
+                {% else %}
+                    <li><a href="/login/" id="txt-login">Login</a></li>
+                    <li><a href="/register/" class="auth-btn" id="txt-signup">Register</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <!-- CONTENT AREA -->
+    <main id="main-content">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="uidai-footer">
+        <div class="container-fluid px-5">
+            <div class="row">
+                <!-- Column 1 -->
+                <div class="col-lg-3 pe-4">
+                    <div class="footer-gov-logo">
+                        <img src="{% static 'images/emblem.png' %}" alt="Emblem" style="height: 45px; display: none;">
+                        <i class="fa-solid fa-building-flag fa-3x me-2" style="color: #ccc;"></i>
+                        <div style="line-height: 1.2; font-size:13px; font-weight:bold;">
+                            भारत सरकार<br>GOVERNMENT<br>OF INDIA
+                        </div>
+                    </div>
+                    <div style="color:white; font-weight:600; font-size:14px; margin-bottom:10px;">Follow Us On:</div>
+                    <div class="footer-social">
+                        <a href="#"><i class="fa-brands fa-facebook"></i></a>
+                        <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="#"><i class="fa-brands fa-x-twitter"></i></a>
+                        <a href="#"><i class="fa-brands fa-youtube"></i></a>
+                        <a href="#"><i class="fa-brands fa-linkedin"></i></a>
+                    </div>
+                    <div style="font-size: 12px; font-style: italic; color:#aaa;">
+                        Last reviewed and updated on: 30-Jul-2026
+                    </div>
+                </div>
+
+                <!-- Column 2 -->
+                <div class="col-lg-2">
+                    <h4 class="footer-heading">Public Awareness</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">NUDGE</a></li>
+                        <li><a href="#">Report Phishing</a></li>
+                        <li><a href="#">RTI</a></li>
+                        <li><a href="#">Children's Corner</a></li>
+                    </ul>
+                </div>
+
+                <!-- Column 3 -->
+                <div class="col-lg-2">
+                    <h4 class="footer-heading">Quick Links</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Feedback</a></li>
+                        <li><a href="#">Sitemap</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="#">Grievance & Support</a></li>
+                        <li><a href="#">Analytics</a></li>
+                    </ul>
+                </div>
+
+                <!-- Column 4 -->
+                <div class="col-lg-2">
+                    <h4 class="footer-heading">Important Resources</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Locate Revenue Offices</a></li>
+                        <li><a href="#">Useful Links</a></li>
+                        <li><a href="#">Subscribe - Newsletter</a></li>
+                        <li><a href="#">Subscribe - Land Feeds</a></li>
+                        <li><a href="#">e-Governance</a></li>
+                    </ul>
+                </div>
+
+                <!-- Column 5 -->
+                <div class="col-lg-3">
+                    <p style="font-size: 13px; color:#d1d5db; line-height: 1.6; margin-bottom:20px;">
+                        This is the official website of the Department of Revenue, Ministry of Finance, Government of India.
+                    </p>
+                    <div class="d-flex gap-2">
+                        <!-- Badge 1: India Code -->
+                        <div style="background:white; color:black; padding:8px 12px; border-radius:4px; border:1px solid #ddd; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                            <i class="fa-solid fa-gavel mb-1"></i>
+                            <span style="font-weight:900; font-size:12px; font-family:serif; color:#900;">INDIA CODE</span>
+                        </div>
+                        <!-- Badge 2: India.gov.in -->
+                        <div style="background:white; padding:8px 12px; border-radius:4px; border:1px solid #ddd; display:flex; align-items:center; justify-content:center;">
+                            <span style="font-weight:bold; font-size:14px; color:#666;">
+                                <span style="color:#d95316;">india</span><span style="color:#203360;">.gov.in</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const t = {
+            'English': { title: "LandScope", subtitle: "Non-Agricultural Land Governance", home: "Home", apply: "Apply for NA", track: "Track Application", about: "About Portal", login: "Login", signup: "Register" },
+            'मराठी': { title: "लँडस्कोप", subtitle: "अकृषिक जमीन प्रशासन", home: "मुख्य पृष्ठ", apply: "NA साठी अर्ज", track: "अर्जाचा मागोवा", about: "पोर्टलबद्दल", login: "लॉगिन", signup: "नोंदणी" },
+            'हिन्दी': { title: "लैंडस्कोप", subtitle: "गैर-कृषि भूमि प्रशासन", home: "होम", apply: "NA के लिए आवेदन", track: "आवेदन ट्रैक करें", about: "पोर्टल के बारे में", login: "लॉगिन", signup: "रजिस्टर" }
+        };
+        function changeLang(lang) {
+            if(!t[lang]) return;
+            const set = (id, txt) => { let e = document.getElementById(id); if(e) e.innerText = txt; };
+            set('txt-title', t[lang].title);
+            set('txt-subtitle', t[lang].subtitle);
+            set('txt-home', t[lang].home);
+            set('txt-apply', t[lang].apply);
+            set('txt-track', t[lang].track);
+            set('txt-about', t[lang].about);
+            set('txt-login', t[lang].login);
+            set('txt-signup', t[lang].signup);
+        }
+    </script>
+</body>
+</html>

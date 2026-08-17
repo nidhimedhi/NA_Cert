@@ -1,0 +1,336 @@
+{% extends 'portal/base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+  /* UIDAI Inspired Media & Resources Styles */
+  .breadcrumb-wrap {
+    background-color: var(--uidai-gray);
+    padding: 10px 0;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 13px;
+    margin-bottom: 30px;
+  }
+  .breadcrumb-wrap a {
+    color: var(--uidai-blue);
+    text-decoration: none;
+  }
+  .breadcrumb-wrap a:hover {
+    color: var(--uidai-orange);
+    text-decoration: underline;
+  }
+  .breadcrumb-wrap span {
+    color: #666;
+  }
+
+  /* Sidebar Navigation */
+  .sidebar-menu {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    margin-bottom: 30px;
+  }
+  .sidebar-header {
+    background-color: var(--uidai-blue);
+    color: white;
+    padding: 15px 20px;
+    font-weight: bold;
+    font-size: 16px;
+    border-radius: 4px 4px 0 0;
+  }
+  .sidebar-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .sidebar-list li {
+    border-bottom: 1px solid #eee;
+  }
+  .sidebar-list li:last-child {
+    border-bottom: none;
+  }
+  .sidebar-list a {
+    display: block;
+    padding: 12px 20px;
+    color: #444;
+    font-size: 14px;
+    text-decoration: none;
+    transition: all 0.3s;
+    border-left: 3px solid transparent;
+  }
+  .sidebar-list a:hover, .sidebar-list a.active {
+    background-color: var(--uidai-light-blue);
+    color: var(--uidai-orange);
+    border-left-color: var(--uidai-orange);
+    font-weight: 600;
+  }
+
+  /* Main Content Area */
+  .page-title {
+    color: var(--uidai-blue);
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .title-underline {
+    width: 60px;
+    height: 3px;
+    background-color: var(--uidai-orange);
+    margin-bottom: 25px;
+  }
+  
+  .content-section {
+    display: none;
+    background: white;
+  }
+  .content-section.active {
+    display: block;
+  }
+
+  /* Data Tables (UIDAI Style) */
+  .uidai-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+    border: 1px solid #dee2e6;
+  }
+  .uidai-table th {
+    background-color: var(--uidai-blue);
+    color: white;
+    padding: 12px 15px;
+    font-size: 14px;
+    text-align: left;
+    border: 1px solid #dee2e6;
+  }
+  .uidai-table td {
+    padding: 12px 15px;
+    font-size: 14px;
+    border: 1px solid #dee2e6;
+    color: #444;
+  }
+  .uidai-table tbody tr:nth-child(even) {
+    background-color: #f8f9fa;
+  }
+  .uidai-table tbody tr:hover {
+    background-color: var(--uidai-light-blue);
+  }
+  .download-link {
+    color: var(--uidai-orange);
+    font-weight: bold;
+    text-decoration: none;
+  }
+  .download-link:hover {
+    text-decoration: underline;
+  }
+  .pdf-icon {
+    color: #d32f2f;
+    font-size: 18px;
+    margin-right: 8px;
+  }
+
+  /* Video Grid Style */
+  .video-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  .video-card {
+    border: 1px solid #eee;
+    border-radius: 4px;
+    padding: 10px;
+    text-align: center;
+  }
+  .video-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    margin-bottom: 15px;
+    border-radius: 2px;
+  }
+  .video-card p {
+    font-size: 14px;
+    color: var(--uidai-blue);
+    font-weight: 600;
+  }
+
+</style>
+
+<!-- Breadcrumbs -->
+<div class="breadcrumb-wrap">
+  <div class="container">
+    <a href="/"><i class="fa-solid fa-house me-1"></i> Home</a> 
+    <span class="mx-2">></span> 
+    <span>Resources & Rules</span>
+  </div>
+</div>
+
+<div class="container mb-5" style="min-height: 600px;">
+  <div class="row">
+    
+    <!-- Left Sidebar -->
+    <div class="col-md-3">
+      <div class="sidebar-menu">
+        <div class="sidebar-header">
+          Resources
+        </div>
+        <ul class="sidebar-list">
+          <li><a href="#" class="nav-link active" data-target="circulars">Circulars & Notifications</a></li>
+          <li><a href="#" class="nav-link" data-target="acts">Acts & Policies</a></li>
+          <li><a href="#" class="nav-link" data-target="manuals">User Manuals</a></li>
+          <li><a href="#" class="nav-link" data-target="videos">Training Videos</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Right Main Content -->
+    <div class="col-md-9">
+      
+      <!-- Section: Circulars -->
+      <div id="circulars" class="content-section active">
+        <h2 class="page-title">Circulars, Orders & Notifications</h2>
+        <div class="title-underline"></div>
+        
+        <table class="uidai-table">
+          <thead>
+            <tr>
+              <th width="15%">Date</th>
+              <th width="65%">Title</th>
+              <th width="20%">Download</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>12-Aug-2026</td>
+              <td>Revised Premium Rates for Commercial NA Conversion in Tier-2 Cities</td>
+              <td><a href="#" class="download-link"><i class="fa-solid fa-file-pdf pdf-icon"></i> PDF (1.2 MB)</a></td>
+            </tr>
+            <tr>
+              <td>05-Jun-2026</td>
+              <td>Notification regarding mandatory online processing of NA Certificates</td>
+              <td><a href="#" class="download-link"><i class="fa-solid fa-file-pdf pdf-icon"></i> PDF (0.8 MB)</a></td>
+            </tr>
+            <tr>
+              <td>22-Mar-2026</td>
+              <td>Amendments in the Maharashtra Land Revenue Code for Educational Trusts</td>
+              <td><a href="#" class="download-link"><i class="fa-solid fa-file-pdf pdf-icon"></i> PDF (2.5 MB)</a></td>
+            </tr>
+            <tr>
+              <td>10-Jan-2026</td>
+              <td>Guidelines for Expedited Industrial NA Clearance</td>
+              <td><a href="#" class="download-link"><i class="fa-solid fa-file-pdf pdf-icon"></i> PDF (1.5 MB)</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Section: Acts & Policies -->
+      <div id="acts" class="content-section">
+        <h2 class="page-title">Acts & Policies</h2>
+        <div class="title-underline"></div>
+        
+        <table class="uidai-table">
+          <thead>
+            <tr>
+              <th width="15%">Year</th>
+              <th width="65%">Title</th>
+              <th width="20%">Download</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1966</td>
+              <td>Maharashtra Land Revenue Code, 1966 (Updated 2026)</td>
+              <td><a href="#" class="download-link"><i class="fa-solid fa-file-pdf pdf-icon"></i> PDF (4.5 MB)</a></td>
+            </tr>
+            <tr>
+              <td>2014</td>
+              <td>Maharashtra Gunthewari Developments Act</td>
+              <td><a href="#" class="download-link"><i class="fa-solid fa-file-pdf pdf-icon"></i> PDF (2.1 MB)</a></td>
+            </tr>
+            <tr>
+              <td>2020</td>
+              <td>Unified Comprehensive Development Control Regulations (UDCPR)</td>
+              <td><a href="#" class="download-link"><i class="fa-solid fa-file-pdf pdf-icon"></i> PDF (8.0 MB)</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Section: Manuals -->
+      <div id="manuals" class="content-section">
+        <h2 class="page-title">User Manuals</h2>
+        <div class="title-underline"></div>
+        
+        <table class="uidai-table">
+          <thead>
+            <tr>
+              <th width="80%">Title</th>
+              <th width="20%">Download</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Step-by-step Guide for Online NA Certificate Application</td>
+              <td><a href="#" class="download-link"><i class="fa-solid fa-file-pdf pdf-icon"></i> PDF (3.2 MB)</a></td>
+            </tr>
+            <tr>
+              <td>How to check your 7/12 Extract details online</td>
+              <td><a href="#" class="download-link"><i class="fa-solid fa-file-pdf pdf-icon"></i> PDF (1.1 MB)</a></td>
+            </tr>
+            <tr>
+              <td>Fee Calculation Reference Manual</td>
+              <td><a href="#" class="download-link"><i class="fa-solid fa-file-pdf pdf-icon"></i> PDF (0.9 MB)</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Section: Videos -->
+      <div id="videos" class="content-section">
+        <h2 class="page-title">Training Videos</h2>
+        <div class="title-underline"></div>
+        
+        <div class="video-grid">
+          <div class="video-card">
+            <!-- Placeholder for YouTube Thumbnail -->
+            <div style="width:100%; height:200px; background:#ddd; display:flex; align-items:center; justify-content:center; border-radius:2px; margin-bottom:15px; position:relative;">
+              <i class="fa-brands fa-youtube" style="font-size: 50px; color: #ff0000; position:absolute;"></i>
+              <img src="{% static 'images/educational_land.png' %}" style="width:100%; height:100%; object-fit:cover; opacity:0.6;">
+            </div>
+            <p>How to Register on LandScope Portal</p>
+          </div>
+          <div class="video-card">
+             <div style="width:100%; height:200px; background:#ddd; display:flex; align-items:center; justify-content:center; border-radius:2px; margin-bottom:15px; position:relative;">
+              <i class="fa-brands fa-youtube" style="font-size: 50px; color: #ff0000; position:absolute;"></i>
+              <img src="{% static 'images/residential_land.png' %}" style="width:100%; height:100%; object-fit:cover; opacity:0.6;">
+            </div>
+            <p>Understanding NA Conversion Premium</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // Simple Tab Switching Logic for the Sidebar
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      
+      // Update active class on links
+      document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+      this.classList.add('active');
+      
+      // Update active class on content sections
+      const targetId = this.getAttribute('data-target');
+      document.querySelectorAll('.content-section').forEach(sec => {
+        sec.classList.remove('active');
+      });
+      document.getElementById(targetId).classList.add('active');
+    });
+  });
+</script>
+
+{% endblock %}

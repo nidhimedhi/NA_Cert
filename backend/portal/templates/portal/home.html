@@ -1,0 +1,395 @@
+{% extends 'portal/base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+  /* UIDAI Inspired Home Page Styles */
+  
+  /* 1. Full Width Banner Carousel */
+  .banner-carousel .carousel-item {
+    height: 450px;
+    background-color: #000;
+  }
+  .banner-carousel .carousel-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.75;
+  }
+  .banner-caption {
+    position: absolute;
+    bottom: 20%;
+    left: 10%;
+    max-width: 600px;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+  }
+  .banner-caption h2 {
+    font-size: 42px;
+    font-weight: 700;
+    margin-bottom: 15px;
+    color: #fff;
+  }
+  .banner-caption p {
+    font-size: 18px;
+    margin-bottom: 20px;
+  }
+  .banner-btn {
+    background-color: var(--uidai-orange);
+    color: white;
+    padding: 10px 24px;
+    border-radius: 4px;
+    font-weight: bold;
+    text-decoration: none;
+    font-size: 16px;
+    display: inline-block;
+  }
+  .banner-btn:hover {
+    background-color: #d95316;
+    color: white;
+  }
+
+  /* 2. UIDAI Style Service Cards Section */
+  .services-section {
+    background-color: var(--uidai-gray);
+    padding: 60px 0;
+  }
+  .section-title {
+    text-align: center;
+    color: var(--uidai-blue);
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 40px;
+    position: relative;
+  }
+  .section-title::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 3px;
+    background-color: var(--uidai-orange);
+    margin: 10px auto 0;
+  }
+  .service-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+    text-align: center;
+    padding: 30px 20px;
+    height: 100%;
+    transition: all 0.3s ease;
+    border-top: 4px solid var(--uidai-blue);
+  }
+  .service-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    border-top-color: var(--uidai-orange);
+  }
+  .service-icon {
+    font-size: 45px;
+    color: var(--uidai-blue);
+    margin-bottom: 20px;
+  }
+  .service-card h3 {
+    font-size: 20px;
+    color: var(--uidai-text);
+    font-weight: 600;
+    margin-bottom: 15px;
+  }
+  .service-card p {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 20px;
+  }
+  .service-link {
+    color: var(--uidai-orange);
+    font-weight: bold;
+    text-decoration: none;
+    font-size: 14px;
+  }
+  .service-link:hover {
+    text-decoration: underline;
+  }
+
+  /* 3. Vision Mission Belief (UIDAI Information style) */
+  .vmb-section {
+    background-color: white;
+    padding: 60px 0;
+  }
+  .info-box {
+    background: var(--uidai-light-blue);
+    border-left: 4px solid var(--uidai-orange);
+    padding: 30px;
+    border-radius: 4px;
+    height: 100%;
+  }
+  .info-box h4 {
+    color: var(--uidai-blue);
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 15px;
+  }
+  .info-box p {
+    color: #444;
+    font-size: 15px;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  /* 4. Graph Section */
+  .graph-section {
+    background-color: var(--uidai-gray);
+    padding: 60px 0;
+  }
+  .graph-content {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+    overflow: hidden;
+  }
+  .graph-img-wrapper {
+    background: #fdfdfd;
+    padding: 20px;
+    text-align: center;
+    border-right: 1px solid #eee;
+  }
+  .graph-img-wrapper img {
+    max-width: 100%;
+    height: auto;
+  }
+  .graph-text-wrapper {
+    padding: 40px;
+  }
+  .graph-text-wrapper h3 {
+    color: var(--uidai-blue);
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+  .graph-text-wrapper p {
+    font-size: 15px;
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 15px;
+  }
+
+  /* 5. Bottom CTA */
+  .bottom-cta {
+    background-color: var(--uidai-blue);
+    color: white;
+    text-align: center;
+    padding: 50px 20px;
+  }
+  .bottom-cta h2 {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 15px;
+  }
+  .bottom-cta p {
+    font-size: 18px;
+    margin-bottom: 30px;
+    color: #d1e5f5;
+  }
+  .cta-button {
+    background-color: white;
+    color: var(--uidai-blue);
+    padding: 12px 30px;
+    border-radius: 4px;
+    font-size: 18px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+  .cta-button:hover {
+    background-color: var(--uidai-orange);
+    color: white;
+  }
+</style>
+
+<!-- 1. Full Width Banner Carousel -->
+<div id="heroCarousel" class="carousel slide banner-carousel" data-bs-ride="carousel" data-bs-interval="4000">
+  <div class="carousel-indicators">
+    <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
+    <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
+    <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2"></button>
+    <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="3"></button>
+  </div>
+  <div class="carousel-inner">
+    
+    <div class="carousel-item active">
+      <img src="{% static 'images/educational_land.png' %}" alt="Educational Land">
+      <div class="banner-caption">
+        <h2>Non-Agricultural Land Certificate</h2>
+        <p>Transforming agricultural land into thriving educational institutions. Secure your official NA certificate efficiently through our intelligent platform.</p>
+        <a href="/upload/" class="banner-btn">Apply Now</a>
+      </div>
+    </div>
+    
+    <div class="carousel-item">
+      <img src="{% static 'images/industrial_land.png' %}" alt="Industrial Land">
+      <div class="banner-caption">
+        <h2>Industrial Expansion</h2>
+        <p>Accelerate your industrial projects with streamlined NA approvals. We ensure compliance, transparency, and rapid processing.</p>
+        <a href="/upload/" class="banner-btn">Apply Now</a>
+      </div>
+    </div>
+
+    <div class="carousel-item">
+      <img src="{% static 'images/commercial_land.png' %}" alt="Commercial Land">
+      <div class="banner-caption">
+        <h2>Commercial Development</h2>
+        <p>Build the future of urban commerce. Our AI-driven platform simplifies the legal conversion of land for commercial use.</p>
+        <a href="/upload/" class="banner-btn">Apply Now</a>
+      </div>
+    </div>
+
+    <div class="carousel-item">
+      <img src="{% static 'images/residential_land.png' %}" alt="Residential Land">
+      <div class="banner-caption">
+        <h2>Residential Planning</h2>
+        <p>Facilitating sustainable housing and residential layouts. Track your NA application in real-time from anywhere.</p>
+        <a href="/upload/" class="banner-btn">Apply Now</a>
+      </div>
+    </div>
+
+  </div>
+  <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon"></span>
+  </button>
+  <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+    <span class="carousel-control-next-icon"></span>
+  </button>
+</div>
+
+<!-- 2. Services Section (UIDAI Style Cards) -->
+<section class="services-section">
+  <div class="container">
+    <h2 class="section-title">LandScope Services</h2>
+    <div class="row g-4">
+      
+      <!-- Card 1 -->
+      <div class="col-md-4">
+        <div class="service-card">
+          <i class="fa-solid fa-file-signature service-icon"></i>
+          <h3>Apply for NA Certificate</h3>
+          <p>Submit your documents online to securely apply for Non-Agricultural conversion across Maharashtra.</p>
+          <a href="/upload/" class="service-link">Apply Now <i class="fa-solid fa-arrow-right ms-1"></i></a>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="col-md-4">
+        <div class="service-card">
+          <i class="fa-solid fa-magnifying-glass-location service-icon"></i>
+          <h3>Track Application</h3>
+          <p>Check the real-time status of your pending NA land certificate applications easily.</p>
+          <a href="#" class="service-link">Track Status <i class="fa-solid fa-arrow-right ms-1"></i></a>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="col-md-4">
+        <div class="service-card">
+          <i class="fa-solid fa-building-circle-check service-icon"></i>
+          <h3>Verify Certificate</h3>
+          <p>Verify the authenticity of any existing Non-Agricultural land certificate instantly.</p>
+          <a href="/about/" class="service-link">Verify Now <i class="fa-solid fa-arrow-right ms-1"></i></a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- 3. Vision, Mission, Belief Section -->
+<section class="vmb-section">
+  <div class="container">
+    <h2 class="section-title">About LandScope</h2>
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="info-box">
+          <h4>Our Vision</h4>
+          <p>To facilitate sustainable urban development and economic growth by efficiently transforming land use while maintaining ecological balance.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="info-box">
+          <h4>Our Mission</h4>
+          <p>To provide a legal, transparent, and structured process for converting agricultural land into productive residential, commercial, or industrial assets.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="info-box">
+          <h4>Our Belief</h4>
+          <p>Grounded in legal integrity, public utility, and planned urbanisation, ensuring that land development benefits both the owner and the community.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3.5 Resources Preview Section -->
+<section style="background-color: white; padding: 60px 0;">
+  <div class="container">
+    <h2 class="section-title">Resources & Rules</h2>
+    <div class="row g-4">
+      <!-- Circulars Box -->
+      <div class="col-md-6">
+        <div style="background: var(--uidai-light-blue); padding: 30px; border-radius: 8px; border-top: 4px solid var(--uidai-blue); height: 100%;">
+          <h4 style="color: var(--uidai-blue); font-weight: bold; margin-bottom: 20px;">
+            <i class="fa-solid fa-bullhorn me-2" style="color: var(--uidai-orange);"></i> Latest Circulars & Acts
+          </h4>
+          <ul style="list-style: none; padding: 0;">
+            <li style="margin-bottom: 12px; font-size: 15px;"><i class="fa-solid fa-file-pdf me-2" style="color: #d32f2f;"></i> Maharashtra Land Revenue Code, 1966</li>
+            <li style="margin-bottom: 12px; font-size: 15px;"><i class="fa-solid fa-file-pdf me-2" style="color: #d32f2f;"></i> Revised Premium Rates for Tier-2 Cities</li>
+            <li style="margin-bottom: 12px; font-size: 15px;"><i class="fa-solid fa-file-pdf me-2" style="color: #d32f2f;"></i> Guidelines for Expedited Industrial Clearance</li>
+          </ul>
+          <a href="/resources/" style="display: inline-block; margin-top: 15px; color: var(--uidai-orange); font-weight: bold; text-decoration: none;">View All Circulars <i class="fa-solid fa-arrow-right ms-1"></i></a>
+        </div>
+      </div>
+      <!-- Manuals Box -->
+      <div class="col-md-6">
+        <div style="background: var(--uidai-light-blue); padding: 30px; border-radius: 8px; border-top: 4px solid var(--uidai-orange); height: 100%;">
+          <h4 style="color: var(--uidai-blue); font-weight: bold; margin-bottom: 20px;">
+            <i class="fa-solid fa-book-open-reader me-2" style="color: var(--uidai-blue);"></i> User Manuals & Videos
+          </h4>
+          <ul style="list-style: none; padding: 0;">
+            <li style="margin-bottom: 12px; font-size: 15px;"><i class="fa-solid fa-file-pdf me-2" style="color: #d32f2f;"></i> Step-by-step Guide for Online NA Certificate</li>
+            <li style="margin-bottom: 12px; font-size: 15px;"><i class="fa-solid fa-file-pdf me-2" style="color: #d32f2f;"></i> How to check your 7/12 Extract details</li>
+            <li style="margin-bottom: 12px; font-size: 15px;"><i class="fa-brands fa-youtube me-2" style="color: #ff0000;"></i> Training Videos for Citizens</li>
+          </ul>
+          <a href="/resources/" style="display: inline-block; margin-top: 15px; color: var(--uidai-orange); font-weight: bold; text-decoration: none;">Access All Resources <i class="fa-solid fa-arrow-right ms-1"></i></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. Graph Section -->
+<section class="graph-section">
+  <div class="container">
+    <h2 class="section-title">Data & Statistics</h2>
+    <div class="graph-content row g-0">
+      <div class="col-md-5 graph-img-wrapper d-flex align-items-center justify-content-center">
+        <img src="{% static 'images/graph.png' %}" alt="Maharashtra Land Data Graph">
+      </div>
+      <div class="col-md-7 graph-text-wrapper">
+        <span class="badge bg-warning text-dark mb-2">Maharashtra Data</span>
+        <h3>Trend of Non-Agricultural Land</h3>
+        <p>The provided graph illustrates a consistent and significant increase in non-agricultural land area in Maharashtra over the span of 52 years, rising from 864,000 hectares in 1971 to 1,768,000 hectares in 2023.</p>
+        <p>This steady upward trajectory reflects the state's aggressive shift from a purely agrarian economy toward a modernized landscape dominated by industrialization and urban expansion.</p>
+        <p>The data shows a notable acceleration in land conversion after 1991, coinciding with India's economic liberalization, continuing into the most recent year where the area grew from 1,744,000 to 1,768,000 hectares between 2022 and 2023.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. Bottom CTA -->
+<section class="bottom-cta">
+  <div class="container">
+    <h2>Ready to Convert Your Land?</h2>
+    <p>Experience a fast, transparent, and intelligent process for your NA Certificate.</p>
+    <a href="/upload/" class="cta-button">Apply for NA Certificate Now</a>
+  </div>
+</section>
+
+{% endblock %}
