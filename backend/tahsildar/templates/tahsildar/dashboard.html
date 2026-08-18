@@ -13,22 +13,22 @@
 <!-- STATS -->
 <div class="t-stats-grid">
   <div class="t-stat-card t-stat-blue">
-    <div class="t-stat-icon">📋</div>
+    <div class="t-stat-icon"><i class="fa-solid fa-file-contract"></i></div>
     <div class="t-stat-num">{{ total }}</div>
     <div class="t-stat-label">Total Applications</div>
   </div>
   <div class="t-stat-card t-stat-yellow">
-    <div class="t-stat-icon">⏳</div>
+    <div class="t-stat-icon"><i class="fa-solid fa-hourglass-half"></i></div>
     <div class="t-stat-num">{{ pending }}</div>
     <div class="t-stat-label">Pending Review</div>
   </div>
   <div class="t-stat-card t-stat-green">
-    <div class="t-stat-icon">✅</div>
+    <div class="t-stat-icon"><i class="fa-solid fa-check-circle"></i></div>
     <div class="t-stat-num">{{ approved }}</div>
     <div class="t-stat-label">Approved</div>
   </div>
   <div class="t-stat-card t-stat-red">
-    <div class="t-stat-icon">❌</div>
+    <div class="t-stat-icon"><i class="fa-solid fa-times-circle"></i></div>
     <div class="t-stat-num">{{ rejected }}</div>
     <div class="t-stat-label">Rejected</div>
   </div>
@@ -66,7 +66,7 @@
           </td>
           <td>
             <a href="/tahsildar/application/{{ app.id }}/" class="t-view-btn">
-              🔍 View
+              <i class="fa-solid fa-search"></i> View
             </a>
           </td>
         </tr>

@@ -1,30 +1,31 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
 
 :root {
-  --primary: #3b82f6;
-  --primary-light: #eff6ff;
+  --primary: #0b3c61;
+  --primary-light: #eef5f9;
+  --primary-dark: #093252;
   --green: #16a34a;
   --green-light: #f0fdf4;
   --red: #dc2626;
   --red-light: #fef2f2;
-  --yellow: #d97706;
-  --yellow-light: #fffbeb;
+  --yellow: #f26522;
+  --yellow-light: #fff0e6;
   --cream: #fdf6ec;
   --white: #ffffff;
   --border: #e5e7eb;
-  --text: #1f2937;
-  --text-muted: #6b7280;
-  --sidebar-bg: #f8faff;
-  --sidebar-border: #e0e7ff;
-  --sidebar-active-bg: #eff6ff;
-  --sidebar-active: #3b82f6;
-  --sidebar-text: #374151;
+  --text: #333333;
+  --text-muted: #666666;
+  --sidebar-bg: #093252;
+  --sidebar-border: #0b3c61;
+  --sidebar-active-bg: #f26522;
+  --sidebar-active: #ffffff;
+  --sidebar-text: #ffffff;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Times New Roman', Times, serif;
   background: #f1f5f9;
   color: var(--text);
 }
@@ -57,14 +58,13 @@ body {
 }
 .t-brand-icon { font-size: 28px; }
 .t-brand-name {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Times New Roman', Times, serif;
   font-size: 1.1rem;
   color: #1e3a5f;
   font-weight: 700;
 }
-.t-brand-sub {
   font-size: 11px;
-  color: var(--text-muted);
+  color: #a0aec0;
   letter-spacing: 0.5px;
 }
 
@@ -167,7 +167,7 @@ body {
   margin-bottom: 32px;
 }
 .t-page-header h1 {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Times New Roman', Times, serif;
   font-size: 1.8rem;
   color: var(--text);
   margin-bottom: 4px;
@@ -208,7 +208,7 @@ body {
 }
 .t-stat-icon { font-size: 28px; }
 .t-stat-num {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Times New Roman', Times, serif;
   font-size: 2.2rem;
   font-weight: 700;
   line-height: 1;
@@ -235,7 +235,7 @@ body {
   margin-bottom: 16px;
 }
 .t-section-header h2 {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Times New Roman', Times, serif;
   font-size: 1.3rem;
   color: var(--text);
 }
@@ -382,7 +382,7 @@ body {
   color: var(--green);
   border: 1px solid #bbf7d0;
   border-radius: 8px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Times New Roman', Times, serif;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
@@ -397,7 +397,7 @@ body {
   color: var(--red);
   border: 1px solid #fecaca;
   border-radius: 8px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Times New Roman', Times, serif;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
@@ -454,7 +454,7 @@ body {
 }
 .t-modal-icon { font-size: 36px; margin-bottom: 12px; }
 .t-modal h3 {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Times New Roman', Times, serif;
   font-size: 1.4rem;
   color: var(--text);
   margin-bottom: 8px;
@@ -490,7 +490,7 @@ body {
   padding: 12px 16px;
   border: 1px solid var(--border);
   border-radius: 10px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Times New Roman', Times, serif;
   font-size: 14px;
   color: var(--text);
   resize: vertical;
@@ -513,7 +513,7 @@ body {
   color: var(--text-muted);
   border: 1px solid var(--border);
   border-radius: 8px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Times New Roman', Times, serif;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -527,7 +527,7 @@ body {
   color: white;
   border: none;
   border-radius: 8px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Times New Roman', Times, serif;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -546,7 +546,7 @@ body {
 }
 .t-empty-icon { font-size: 48px; margin-bottom: 16px; }
 .t-empty-state h3 {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Times New Roman', Times, serif;
   font-size: 1.4rem;
   color: var(--text);
   margin-bottom: 8px;

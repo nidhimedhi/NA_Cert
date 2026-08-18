@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tahsildar Portal – LandScope</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'tahsildar/css/tahsildar.css' %}">
 </head>
 <body>
@@ -15,25 +15,25 @@
   <!-- SIDEBAR -->
   <aside class="t-sidebar">
     <div class="t-sidebar-brand">
-      <span class="t-brand-icon">⚖️</span>
+      <i class="fa-solid fa-landmark t-brand-icon" style="color: var(--yellow);"></i>
       <div>
         <div class="t-brand-name">LandScope</div>
-        <div class="t-brand-sub">Tahsildar Portal</div>
+        <div class="t-brand-sub">Govt. of Maharashtra</div>
       </div>
     </div>
 
     <nav class="t-nav">
       <a href="/tahsildar/dashboard/" class="t-nav-item {% block nav_dashboard %}{% endblock %}">
-        <span class="t-nav-icon">📊</span> Dashboard
+        <i class="fa-solid fa-chart-line t-nav-icon"></i> Dashboard
       </a>
       <a href="/tahsildar/upcoming/" class="t-nav-item {% block nav_upcoming %}{% endblock %}">
-        <span class="t-nav-icon">📋</span> Upcoming Applications
+        <i class="fa-solid fa-clipboard-list t-nav-icon"></i> Upcoming Applications
       </a>
       <a href="/tahsildar/approved/" class="t-nav-item {% block nav_approved %}{% endblock %}">
-        <span class="t-nav-icon">✅</span> Approved
+        <i class="fa-solid fa-check-circle t-nav-icon"></i> Approved
       </a>
       <a href="/tahsildar/rejected/" class="t-nav-item {% block nav_rejected %}{% endblock %}">
-        <span class="t-nav-icon">❌</span> Rejected
+        <i class="fa-solid fa-times-circle t-nav-icon"></i> Rejected
       </a>
     </nav>
 
@@ -45,7 +45,7 @@
           <div class="t-user-role">Tahsildar</div>
         </div>
       </div>
-      <a href="/tahsildar/logout/" class="t-logout-btn">Logout →</a>
+      <a href="/tahsildar/logout/" class="t-logout-btn"><i class="fa-solid fa-sign-out-alt"></i> Logout</a>
     </div>
   </aside>
 
