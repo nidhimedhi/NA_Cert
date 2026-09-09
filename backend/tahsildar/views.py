@@ -35,10 +35,10 @@ def dashboard(request):
     all_apps  = all_apps if isinstance(all_apps, list) else []
 
     total    = len(all_apps)
-    pending  = len([a for a in all_apps if a.get('status') == 'pending'])
-    approved = len([a for a in all_apps if a.get('status') == 'approved'])
-    rejected = len([a for a in all_apps if a.get('status') == 'rejected'])
-    recent   = all_apps[:5]
+    pending  = len([a for a in all_apps if a.get('status') in ('forwarded_to_tahsildar', 'pending')])
+    approved = len([a for a in all_apps if a.get('status') in ('tahsildar_verified', 'approved', 'collector_approved')])
+    rejected = len([a for a in all_apps if a.get('status') in ('tahsildar_rejected', 'rejected', 'collector_rejected')])
+    recent   = [a for a in all_apps if a.get('status') in ('forwarded_to_tahsildar', 'pending')][:5]
 
     return render(request, 'tahsildar/dashboard.html', {
         'total':    total,
@@ -51,8 +51,8 @@ def dashboard(request):
 
 @login_required(login_url='/tahsildar/login/')
 def upcoming(request):
-    applications = select_with_filter('na_applications', 'status', 'pending')
-    applications = applications if isinstance(applications, list) else []
+    all_apps = select_all('na_applications')
+    applications = [a for a in (all_apps if isinstance(all_apps, list) else []) if a.get('status') in ('forwarded_to_tahsildar', 'pending')]
     return render(request, 'tahsildar/upcoming.html', {
         'applications': applications
     })
@@ -65,12 +65,22 @@ def application_detail(request, app_id):
     app = app_result[0] if isinstance(app_result, list) and app_result else None
 
     # Get all uploaded documents for this application
-    documents = select_documents_for_application(app_id)
-    documents = documents if isinstance(documents, list) else []
+    all_documents = select_documents_for_application(app_id)
+    all_documents = all_documents if isinstance(all_documents, list) else []
+
+    form_doc = None
+    supporting_docs = []
+    for doc in all_documents:
+        if doc.get('document_name') == 'Application Form - e-District Maharashtra':
+            form_doc = doc
+        else:
+            supporting_docs.append(doc)
 
     return render(request, 'tahsildar/application_detail.html', {
         'app':       app,
-        'documents': documents,
+        'form_doc':  form_doc,
+        'form_data': form_doc.get('raw_json') if (form_doc and isinstance(form_doc.get('raw_json'), dict)) else None,
+        'documents': supporting_docs,
     })
 
 
@@ -78,7 +88,7 @@ def application_detail(request, app_id):
 def approve_application(request, app_id):
     if request.method == 'POST':
         update('na_applications', {'id': app_id}, {
-            'status':      'approved',
+            'status':      'tahsildar_verified',
             'reviewed_at': timezone.now().isoformat(),
         })
     return redirect('/tahsildar/upcoming/')
@@ -89,8 +99,8 @@ def reject_application(request, app_id):
     if request.method == 'POST':
         reason = request.POST.get('reason', '')
         update('na_applications', {'id': app_id}, {
-            'status':           'rejected',
-            'rejection_reason': reason,
+            'status':           'tahsildar_rejected',
+            'rejection_reason': f"Tahsildar: {reason}" if not reason.startswith('Tahsildar:') else reason,
             'reviewed_at':      timezone.now().isoformat(),
         })
     return redirect('/tahsildar/upcoming/')
@@ -98,8 +108,8 @@ def reject_application(request, app_id):
 
 @login_required(login_url='/tahsildar/login/')
 def approved(request):
-    applications = select_with_filter('na_applications', 'status', 'approved')
-    applications = applications if isinstance(applications, list) else []
+    all_apps = select_all('na_applications')
+    applications = [a for a in (all_apps if isinstance(all_apps, list) else []) if a.get('status') in ('tahsildar_verified', 'approved', 'collector_approved')]
     return render(request, 'tahsildar/approved.html', {
         'applications': applications
     })
@@ -107,8 +117,8 @@ def approved(request):
 
 @login_required(login_url='/tahsildar/login/')
 def rejected(request):
-    applications = select_with_filter('na_applications', 'status', 'rejected')
-    applications = applications if isinstance(applications, list) else []
+    all_apps = select_all('na_applications')
+    applications = [a for a in (all_apps if isinstance(all_apps, list) else []) if a.get('status') in ('tahsildar_rejected', 'rejected', 'collector_rejected')]
     return render(request, 'tahsildar/rejected.html', {
         'applications': applications
     })

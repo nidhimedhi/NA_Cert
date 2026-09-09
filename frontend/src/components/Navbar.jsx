@@ -116,11 +116,10 @@ export default function Navbar() {
             <Link to="/" onClick={() => setMobileOpen(false)}>{t.home}</Link>
             
             {user && (
-              <>
-                <Link to="/upload" onClick={() => setMobileOpen(false)}>{t.apply}</Link>
-                <Link to="/dashboard" onClick={() => setMobileOpen(false)}>{t.track}</Link>
-              </>
+              <Link to="/upload" onClick={() => setMobileOpen(false)}>{t.apply}</Link>
             )}
+            
+            <Link to="/track" onClick={() => setMobileOpen(false)}>{t.track}</Link>
             
             <Link to="/about" onClick={() => setMobileOpen(false)}>{t.about}</Link>
             

@@ -82,11 +82,31 @@ export default function Apply() {
       <div className="success-page">
         <div className="success-card">
           <div className="success-icon">🎉</div>
-          <h2>Application Submitted!</h2>
-          <p>Reference Number: <strong>{success.reference_no}</strong></p>
-          <p>Category: <strong>{success.land_type}</strong></p>
-          <p>Your application will be reviewed within 15–30 working days.</p>
-          <Link to="/upload" className="btn-primary">← Back to Land Types</Link>
+          <h2>Application Submitted Successfully!</h2>
+          <p style={{ color: '#4b5563', fontSize: '15px', marginBottom: '16px' }}>
+            Your NA Certificate Application has been recorded in the system and submitted to the <strong>District Collectorate</strong> for review and processing.
+          </p>
+          <div style={{ background: '#f0fdf4', border: '1px dashed #86efac', borderRadius: '8px', padding: '16px 20px', textAlign: 'left', margin: '0 auto 20px', maxWidth: '420px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+              <span style={{ color: '#6b7280', fontSize: '14px' }}>Reference Number:</span>
+              <strong style={{ color: '#0f172a', fontFamily: 'monospace', fontSize: '15px' }}>{success.reference_no}</strong>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: '#6b7280', fontSize: '14px' }}>Land Category:</span>
+              <strong style={{ color: '#0f172a', fontSize: '14px' }}>{success.land_type}</strong>
+            </div>
+          </div>
+          <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '24px' }}>
+            ⏱ Standard field inspection and scrutiny takes 15–30 working days. You can track real-time progress anytime.
+          </p>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Link to={`/track/${success.reference_no}`} className="btn-primary" style={{ textDecoration: 'none', background: '#0f172a', padding: '12px 24px', fontWeight: 'bold' }}>
+              🔍 Track Application Status →
+            </Link>
+            <Link to="/upload" className="btn-outline" style={{ textDecoration: 'none', padding: '12px 20px' }}>
+              ← Apply for Another Land
+            </Link>
+          </div>
         </div>
       </div>
     </>

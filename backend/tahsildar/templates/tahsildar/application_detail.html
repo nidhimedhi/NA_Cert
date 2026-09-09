@@ -3,9 +3,9 @@
 {% block content %}
 <div class="t-page-header">
   <div>
-    <a href="/tahsildar/upcoming/" class="t-back-btn">← Back</a>
-    <h1>Application Detail</h1>
-    <p>Full details and uploaded documents</p>
+    <a href="/tahsildar/upcoming/" class="t-back-btn">← Back to Upcoming</a>
+    <h1>Application Review</h1>
+    <p>Official citizen submission, land details, and verification documents</p>
   </div>
   {% if app %}
   <span class="t-badge t-badge-{{ app.status }}">{{ app.status|title }}</span>
@@ -14,24 +14,24 @@
 
 {% if app %}
 
-<!-- APPLICATION INFO -->
+<!-- 1. APPLICATION SUMMARY BANNER -->
 <div class="t-detail-card" style="margin-bottom: 24px;">
-  <div class="t-detail-card-title">📋 Application Info</div>
+  <div class="t-detail-card-title">📋 Application Overview</div>
   <div class="t-detail-rows">
     <div class="t-detail-row">
       <span class="t-detail-label">Reference No</span>
-      <span class="t-ref">{{ app.reference_no }}</span>
+      <span class="t-ref" style="font-family:monospace; font-size:16px;">{{ app.reference_no }}</span>
     </div>
     <div class="t-detail-row">
       <span class="t-detail-label">Applicant Email</span>
       <span class="t-detail-value">{{ app.user_email }}</span>
     </div>
     <div class="t-detail-row">
-      <span class="t-detail-label">Land Type</span>
-      <span class="t-detail-value">{{ app.land_type }}</span>
+      <span class="t-detail-label">Land Type / Category</span>
+      <span class="t-detail-value" style="font-weight:700; color:#093252;">{{ app.land_type }}</span>
     </div>
     <div class="t-detail-row">
-      <span class="t-detail-label">Status</span>
+      <span class="t-detail-label">Current Status</span>
       <span class="t-badge t-badge-{{ app.status }}">{{ app.status|title }}</span>
     </div>
     <div class="t-detail-row">
@@ -47,16 +47,248 @@
     {% if app.rejection_reason %}
     <div class="t-detail-row">
       <span class="t-detail-label">Rejection Reason</span>
-      <span class="t-detail-value" style="color:#dc2626;">{{ app.rejection_reason }}</span>
+      <span class="t-detail-value" style="color:#dc2626; font-weight:600;">{{ app.rejection_reason }}</span>
     </div>
     {% endif %}
   </div>
 </div>
 
-<!-- UPLOADED DOCUMENTS -->
+<!-- 2. OFFICIAL APPLICATION FORM (e-District Maharashtra) -->
+{% if form_data %}
+<div class="t-section" style="margin-bottom: 30px;">
+  <div class="t-section-header" style="background:#093252; color:#fff; padding:12px 20px; border-radius:8px 8px 0 0;">
+    <h2 style="color:#fff; font-size:17px; margin:0;">
+      <i class="fa-solid fa-landmark me-2" style="color:#f26522;"></i>
+      Application for Non Agricultural Permission (e-District Maharashtra)
+    </h2>
+    <span class="t-count-badge" style="background:#f26522; color:#fff;">Citizen Submitted Form</span>
+  </div>
+
+  <div style="background:#fff; border:1px solid #cbd5e1; border-top:none; border-radius:0 0 8px 8px; padding:24px; box-shadow:0 4px 12px rgba(0,0,0,0.03);">
+
+    <!-- TAB A: Applicant Details -->
+    <h3 style="font-size:14px; font-weight:700; color:#881337; background:#fee2e2; padding:8px 14px; border-left:4px solid #e11d48; margin:0 0 16px;">
+      1. Applicant Details
+    </h3>
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:16px; margin-bottom:24px;">
+      <div class="t-extracted-item">
+        <span class="t-extracted-label">Full Name</span>
+        <span class="t-extracted-value" style="font-weight:700;">{{ form_data.applicant_details.full_name|default:"—" }}</span>
+      </div>
+      <div class="t-extracted-item">
+        <span class="t-extracted-label">Aadhaar Number</span>
+        <span class="t-extracted-value" style="font-family:monospace;">{{ form_data.applicant_details.aadhaar_number|default:"—" }}</span>
+      </div>
+      <div class="t-extracted-item">
+        <span class="t-extracted-label">Gender</span>
+        <span class="t-extracted-value">{{ form_data.applicant_details.gender|default:"—" }}</span>
+      </div>
+      <div class="t-extracted-item">
+        <span class="t-extracted-label">Date of Birth</span>
+        <span class="t-extracted-value">{{ form_data.applicant_details.dob|default:"—" }}</span>
+      </div>
+      <div class="t-extracted-item">
+        <span class="t-extracted-label">Mobile No.</span>
+        <span class="t-extracted-value">{{ form_data.applicant_details.mobile_no|default:"—" }}</span>
+      </div>
+      <div class="t-extracted-item">
+        <span class="t-extracted-label">Email</span>
+        <span class="t-extracted-value">{{ form_data.applicant_details.email|default:"—" }}</span>
+      </div>
+      <div class="t-extracted-item" style="grid-column: 1 / -1;">
+        <span class="t-extracted-label">Residence Address</span>
+        <span class="t-extracted-value">{{ form_data.applicant_details.residence_address|default:"—" }}</span>
+      </div>
+      <div class="t-extracted-item">
+        <span class="t-extracted-label">Village / Taluka</span>
+        <span class="t-extracted-value">{{ form_data.applicant_details.village }} / {{ form_data.applicant_details.taluka }}</span>
+      </div>
+      <div class="t-extracted-item">
+        <span class="t-extracted-label">District / Pin Code</span>
+        <span class="t-extracted-value">{{ form_data.applicant_details.district }} - {{ form_data.applicant_details.pincode }}</span>
+      </div>
+    </div>
+
+    <!-- TAB B: Land & Property Specifications -->
+    <h3 style="font-size:14px; font-weight:700; color:#881337; background:#fee2e2; padding:8px 14px; border-left:4px solid #e11d48; margin:0 0 16px;">
+      2. Land & Property Specifications
+    </h3>
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:16px; margin-bottom:24px;">
+      <div class="t-extracted-item">
+        <span class="t-extracted-label">Gat / Survey Number</span>
+        <span class="t-extracted-value" style="font-weight:700; color:#b91c1c;">{{ form_data.service_specific_details.gat_number|default:"—" }}</span>
+      </div>
+      <div class="t-extracted-item">
+        <span class="t-extracted-label">Village</span>
+        <span class="t-extracted-value">{{ form_data.service_specific_details.land_village|default:"—" }}</span>
+      </div>
+      <div class="t-extracted-item">
+        <span class="t-extracted-label">Taluka</span>
+        <span class="t-extracted-value">{{ form_data.service_specific_details.land_taluka|default:"—" }}</span>
+      </div>
+      <div class="t-extracted-item">
+        <span class="t-extracted-label">District</span>
+        <span class="t-extracted-value">{{ form_data.service_specific_details.land_district|default:"—" }}</span>
+      </div>
+      <div class="t-extracted-item">
+        <span class="t-extracted-label">Total Area (Sq. Mt.)</span>
+        <span class="t-extracted-value" style="font-weight:700;">{{ form_data.service_specific_details.area_sqmt|default:"—" }}</span>
+      </div>
+      <div class="t-extracted-item">
+        <span class="t-extracted-label">Assessment / Rent</span>
+        <span class="t-extracted-value">{{ form_data.service_specific_details.assessment_rent|default:"—" }}</span>
+      </div>
+    </div>
+
+    <!-- Proposed Usage Breakdown -->
+    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:14px; margin-bottom:24px;">
+      <div style="font-size:12px; font-weight:700; color:#475569; text-transform:uppercase; margin-bottom:8px;">Proposed Area Usage Breakdown (Sq. Mt.)</div>
+      <div style="display:flex; flex-wrap:wrap; gap:25px;">
+        <div><span>🏡 Residential:</span> <strong>{{ form_data.service_specific_details.area_residential|default:"0" }}</strong></div>
+        <div><span>🏭 Industrial:</span> <strong>{{ form_data.service_specific_details.area_industrial|default:"0" }}</strong></div>
+        <div><span>🏢 Commercial:</span> <strong>{{ form_data.service_specific_details.area_commercial|default:"0" }}</strong></div>
+        <div><span>📌 Other Non-Agri:</span> <strong>{{ form_data.service_specific_details.area_other_purpose|default:"None" }}</strong></div>
+      </div>
+    </div>
+
+    <!-- TAB C: Service Specific & Grant Details -->
+    <h3 style="font-size:14px; font-weight:700; color:#881337; background:#fee2e2; padding:8px 14px; border-left:4px solid #e11d48; margin:0 0 16px;">
+      3. Service Specific & Grant Classification
+    </h3>
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:16px; margin-bottom:24px;">
+      <div class="t-extracted-item">
+        <span class="t-extracted-label">Type of Assessment</span>
+        <span class="t-extracted-value">{{ form_data.service_specific_details.assessment_type|default:"—" }}</span>
+      </div>
+      <div class="t-extracted-item">
+        <span class="t-extracted-label">Applicant Superior Holder By</span>
+        <span class="t-extracted-value">{{ form_data.service_specific_details.holder_type|default:"—" }}</span>
+      </div>
+      <div class="t-extracted-item" style="grid-column: 1 / -1;">
+        <span class="t-extracted-label">Type of Grant Applied For</span>
+        <span class="t-extracted-value">{{ form_data.service_specific_details.grant_type|default:"—" }}</span>
+      </div>
+      {% if form_data.service_specific_details.grant_condition_detail %}
+      <div class="t-extracted-item" style="grid-column: 1 / -1;">
+        <span class="t-extracted-label">Grant Condition Gist</span>
+        <span class="t-extracted-value">{{ form_data.service_specific_details.grant_condition_detail }}</span>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- TAB D: Statutory & Infrastructure Clearances -->
+    <h3 style="font-size:14px; font-weight:700; color:#881337; background:#fee2e2; padding:8px 14px; border-left:4px solid #e11d48; margin:0 0 16px;">
+      4. Statutory & Proximity Inquiries
+    </h3>
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:14px; margin-bottom:24px;">
+      <div class="t-extracted-item">
+        <span class="t-extracted-label">Municipal / Council Jurisdiction</span>
+        <span class="t-extracted-value">{{ form_data.statutory_and_proximity_clearances.jurisdiction_municipal }}</span>
+      </div>
+      <div class="t-extracted-item">
+        <span class="t-extracted-label">City Survey Done</span>
+        <span class="t-extracted-value">{{ form_data.statutory_and_proximity_clearances.city_survey_done }}</span>
+      </div>
+      <div class="t-extracted-item">
+        <span class="t-extracted-label">Cantonment Jurisdiction</span>
+        <span class="t-extracted-value">{{ form_data.statutory_and_proximity_clearances.cantonment_jurisdiction }}</span>
+      </div>
+      <div class="t-extracted-item">
+        <span class="t-extracted-label">Regional Plan (Town Planning Act 1966)</span>
+        <span class="t-extracted-value">{{ form_data.statutory_and_proximity_clearances.regional_plan }}</span>
+      </div>
+      <div class="t-extracted-item">
+        <span class="t-extracted-label">Land Under Acquisition</span>
+        <span class="t-extracted-value" style="font-weight:700; color:{% if form_data.statutory_and_proximity_clearances.land_under_acquisition == 'Yes' %}#dc2626{% else %}#16a34a{% endif %};">
+          {{ form_data.statutory_and_proximity_clearances.land_under_acquisition }}
+        </span>
+      </div>
+      <div class="t-extracted-item">
+        <span class="t-extracted-label">Prior Application Submitted</span>
+        <span class="t-extracted-value">{{ form_data.statutory_and_proximity_clearances.prior_application_submitted }}</span>
+      </div>
+    </div>
+
+    <!-- Proximity Table -->
+    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:14px; margin-bottom:24px;">
+      <div style="font-size:12px; font-weight:700; color:#475569; text-transform:uppercase; margin-bottom:10px;">Proximity Within 30 Meters Status</div>
+      <div style="display:flex; flex-wrap:wrap; gap:20px; font-size:13.5px;">
+        <span>🚂 Railway: <strong>{{ form_data.statutory_and_proximity_clearances.near_railway }}</strong></span>
+        <span>✈️ Airport: <strong>{{ form_data.statutory_and_proximity_clearances.near_airport }}</strong></span>
+        <span>🏢 Jail: <strong>{{ form_data.statutory_and_proximity_clearances.near_jail }}</strong></span>
+        <span>🏛️ Public Office: <strong>{{ form_data.statutory_and_proximity_clearances.near_public_office }}</strong></span>
+        <span>⛪ Cemetery: <strong>{{ form_data.statutory_and_proximity_clearances.near_cemetery }}</strong></span>
+        {% if form_data.statutory_and_proximity_clearances.distance_from_proposed_land %}
+        <span>📏 Distance: <strong>{{ form_data.statutory_and_proximity_clearances.distance_from_proposed_land }}</strong></span>
+        {% endif %}
+      </div>
+      <div style="margin-top:10px; font-size:13.5px; border-top:1px dashed #cbd5e1; padding-top:8px;">
+        ⚡ High Tension line within 15m: <strong>{{ form_data.statutory_and_proximity_clearances.near_ht_line }}</strong>
+        {% if form_data.statutory_and_proximity_clearances.ht_line_distance %}
+        &mdash; Distance: <strong>{{ form_data.statutory_and_proximity_clearances.ht_line_distance }}</strong>
+        {% endif %}
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-bottom:24px;">
+      <div class="t-extracted-item">
+        <span class="t-extracted-label">Present Use of Land & Buildings</span>
+        <span class="t-extracted-value">{{ form_data.statutory_and_proximity_clearances.present_land_use|default:"—" }}</span>
+      </div>
+      <div class="t-extracted-item">
+        <span class="t-extracted-label">Approach Road Provision</span>
+        <span class="t-extracted-value">{{ form_data.statutory_and_proximity_clearances.approach_road_provision|default:"—" }}</span>
+      </div>
+      {% if form_data.statutory_and_proximity_clearances.prior_rejection_reason %}
+      <div class="t-extracted-item" style="grid-column:1 / -1;">
+        <span class="t-extracted-label">Prior Rejection Reason</span>
+        <span class="t-extracted-value" style="color:#dc2626;">{{ form_data.statutory_and_proximity_clearances.prior_rejection_reason }}</span>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- TAB E: Self Declaration & Signature -->
+    <h3 style="font-size:14px; font-weight:700; color:#881337; background:#fee2e2; padding:8px 14px; border-left:4px solid #e11d48; margin:0 0 16px;">
+      5. Self Declaration & Legal Attestation
+    </h3>
+    <div style="background:#fefefe; border:1px solid #cbd5e1; border-radius:6px; padding:16px; font-size:13.5px; line-height:1.8; margin-bottom:16px;">
+      I <strong>{{ form_data.self_declaration.name }}</strong>, son/daughter of <strong>{{ form_data.self_declaration.parent_name }}</strong>, aged <strong>{{ form_data.self_declaration.age }}</strong>, occupation <strong>{{ form_data.self_declaration.occupation }}</strong>, resident of <strong>{{ form_data.self_declaration.resident_of }}</strong> hereby declare that the information provided above is true and correct to the best of my knowledge, information and belief. I fully understand the consequence of giving false information. If the information as given above is found to be false, I shall be liable to prosecution and punishment under section 199 and 200 of IPC 1960 and/or any other law applicable thereto.
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; border-top:1px solid #e2e8f0; padding-top:14px;">
+      <div>
+        <div>Place: <strong>{{ form_data.self_declaration.place }}</strong></div>
+        <div>Date: <strong>{{ form_data.self_declaration.date }}</strong></div>
+        <div>Declared Applicant Name: <strong>{{ form_data.self_declaration.applicant_name }}</strong></div>
+      </div>
+      <div style="text-align:right;">
+        <span style="font-size:11.5px; color:#64748b; display:block; margin-bottom:4px;">Digital Signature:</span>
+        {% if form_data.self_declaration.signature_data %}
+          {% if "data:image" in form_data.self_declaration.signature_data %}
+            <img src="{{ form_data.self_declaration.signature_data }}" alt="Signature" style="max-height:55px; border:1px dashed #94a3b8; border-radius:4px; padding:2px 8px; background:#fff;">
+          {% elif "typed:" in form_data.self_declaration.signature_data %}
+            <div style="font-family:'Times New Roman', cursive, serif; font-size:20px; font-style:italic; color:#1e3a8a; border-bottom:1px solid #1e3a8a; display:inline-block; padding:0 12px;">
+              {{ form_data.self_declaration.signature_data|slice:"6:" }}
+            </div>
+          {% else %}
+            <div style="font-family:'Times New Roman', cursive, serif; font-size:18px; font-style:italic; color:#1e3a8a;">
+              {{ form_data.self_declaration.signature_data }}
+            </div>
+          {% endif %}
+        {% else %}
+          <em style="color:#94a3b8;">Digitally Signed</em>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endif %}
+
+<!-- 3. UPLOADED SUPPORTING DOCUMENTS -->
 <div class="t-section">
   <div class="t-section-header">
-    <h2>📁 Uploaded Documents</h2>
+    <h2>📁 Uploaded Supporting Documents</h2>
     <span class="t-count-badge">{{ documents|length }} Documents</span>
   </div>
 
@@ -70,7 +302,7 @@
         <div class="t-doc-icon">📄</div>
         <div>
           <div class="t-doc-name">{{ doc.document_name }}</div>
-          <div class="t-doc-date">{{ doc.uploaded_at|slice:":10" }}</div>
+          <div class="t-doc-date">Uploaded: {{ doc.uploaded_at|slice:":10" }}</div>
         </div>
         {% if doc.file_url %}
         <a href="{{ doc.file_url }}" target="_blank" class="t-view-file-btn">
@@ -82,7 +314,7 @@
       <!-- EXTRACTED 7/12 FIELDS -->
       {% if doc.village or doc.taluka or doc.district or doc.satbara_no or doc.gat_no or doc.owner_names %}
       <div class="t-extracted-section">
-        <div class="t-extracted-title">🔍 Extracted Data</div>
+        <div class="t-extracted-title">🔍 OCR Extracted Data (7/12 Extract)</div>
         <div class="t-extracted-grid">
           {% if doc.village %}
           <div class="t-extracted-item">
@@ -124,11 +356,11 @@
       </div>
       {% endif %}
 
-      <!-- RAW TEXT -->
-      {% if doc.raw_json %}
+      <!-- RAW OCR JSON -->
+      {% if doc.raw_json and doc.raw_json.key_value_pairs %}
       <div class="t-raw-section">
-        <div class="t-raw-title">📝 Full Extracted Text</div>
-        <pre class="t-raw-text">{{ doc.raw_json }}</pre>
+        <div class="t-raw-title">📝 Key Metadata Extracted</div>
+        <pre class="t-raw-text">{{ doc.raw_json.key_value_pairs }}</pre>
       </div>
       {% endif %}
 
@@ -139,28 +371,32 @@
   {% else %}
   <div class="t-empty-state">
     <div class="t-empty-icon">📂</div>
-    <h3>No documents found</h3>
-    <p>No documents were uploaded for this application.</p>
+    <h3>No attached files</h3>
+    <p>No separate files were uploaded for this application.</p>
   </div>
   {% endif %}
 </div>
 
-<!-- ACTION BUTTONS -->
+<!-- 4. ACTION BUTTONS (TAHSILDAR REVIEW) -->
 {% if app.status == 'pending' %}
-<div class="t-action-section">
+<div class="t-action-section" style="margin-top:30px;">
   <form method="POST" action="/tahsildar/approve/{{ app.id }}/">
     {% csrf_token %}
-    <button type="submit" class="t-approve-btn-large">✅ Approve Application</button>
+    <button type="submit" class="t-approve-btn-large">
+      <i class="fa-solid fa-check me-2"></i> Approve Application
+    </button>
   </form>
 
-  <div class="t-reject-section" style="margin-top: 20px;">
+  <div class="t-reject-section" style="margin-top: 24px;">
     <div class="t-reject-section-title">❌ Reject this Application</div>
-    <p class="t-reject-section-sub">Write the reason clearly. The applicant will be notified.</p>
+    <p class="t-reject-section-sub">Write the official rejection reason clearly. The applicant will be notified.</p>
     <form method="POST" action="/tahsildar/reject/{{ app.id }}/">
       {% csrf_token %}
       <textarea name="reason" class="t-reject-textarea"
         placeholder="Write rejection reason here..." rows="4" required></textarea>
-      <button type="submit" class="t-reject-submit-btn">❌ Submit Rejection</button>
+      <button type="submit" class="t-reject-submit-btn">
+        <i class="fa-solid fa-times me-2"></i> Submit Rejection
+      </button>
     </form>
   </div>
 </div>

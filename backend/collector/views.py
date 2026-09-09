@@ -61,11 +61,22 @@ def applications(request):
 @login_required(login_url='/collector/login/')
 def application_detail(request, app_id):
     app  = select_one('na_applications', 'id', app_id)
-    docs = get_documents(app_id)
-    docs = docs if isinstance(docs, list) else []
+    all_docs = get_documents(app_id)
+    all_docs = all_docs if isinstance(all_docs, list) else []
+
+    form_doc = None
+    supporting_docs = []
+    for doc in all_docs:
+        if doc.get('document_name') == 'Application Form - e-District Maharashtra':
+            form_doc = doc
+        else:
+            supporting_docs.append(doc)
+
     return render(request, 'collector/application_detail.html', {
         'app':       app,
-        'documents': docs,
+        'form_doc':  form_doc,
+        'form_data': form_doc.get('raw_json') if (form_doc and isinstance(form_doc.get('raw_json'), dict)) else None,
+        'documents': supporting_docs,
     })
 
 

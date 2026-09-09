@@ -367,10 +367,50 @@ body {
 .apps-table th { background: var(--bg-page); padding: 16px; font-size: 13px; font-weight: bold; text-transform: uppercase; text-align: left; border-bottom: 2px solid var(--border); color: var(--navy-secondary); }
 .apps-table td { padding: 16px; font-size: 15px; border-bottom: 1px solid var(--border); }
 .apps-table tr:hover td { background: #f9fafb; }
-.status-pill { padding: 4px 12px; font-size: 12px; font-weight: bold; text-transform: uppercase; border-radius: 2px; }
-.status-pending { background: #fef3c7; color: var(--pending); border: 1px solid #fde68a; }
-.status-approved, .status-collector_approved { background: #d1fae5; color: var(--success); border: 1px solid #a7f3d0; }
-.status-rejected, .status-collector_rejected { background: #fee2e2; color: var(--rejected); border: 1px solid #fecaca; }
+.status-pill { padding: 5px 12px; font-size: 12px; font-weight: 700; text-transform: uppercase; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; letter-spacing: 0.3px; }
+.status-pending, .status-pending_collector { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+.status-forwarded_to_tahsildar { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+.status-tahsildar_verified { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+.status-tahsildar_rejected { background: #fff1f2; color: #be123c; border: 1px solid #fecdd3; }
+.status-approved, .status-collector_approved { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+.status-rejected, .status-collector_rejected { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+
+/* ── 4-STEP WORKFLOW TRACKER ── */
+.workflow-tracker-wrap { background: #ffffff; border: 1px solid var(--border); border-radius: 8px; padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow); }
+.workflow-tracker-title { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--navy-secondary); margin-bottom: 18px; }
+.workflow-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; position: relative; }
+.workflow-step { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 14px 12px; position: relative; transition: all 0.2s; }
+.workflow-step.completed { background: #f0fdf4; border-color: #86efac; }
+.workflow-step.active { background: #eff6ff; border-color: #60a5fa; box-shadow: 0 0 0 2px rgba(59,130,246,0.2); }
+.workflow-step.rejected { background: #fef2f2; border-color: #fca5a5; }
+.workflow-step-num { font-size: 11px; font-weight: 800; text-transform: uppercase; color: #64748b; margin-bottom: 4px; }
+.workflow-step.completed .workflow-step-num { color: #166534; }
+.workflow-step.active .workflow-step-num { color: #1d4ed8; }
+.workflow-step.rejected .workflow-step-num { color: #991b1b; }
+.workflow-step-title { font-size: 14px; font-weight: 700; color: #1e293b; line-height: 1.3; }
+.workflow-step-sub { font-size: 12px; color: #64748b; margin-top: 4px; }
+
+/* ── COLLECTOR METRIC CARDS ── */
+.collector-metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.collector-metric-card { background: #ffffff; border: 1px solid var(--border); border-radius: 8px; padding: 16px; box-shadow: var(--shadow); cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; border-left: 4px solid #94a3b8; }
+.collector-metric-card:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.08); }
+.collector-metric-card.active-metric { border-left-color: var(--saffron); background: #fffdfa; }
+.collector-metric-card.color-blue { border-left-color: #3b82f6; }
+.collector-metric-card.color-amber { border-left-color: #f59e0b; }
+.collector-metric-card.color-teal { border-left-color: #0d9488; }
+.collector-metric-card.color-green { border-left-color: #16a34a; }
+.collector-metric-card.color-red { border-left-color: #dc2626; }
+.collector-metric-label { font-size: 12px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 8px; }
+.collector-metric-val { font-size: 26px; font-weight: 800; color: #0f172a; }
+
+/* ── TAHSILDAR CALLOUT CARD ── */
+.tahsildar-findings-card { background: #ffffff; border-radius: 8px; padding: 20px 24px; margin-bottom: 24px; border: 1px solid #cbd5e1; box-shadow: var(--shadow); }
+.tahsildar-findings-card.verified { border-left: 6px solid #16a34a; background: #f0fdf4; }
+.tahsildar-findings-card.rejected { border-left: 6px solid #dc2626; background: #fef2f2; }
+.tahsildar-findings-card.pending { border-left: 6px solid #f59e0b; background: #fffbeb; }
+.findings-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.findings-title { font-size: 16px; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 8px; }
+.findings-body { font-size: 14px; color: #334155; line-height: 1.5; }
 
 /* ── APPLICATION DETAIL PAGE ── */
 .detail-page { padding: 40px; font-family: 'Times New Roman', Times, serif; background: var(--bg-page); min-height: 100vh; }
@@ -425,4 +465,254 @@ body {
   .hero h1 { font-size: 2.2rem; }
   .form-row { grid-template-columns: 1fr; }
   .land-grid, .doc-upload-grid { grid-template-columns: 1fr; }
+}
+
+/* ── APPLICATION PDF DOSSIER MODAL & PRINT STYLES ── */
+.pdf-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(4px);
+  z-index: 99999;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 30px 15px;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.pdf-modal-container {
+  background: #ffffff;
+  width: 100%;
+  max-width: 960px;
+  border-radius: 8px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.pdf-modal-toolbar {
+  background: #0f172a;
+  color: #ffffff;
+  padding: 14px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #334155;
+}
+
+.pdf-modal-toolbar .toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+}
+
+.toolbar-ref {
+  background: #1e293b;
+  padding: 3px 10px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 13px;
+  color: #38bdf8;
+  border: 1px solid #475569;
+}
+
+.pdf-modal-toolbar .toolbar-right {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-print-pdf {
+  background: #059669;
+  color: #ffffff;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 5px;
+  font-weight: bold;
+  font-size: 13px;
+  cursor: pointer;
+  transition: 0.15s;
+}
+
+.btn-print-pdf:hover {
+  background: #047857;
+}
+
+.btn-close-modal {
+  background: #475569;
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  font-weight: bold;
+  font-size: 13px;
+  cursor: pointer;
+  transition: 0.15s;
+}
+
+.btn-close-modal:hover {
+  background: #334155;
+}
+
+/* Printable Official Document Sheet */
+.pdf-sheet {
+  padding: 35px 40px;
+  background: #ffffff;
+  color: #0f172a;
+  font-family: 'Times New Roman', Times, serif;
+  line-height: 1.4;
+}
+
+.gov-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  gap: 15px;
+}
+
+.gov-header-emblem {
+  font-size: 44px;
+  width: 60px;
+  text-align: center;
+}
+
+.gov-header-text {
+  flex: 1;
+  text-align: center;
+}
+
+.gov-header-text h2 {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  margin: 0 0 2px;
+  color: #0f172a;
+}
+
+.gov-header-text h3 {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0 0 4px;
+  color: #1e3a8a;
+}
+
+.gov-header-text h4 {
+  font-size: 15px;
+  font-weight: 800;
+  margin: 4px 0 2px;
+  color: #881337;
+}
+
+.gov-header-text p {
+  font-size: 11.5px;
+  font-style: italic;
+  margin: 0;
+  color: #475569;
+}
+
+.office-use-box {
+  border-collapse: collapse;
+  font-size: 11px;
+  border: 1.5px solid #0f172a;
+  min-width: 210px;
+}
+
+.office-use-box th, .office-use-box td {
+  border: 1px solid #475569;
+  padding: 4px 8px;
+}
+
+.office-use-box th {
+  background: #e2e8f0;
+  font-weight: 700;
+  text-align: center;
+}
+
+.status-stamp {
+  background: #fef08a;
+  padding: 2px 6px;
+  font-weight: bold;
+  border-radius: 3px;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+}
+
+.divider-line {
+  border: none;
+  border-top: 2px solid #0f172a;
+  margin: 15px 0 20px;
+}
+
+.doc-section {
+  margin-bottom: 22px;
+}
+
+.section-title {
+  background: #f1f5f9;
+  color: #0f172a;
+  font-weight: 800;
+  font-size: 13px;
+  padding: 6px 10px;
+  border: 1px solid #475569;
+  border-left: 5px solid #1e3a8a;
+  margin-bottom: 0;
+  letter-spacing: 0.2px;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  border: 1px solid #475569;
+}
+
+.data-table th, .data-table td {
+  border: 1px solid #64748b;
+  padding: 6px 9px;
+  vertical-align: middle;
+}
+
+.data-table th {
+  background: #f8fafc;
+  font-weight: 700;
+  color: #1e293b;
+  text-align: left;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .pdf-modal-overlay,
+  .pdf-modal-overlay * {
+    visibility: visible;
+  }
+  .pdf-modal-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: auto;
+    padding: 0;
+    background: transparent !important;
+  }
+  .pdf-modal-container {
+    box-shadow: none !important;
+    border: none !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .pdf-sheet {
+    padding: 10mm 15mm !important;
+  }
 }

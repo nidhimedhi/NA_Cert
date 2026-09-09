@@ -1,0 +1,391 @@
+{% extends 'portal/base.html' %}
+{% load static %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+    .track-container {
+        max-width: 980px;
+        margin: 30px auto 60px;
+        padding: 0 15px;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .track-search-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 28px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        margin-bottom: 25px;
+    }
+
+    .track-search-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 20px;
+    }
+
+    .track-search-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        background: #f0fdf4;
+        color: #16a34a;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        border: 1px solid #bbf7d0;
+    }
+
+    .track-search-title h2 {
+        font-size: 20px;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0 0 4px;
+    }
+
+    .track-search-title p {
+        font-size: 13px;
+        color: #64748b;
+        margin: 0;
+    }
+
+    .track-input-row {
+        display: flex;
+        gap: 12px;
+    }
+
+    .track-input {
+        flex: 1;
+        padding: 12px 18px;
+        font-size: 15px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        outline: none;
+        font-family: monospace;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .track-input:focus {
+        border-color: #0f172a;
+        box-shadow: 0 0 0 3px rgba(15,23,42,0.1);
+    }
+
+    .btn-track {
+        padding: 12px 28px;
+        background: #0f172a;
+        color: #ffffff;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.15s;
+    }
+
+    .btn-track:hover {
+        background: #1e293b;
+    }
+
+    /* Result Card */
+    .track-result-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+
+    .result-header-bar {
+        background: #f8fafc;
+        padding: 20px 24px;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .status-pill {
+        padding: 5px 14px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        border-radius: 4px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        letter-spacing: 0.3px;
+    }
+    .status-pending_collector, .status-pending { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+    .status-forwarded_to_tahsildar { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+    .status-tahsildar_verified { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+    .status-tahsildar_rejected { background: #fff1f2; color: #be123c; border: 1px solid #fecdd3; }
+    .status-collector_approved { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+    .status-collector_rejected { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+
+    .summary-banner {
+        padding: 18px 24px;
+        background: #f0f9ff;
+        border-bottom: 1px solid #e0f2fe;
+        color: #0369a1;
+        font-size: 14px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    /* 4-Step Stepper */
+    .stepper-wrap {
+        padding: 28px 24px;
+    }
+
+    .stepper-steps {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+    }
+
+    .step-box {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 16px 14px;
+        position: relative;
+    }
+    .step-box.completed {
+        background: #f0fdf4;
+        border-color: #86efac;
+    }
+    .step-box.active {
+        background: #eff6ff;
+        border-color: #60a5fa;
+        box-shadow: 0 0 0 2px rgba(59,130,246,0.2);
+    }
+    .step-box.rejected {
+        background: #fef2f2;
+        border-color: #fca5a5;
+    }
+
+    .step-badge {
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+    }
+    .step-box.completed .step-badge { color: #166534; }
+    .step-box.active .step-badge { color: #1d4ed8; }
+    .step-box.rejected .step-badge { color: #991b1b; }
+    .step-box.upcoming .step-badge { color: #94a3b8; }
+
+    .step-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 4px;
+        line-height: 1.3;
+    }
+
+    .step-desc {
+        font-size: 12px;
+        color: #64748b;
+        line-height: 1.4;
+    }
+
+    /* Dossier Info Grid */
+    .dossier-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        padding: 20px 24px;
+        border-top: 1px solid #e2e8f0;
+        background: #ffffff;
+    }
+
+    .dossier-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 14px;
+    }
+
+    .dossier-item span { color: #64748b; font-weight: 600; }
+    .dossier-item strong, .dossier-item code { color: #0f172a; }
+
+    /* My Applications Table */
+    .my-apps-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 24px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .my-apps-card h3 {
+        font-size: 17px;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0 0 16px;
+    }
+
+    .my-apps-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .my-apps-table th {
+        background: #f8fafc;
+        padding: 12px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #475569;
+        text-align: left;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .my-apps-table td {
+        padding: 12px;
+        font-size: 13px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    @media (max-width: 768px) {
+        .stepper-steps { grid-template-columns: 1fr; }
+        .dossier-grid { grid-template-columns: 1fr; }
+        .track-input-row { flex-direction: column; }
+    }
+</style>
+
+<div class="track-container">
+
+    <!-- SEARCH CARD -->
+    <div class="track-search-card">
+        <div class="track-search-header">
+            <div class="track-search-icon">🔍</div>
+            <div class="track-search-title">
+                <h2>Track NA Application Status</h2>
+                <p>Enter your official Application Reference Number below to inspect real-time progress.</p>
+            </div>
+        </div>
+
+        <form method="GET" action="/track/">
+            <div class="track-input-row">
+                <input 
+                    type="text" 
+                    name="ref" 
+                    class="track-input" 
+                    placeholder="e.g. NA-2026-123456" 
+                    value="{{ query_ref }}" 
+                    required
+                >
+                <button type="submit" class="btn-track">Track Application →</button>
+            </div>
+        </form>
+    </div>
+
+    {% if error %}
+    <div style="background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; padding: 16px 20px; border-radius: 8px; margin-bottom: 24px; font-size: 14px; font-weight: 600;">
+        ⚠️ {{ error }}
+    </div>
+    {% endif %}
+
+    {% if app %}
+    <!-- APPLICATION TIMELINE & RESULT -->
+    <div class="track-result-card">
+        <div class="result-header-bar">
+            <div>
+                <span style="font-size: 12px; text-transform: uppercase; color: #64748b; font-weight: 700;">Reference Number</span>
+                <div style="font-family: monospace; font-size: 18px; font-weight: 800; color: #0f172a;">{{ app.reference_no }}</div>
+            </div>
+            <div>
+                <span class="status-pill {{ status_meta.badge_class }}">{{ status_meta.label }}</span>
+            </div>
+        </div>
+
+        <div class="summary-banner">
+            <span>ℹ️</span> {{ status_meta.summary }}
+        </div>
+
+        <!-- 4-STEP TIMELINE -->
+        <div class="stepper-wrap">
+            <div style="font-size: 13px; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 14px; letter-spacing: 0.5px;">
+                Workflow Progression Lifecycle
+            </div>
+            <div class="stepper-steps">
+                {% for s in steps %}
+                <div class="step-box {{ s.status }}">
+                    <div class="step-badge">
+                        {% if s.status == 'completed' %}✅ Step {{ s.step }} Done{% elif s.status == 'active' %}⏳ Step {{ s.step }} Active{% elif s.status == 'rejected' %}❌ Step {{ s.step }} Objection{% else %}⚪ Step {{ s.step }}{% endif %}
+                    </div>
+                    <div class="step-title">{{ s.title }}</div>
+                    <div class="step-desc">{{ s.desc }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        {% if app.rejection_reason %}
+        <div style="margin: 0 24px 20px; padding: 14px 18px; border-radius: 6px; font-size: 13px; {% if app.status == 'collector_rejected' or app.status == 'tahsildar_rejected' %}background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b;{% else %}background: #f8fafc; border: 1px solid #e2e8f0; color: #334155;{% endif %}">
+            <strong>Official Officer Note:</strong> {{ app.rejection_reason }}
+        </div>
+        {% endif %}
+
+        <!-- APPLICATION PARTICULARS -->
+        <div class="dossier-grid">
+            <div>
+                <div class="dossier-item"><span>Land Category:</span><strong>{{ app.land_type }}</strong></div>
+                <div class="dossier-item"><span>Applicant Name:</span><strong>{{ dossier.applicant_name|default:user_name|default:'Registered Citizen' }}</strong></div>
+                <div class="dossier-item"><span>Gat / Survey Number:</span><code>{{ dossier.gat_number|default:'On File' }}</code></div>
+            </div>
+            <div>
+                <div class="dossier-item"><span>Village / Taluka / District:</span><strong>{% if dossier.village %}{{ dossier.village }}, {{ dossier.taluka }}, {{ dossier.district }}{% else %}Jurisdiction Recorded{% endif %}</strong></div>
+                <div class="dossier-item"><span>Area:</span><strong>{% if dossier.area_sqmt %}{{ dossier.area_sqmt }} Sq. Meters{% else %}Recorded{% endif %}</strong></div>
+                <div class="dossier-item"><span>Submission Date:</span><strong>{{ app.submitted_at|slice:":10" }}</strong></div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- CITIZEN APPLICATIONS HISTORY -->
+    {% if user_apps %}
+    <div class="my-apps-card">
+        <h3>My Submitted Applications ({{ user_apps|length }})</h3>
+        <table class="my-apps-table">
+            <thead>
+                <tr>
+                    <th>Reference No.</th>
+                    <th>Land Category</th>
+                    <th>Submitted</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in user_apps %}
+                <tr>
+                    <td><strong style="font-family: monospace;">{{ a.reference_no }}</strong></td>
+                    <td>{{ a.land_type }}</td>
+                    <td>{{ a.submitted_at|slice:":10" }}</td>
+                    <td><span class="status-pill status-{{ a.status }}">{{ a.status }}</span></td>
+                    <td>
+                        <a href="/track/?ref={{ a.reference_no }}" style="color: #0f172a; font-weight: 700; text-decoration: none;">Track Status →</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

@@ -15,9 +15,12 @@ urlpatterns = [
 
     # ── Public ────────────────────────────────────────────────────────
     path('land-types/',  views.land_types),
+    path('track/',       views.track_application),
+    path('track/<str:ref>/', views.track_application),
 
     # ── Citizen portal ────────────────────────────────────────────────
     path('apply/',       views.apply_na),
+    path('citizen/applications/', views.citizen_applications),
 
     # ── Tahsildar dashboard ───────────────────────────────────────────
     path('tahsildar/applications/',              views.tahsildar_applications),
@@ -26,8 +29,9 @@ urlpatterns = [
     path('tahsildar/applications/<str:app_id>/reject/',  views.tahsildar_reject),
 
     # ── Collector dashboard ───────────────────────────────────────────
-    path('collector/applications/',              views.collector_applications),
-    path('collector/applications/<str:app_id>/', views.collector_application_detail),
+    path('collector/applications/',                     views.collector_applications),
+    path('collector/applications/<str:app_id>/',        views.collector_application_detail),
+    path('collector/applications/<str:app_id>/forward/', views.collector_forward),
     path('collector/applications/<str:app_id>/approve/', views.collector_approve),
     path('collector/applications/<str:app_id>/reject/',  views.collector_reject),
 ]

@@ -3,9 +3,9 @@
 {% block content %}
 <div class="c-page-header">
   <div>
-    <a href="/collector/applications/" class="c-back-btn">← Back</a>
+    <a href="/collector/applications/" class="c-back-btn">← Back to Applications</a>
     <h1>Application Detail</h1>
-    <p>Full documents and extracted 7/12 data</p>
+    <p>Tahsildar verified application, citizen form, and legal documents</p>
   </div>
   {% if app %}
   <span class="c-badge c-badge-{{ app.status }}">{{ app.status|title }}</span>
@@ -15,11 +15,11 @@
 {% if app %}
 <!-- APP INFO -->
 <div class="c-detail-card" style="margin-bottom:24px;">
-  <div class="c-detail-title">📋 Application Info</div>
+  <div class="c-detail-title">📋 Application Overview</div>
   <div class="c-detail-rows">
-    <div class="c-detail-row"><span class="c-detail-label">Reference No</span><span class="c-ref">{{ app.reference_no }}</span></div>
-    <div class="c-detail-row"><span class="c-detail-label">Applicant</span><span class="c-detail-value">{{ app.user_email }}</span></div>
-    <div class="c-detail-row"><span class="c-detail-label">Land Type</span><span class="c-detail-value">{{ app.land_type }}</span></div>
+    <div class="c-detail-row"><span class="c-detail-label">Reference No</span><span class="c-ref" style="font-family:monospace; font-size:16px;">{{ app.reference_no }}</span></div>
+    <div class="c-detail-row"><span class="c-detail-label">Applicant Email</span><span class="c-detail-value">{{ app.user_email }}</span></div>
+    <div class="c-detail-row"><span class="c-detail-label">Land Category</span><span class="c-detail-value" style="font-weight:700;">{{ app.land_type }}</span></div>
     <div class="c-detail-row"><span class="c-detail-label">Status</span><span class="c-badge c-badge-{{ app.status }}">{{ app.status|title }}</span></div>
     <div class="c-detail-row"><span class="c-detail-label">Submitted</span><span class="c-detail-value">{{ app.submitted_at|slice:":10" }}</span></div>
     {% if app.reviewed_at %}
@@ -31,10 +31,86 @@
   </div>
 </div>
 
-<!-- DOCUMENTS -->
+<!-- 2. OFFICIAL APPLICATION FORM (e-District Maharashtra) -->
+{% if form_data %}
+<div class="c-section" style="margin-bottom: 30px;">
+  <div class="c-section-header" style="background:#0f766e; color:#fff; padding:12px 20px; border-radius:8px 8px 0 0;">
+    <h2 style="color:#fff; font-size:17px; margin:0;">
+      <i class="fa-solid fa-file-invoice me-2"></i>
+      Official Application Form & Declarations (e-District Maharashtra)
+    </h2>
+    <span class="c-count-badge" style="background:#fff; color:#0f766e;">Form Data</span>
+  </div>
+
+  <div style="background:#fff; border:1px solid #cbd5e1; border-top:none; border-radius:0 0 8px 8px; padding:24px; box-shadow:0 4px 12px rgba(0,0,0,0.03);">
+
+    <!-- Applicant Details -->
+    <h3 style="font-size:14px; font-weight:700; color:#0f766e; background:#f0fdfa; padding:8px 14px; border-left:4px solid #0f766e; margin:0 0 16px;">
+      1. Applicant Particulars
+    </h3>
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:16px; margin-bottom:24px;">
+      <div class="c-ext-item"><span class="c-ext-label">Full Name</span><span class="c-ext-value" style="font-weight:700;">{{ form_data.applicant_details.full_name|default:"—" }}</span></div>
+      <div class="c-ext-item"><span class="c-ext-label">Aadhaar Number</span><span class="c-ext-value" style="font-family:monospace;">{{ form_data.applicant_details.aadhaar_number|default:"—" }}</span></div>
+      <div class="c-ext-item"><span class="c-ext-label">Gender / DOB</span><span class="c-ext-value">{{ form_data.applicant_details.gender }} / {{ form_data.applicant_details.dob }}</span></div>
+      <div class="c-ext-item"><span class="c-ext-label">Contact</span><span class="c-ext-value">{{ form_data.applicant_details.mobile_no }} | {{ form_data.applicant_details.email }}</span></div>
+      <div class="c-ext-item" style="grid-column: 1 / -1;"><span class="c-ext-label">Residence Address</span><span class="c-ext-value">{{ form_data.applicant_details.residence_address }}</span></div>
+      <div class="c-ext-item"><span class="c-ext-label">Location</span><span class="c-ext-value">{{ form_data.applicant_details.village }}, {{ form_data.applicant_details.taluka }}, {{ form_data.applicant_details.district }} - {{ form_data.applicant_details.pincode }}</span></div>
+    </div>
+
+    <!-- Land Specifications -->
+    <h3 style="font-size:14px; font-weight:700; color:#0f766e; background:#f0fdfa; padding:8px 14px; border-left:4px solid #0f766e; margin:0 0 16px;">
+      2. Land & Property Details
+    </h3>
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:16px; margin-bottom:24px;">
+      <div class="c-ext-item"><span class="c-ext-label">Gat / Survey Number</span><span class="c-ext-value" style="font-weight:700; color:#0f766e;">{{ form_data.service_specific_details.gat_number|default:"—" }}</span></div>
+      <div class="c-ext-item"><span class="c-ext-label">Location</span><span class="c-ext-value">{{ form_data.service_specific_details.land_village }}, Taluka: {{ form_data.service_specific_details.land_taluka }}, Dist: {{ form_data.service_specific_details.land_district }}</span></div>
+      <div class="c-ext-item"><span class="c-ext-label">Total Area (Sq. Mt.)</span><span class="c-ext-value" style="font-weight:700;">{{ form_data.service_specific_details.area_sqmt|default:"—" }}</span></div>
+      <div class="c-ext-item"><span class="c-ext-label">Assessment / Rent</span><span class="c-ext-value">{{ form_data.service_specific_details.assessment_rent|default:"—" }}</span></div>
+      <div class="c-ext-item"><span class="c-ext-label">Superior Holder Type</span><span class="c-ext-value">{{ form_data.service_specific_details.holder_type|default:"—" }}</span></div>
+      <div class="c-ext-item"><span class="c-ext-label">Grant Type</span><span class="c-ext-value">{{ form_data.service_specific_details.grant_type|default:"—" }}</span></div>
+    </div>
+
+    <!-- Clearances & Self Declaration Summary -->
+    <h3 style="font-size:14px; font-weight:700; color:#0f766e; background:#f0fdfa; padding:8px 14px; border-left:4px solid #0f766e; margin:0 0 16px;">
+      3. Clearances & Declaration Status
+    </h3>
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:14px; margin-bottom:20px;">
+      <div class="c-ext-item"><span class="c-ext-label">Municipal Jurisdiction</span><span class="c-ext-value">{{ form_data.statutory_and_proximity_clearances.jurisdiction_municipal }}</span></div>
+      <div class="c-ext-item"><span class="c-ext-label">Cantonment Border</span><span class="c-ext-value">{{ form_data.statutory_and_proximity_clearances.cantonment_jurisdiction }}</span></div>
+      <div class="c-ext-item"><span class="c-ext-label">Regional Plan 1966</span><span class="c-ext-value">{{ form_data.statutory_and_proximity_clearances.regional_plan }}</span></div>
+      <div class="c-ext-item"><span class="c-ext-label">Land Under Acquisition</span><span class="c-ext-value">{{ form_data.statutory_and_proximity_clearances.land_under_acquisition }}</span></div>
+      <div class="c-ext-item" style="grid-column: 1 / -1;"><span class="c-ext-label">Present Land Use</span><span class="c-ext-value">{{ form_data.statutory_and_proximity_clearances.present_land_use }}</span></div>
+      <div class="c-ext-item" style="grid-column: 1 / -1;"><span class="c-ext-label">Approach Road Provision</span><span class="c-ext-value">{{ form_data.statutory_and_proximity_clearances.approach_road_provision }}</span></div>
+    </div>
+
+    <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:6px; padding:14px; display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <div>Declared By: <strong>{{ form_data.self_declaration.name }}</strong> (Age: {{ form_data.self_declaration.age }}, {{ form_data.self_declaration.occupation }})</div>
+        <div style="font-size:12px; color:#64748b;">Place: {{ form_data.self_declaration.place }} | Date: {{ form_data.self_declaration.date }}</div>
+      </div>
+      <div>
+        {% if form_data.self_declaration.signature_data %}
+          {% if "data:image" in form_data.self_declaration.signature_data %}
+            <img src="{{ form_data.self_declaration.signature_data }}" alt="Signature" style="max-height:45px; border:1px dashed #94a3b8; background:#fff; padding:2px 6px;">
+          {% elif "typed:" in form_data.self_declaration.signature_data %}
+            <span style="font-family:'Times New Roman', cursive; font-size:18px; color:#0f766e; font-style:italic;">
+              {{ form_data.self_declaration.signature_data|slice:"6:" }}
+            </span>
+          {% else %}
+            <span>{{ form_data.self_declaration.signature_data }}</span>
+          {% endif %}
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endif %}
+
+<!-- 4. SUPPORTING DOCUMENTS -->
 <div class="c-section">
   <div class="c-section-header">
-    <h2>📁 Uploaded Documents</h2>
+    <h2>📁 Attached Supporting Documents</h2>
     <span class="c-count-badge">{{ documents|length }} Documents</span>
   </div>
 
@@ -70,10 +146,10 @@
       </div>
       {% endif %}
 
-      {% if doc.raw_json %}
+      {% if doc.raw_json and doc.raw_json.key_value_pairs %}
       <div class="c-raw">
-        <div class="c-raw-title">📝 Full Extracted Text</div>
-        <pre class="c-raw-text">{{ doc.raw_json }}</pre>
+        <div class="c-raw-title">📝 Metadata Extracted</div>
+        <pre class="c-raw-text">{{ doc.raw_json.key_value_pairs }}</pre>
       </div>
       {% endif %}
 
