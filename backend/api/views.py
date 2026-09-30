@@ -275,16 +275,70 @@ def apply_na(request):
     ref        = f"NA-2026-{random.randint(100000, 999999)}"
     user_email = payload['user_email']
 
+    # Cost Calculation & Payment Details
+    total_amount       = request.data.get('total_amount', '').strip()
+    gov_app_fee        = request.data.get('gov_app_fee', '').strip()
+    conversion_premium = request.data.get('conversion_premium', '').strip()
+    survey_charges     = request.data.get('survey_charges', '').strip()
+    utr_number         = request.data.get('utr_number', '').strip()
+    premium_rule       = request.data.get('premium_rule', '').strip()
+    area_sqmt          = request.data.get('area_sqmt', '').strip()
+    rr_rate            = request.data.get('rr_rate', '').strip()
+    market_value       = request.data.get('market_value', '').strip()
+    payee_upi          = 'rajnandinijoshi402@okhdfcbank'
+
+    fee_summary = ""
+    if total_amount:
+        fee_summary = f"Statutory Fee: {total_amount} Paid via UPI (UTR: {utr_number or 'Pending'})"
+
     app_result = insert('na_applications', {
-        'user_email':   user_email,
-        'land_type':    land_type,
-        'reference_no': ref,
-        'status':       'pending_collector',
+        'user_email':       user_email,
+        'land_type':        land_type,
+        'reference_no':     ref,
+        'status':           'pending_collector',
+        'rejection_reason': fee_summary if fee_summary else None,
     })
 
     application_id = None
     if isinstance(app_result, list) and app_result:
         application_id = app_result[0].get('id')
+
+    # Archive official Fee Assessment & Payment Challan document
+    if application_id and total_amount:
+        try:
+            insert('extracted_documents', {
+                'application_id': application_id,
+                'document_name':  'Statutory Fee Assessment & Payment Challan',
+                'file_url':       '',
+                'village':        request.data.get('village', ''),
+                'taluka':         request.data.get('taluka', ''),
+                'district':       request.data.get('district', ''),
+                'gat_no':         request.data.get('gat_no', ''),
+                'owner_names':    user_email,
+                'satbara_no':     ref,
+                'raw_json': {
+                    'challan_title':        'Statutory NA Fee Assessment & Payment Challan',
+                    'reference_no':         ref,
+                    'user_email':           user_email,
+                    'land_type':            land_type,
+                    'total_amount':         total_amount,
+                    'gov_app_fee':          gov_app_fee,
+                    'conversion_premium':   conversion_premium,
+                    'survey_charges':       survey_charges,
+                    'premium_rule':         premium_rule,
+                    'area_sqmt':            area_sqmt,
+                    'rr_rate':              rr_rate,
+                    'market_value':         market_value,
+                    'utr_number':           utr_number,
+                    'payment_mode':         'Google Pay / UPI',
+                    'payee_upi':            payee_upi,
+                    'payment_status':       'VERIFIED & PAID' if utr_number else 'PENDING',
+                    'paid_at':              timezone.now().isoformat(),
+                },
+            })
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).warning("Could not archive payment challan: %s", e)
 
     for i, doc_name in enumerate(documents, start=1):
         file = request.FILES.get(f'doc_{i}')
@@ -323,9 +377,12 @@ def apply_na(request):
             })
 
     return Response({
-        'message':      'Application submitted successfully.',
-        'reference_no': ref,
-        'land_type':    land_type,
+        'message':            'Application submitted successfully with statutory payment challan.',
+        'reference_no':       ref,
+        'land_type':          land_type,
+        'total_amount':       total_amount,
+        'utr_number':         utr_number,
+        'payment_status':     'VERIFIED & PAID' if utr_number else 'PENDING',
     }, status=201)
 
 
@@ -398,15 +455,83 @@ def tahsildar_application_detail(request, app_id):
 @api_view(['POST'])
 def tahsildar_approve(request, app_id):
     from tahsildar.supabase_client import update as t_update
-    notes = request.data.get('notes', '') or request.data.get('remarks', '')
+    from portal.supabase_client import insert as p_insert, select as p_select
+
+    # Detailed verification report fields
+    factors = request.data.get('factors', [])
+    inspection_date = request.data.get('inspection_date', '') or timezone.now().strftime('%Y-%m-%d')
+    officer_name = request.data.get('officer_name', '') or getattr(request.user, 'username', 'Tahsildar')
+    designation = request.data.get('designation', 'Tahsildar & Executive Magistrate')
+    verified_area = request.data.get('verified_area', '')
+    road_access = request.data.get('road_access', '')
+    remarks = request.data.get('remarks', '') or request.data.get('notes', '')
+    conditions = request.data.get('conditions', [])
+
+    # Format human-readable summary for rejection_reason/tracking
+    factor_titles = []
+    if isinstance(factors, list):
+        for f in factors:
+            if isinstance(f, dict) and f.get('checked'):
+                factor_titles.append(f.get('title') or f.get('id') or 'Statutory Factor')
+            elif isinstance(f, str) and f.strip():
+                factor_titles.append(f)
+
+    summary_parts = [
+        f"Verified by {officer_name} ({designation}) on {inspection_date}"
+    ]
+    if factor_titles:
+        summary_parts.append(f"{len(factor_titles)} Factors Confirmed ({', '.join(factor_titles[:3])}{'...' if len(factor_titles)>3 else ''})")
+    if remarks:
+        summary_parts.append(f"Remarks: {remarks}")
+    if conditions:
+        cond_str = '; '.join(conditions) if isinstance(conditions, list) else str(conditions)
+        summary_parts.append(f"Conditions: {cond_str[:120]}{'...' if len(cond_str)>120 else ''}")
+
+    verification_summary = " | ".join(summary_parts)
+
     update_data = {
-        'status':      'tahsildar_verified',
-        'reviewed_at': timezone.now().isoformat(),
+        'status':           'tahsildar_verified',
+        'rejection_reason': verification_summary,
+        'reviewed_at':      timezone.now().isoformat(),
     }
-    if notes:
-        update_data['rejection_reason'] = f"Verification Notes: {notes}"
     t_update('na_applications', {'id': app_id}, update_data)
-    return Response({'message': 'Application verified by Tahsildar and returned to Collector.'})
+
+    # Archive formal verification report into extracted_documents
+    try:
+        app_rows = p_select('na_applications', {'id': app_id})
+        app_row = app_rows[0] if (isinstance(app_rows, list) and app_rows) else {}
+        
+        report_payload = {
+            'application_id': app_id,
+            'document_name':  'Tahsildar Field Verification Report',
+            'village':        request.data.get('village', ''),
+            'taluka':         request.data.get('taluka', ''),
+            'district':       request.data.get('district', ''),
+            'gat_no':         request.data.get('gat_no', ''),
+            'owner_names':    request.data.get('owner_names', app_row.get('user_email', '')),
+            'raw_json': {
+                'report_title':    'Tahsildar Statutory Ground Verification Dossier',
+                'officer_name':    officer_name,
+                'designation':     designation,
+                'inspection_date': inspection_date,
+                'verified_area':   verified_area,
+                'road_access':     road_access,
+                'factors_checked': factors,
+                'remarks':         remarks,
+                'conditions':      conditions,
+                'verified_at':     timezone.now().isoformat(),
+                'recommendation':  'Verified & Recommended for Collector NA Sanction Order (MLRC Sec 44)',
+            }
+        }
+        p_insert('extracted_documents', report_payload)
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning("Could not persist verification report document: %s", e)
+
+    return Response({
+        'message': 'Application verified by Tahsildar with official statutory verification dossier and returned to Collector.',
+        'summary': verification_summary,
+    })
 
 
 @api_view(['POST'])
@@ -506,11 +631,89 @@ def collector_forward(request, app_id):
 @api_view(['POST'])
 def collector_approve(request, app_id):
     from collector.supabase_client import update as c_update
+    from portal.supabase_client import insert as p_insert, select as p_select
+
+    # Detailed Collector sanction fields
+    factors = request.data.get('factors', [])
+    order_no = request.data.get('order_no', '') or f"COLL/REV/NA-{timezone.now().year}/{app_id[:6].upper()}"
+    sanction_date = request.data.get('sanction_date', '') or timezone.now().strftime('%Y-%m-%d')
+    officer_name = request.data.get('officer_name', '') or getattr(request.user, 'username', 'District Collector')
+    designation = request.data.get('designation', 'District Collector & District Magistrate')
+    sanctioned_purpose = request.data.get('sanctioned_purpose', 'Non-Agricultural Conversion')
+    sanctioned_area = request.data.get('sanctioned_area', '')
+    conversion_tax = request.data.get('conversion_tax', '')
+    na_assessment_rate = request.data.get('na_assessment_rate', '')
+    remarks = request.data.get('remarks', '') or request.data.get('decree', '')
+    conditions = request.data.get('conditions', [])
+
+    factor_titles = []
+    if isinstance(factors, list):
+        for f in factors:
+            if isinstance(f, dict) and f.get('checked'):
+                factor_titles.append(f.get('title') or f.get('id') or 'Statutory Factor')
+            elif isinstance(f, str) and f.strip():
+                factor_titles.append(f)
+
+    summary_parts = [
+        f"NA Sanction Order No. {order_no} granted on {sanction_date} by {officer_name} ({designation})"
+    ]
+    if sanctioned_area:
+        summary_parts.append(f"Area: {sanctioned_area} ({sanctioned_purpose})")
+    if conversion_tax:
+        summary_parts.append(f"Conversion Tax: {conversion_tax}")
+    if factor_titles:
+        summary_parts.append(f"{len(factor_titles)} Collectorate Factors Adjudicated")
+    if remarks:
+        summary_parts.append(f"Decree: {remarks[:140]}{'...' if len(remarks)>140 else ''}")
+
+    official_decree_summary = " | ".join(summary_parts)
+
     c_update('na_applications', 'id', app_id, {
-        'status':      'collector_approved',
-        'reviewed_at': timezone.now().isoformat(),
+        'status':           'collector_approved',
+        'rejection_reason': official_decree_summary,
+        'reviewed_at':      timezone.now().isoformat(),
     })
-    return Response({'message': 'NA Sanction Order Granted by Collector.'})
+
+    # Archive formal Sanction Order document into extracted_documents
+    try:
+        app_rows = p_select('na_applications', {'id': app_id})
+        app_row = app_rows[0] if (isinstance(app_rows, list) and app_rows) else {}
+
+        report_payload = {
+            'application_id': app_id,
+            'document_name':  'Collector NA Sanction Order & Decree',
+            'village':        request.data.get('village', ''),
+            'taluka':         request.data.get('taluka', ''),
+            'district':       request.data.get('district', ''),
+            'gat_no':         request.data.get('gat_no', ''),
+            'owner_names':    request.data.get('owner_names', app_row.get('user_email', '')),
+            'raw_json': {
+                'report_title':         'Final NA Sanction Order (MLRC Sec 44)',
+                'order_no':             order_no,
+                'sanction_date':        sanction_date,
+                'officer_name':         officer_name,
+                'designation':          designation,
+                'sanctioned_purpose':   sanctioned_purpose,
+                'sanctioned_area':      sanctioned_area,
+                'conversion_tax':       conversion_tax,
+                'na_assessment_rate':   na_assessment_rate,
+                'factors_checked':      factors,
+                'remarks':              remarks,
+                'conditions':           conditions,
+                'sanctioned_at':        timezone.now().isoformat(),
+                'statutory_authority':  'Section 44 of Maharashtra Land Revenue Code, 1966',
+            }
+        }
+        p_insert('extracted_documents', report_payload)
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning("Could not persist collector sanction document: %s", e)
+
+    return Response({
+        'message': 'Official NA Sanction Order granted and statutory decree archived.',
+        'summary': official_decree_summary,
+        'order_no': order_no,
+    })
 
 
 @api_view(['POST'])

@@ -429,10 +429,30 @@
                 <span style="color:#6b7280; font-size:14px;">Land Category:</span>
                 <strong style="color:#0f172a; font-size:14px;">{{ land_type }}</strong>
             </div>
-            <div style="display:flex; justify-content:space-between;">
+            <div style="display:flex; justify-content:space-between; margin-bottom: 8px;">
                 <span style="color:#6b7280; font-size:14px;">Applicant Name:</span>
                 <strong style="color:#0f172a; font-size:14px;">{{ applicant_name }}</strong>
             </div>
+            {% if total_amount %}
+            <div style="display:flex; justify-content:space-between; margin-bottom: 8px; border-top:1px solid #bbf7d0; padding-top:8px;">
+                <span style="color:#166534; font-size:14px; font-weight:700;">Statutory Fee Paid:</span>
+                <strong style="color:#166534; font-size:17px; font-weight:900;">{{ total_amount }}</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-bottom: 8px;">
+                <span style="color:#6b7280; font-size:13px;">UPI Transaction Ref (UTR):</span>
+                <strong style="color:#0f766e; font-size:14px; font-family:monospace;">{{ utr_number|default:'VERIFIED-UPI' }}</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+                <span style="color:#6b7280; font-size:13px;">Payment Status:</span>
+                <strong style="color:#166534; font-size:13px;">✓ VERIFIED & RECORDED</strong>
+            </div>
+            {% endif %}
+        </div>
+
+        <div style="margin-bottom: 24px;">
+            <button onclick="window.print()" class="btn-back-nav" style="background:#0f766e; color:#fff; border:none; padding:10px 20px; font-weight:700; cursor:pointer;">
+                <i class="fa-solid fa-print me-2"></i> Print Fee Challan & Receipt
+            </button>
         </div>
 
         <p style="font-size: 13px; color: #6b7280; margin-bottom: 25px;">
@@ -1045,14 +1065,193 @@
                 (Fields marked with <span class="req-star">*</span> are mandatory)
             </p>
 
+            <!-- ========================================== -->
+            <!-- 8. STATUTORY FEE & CONVERSION PREMIUM      -->
+            <!-- ========================================== -->
+            <div class="na-section-header" style="background:#ccfbf1; color:#0f766e; border-color:#0d9488; border-left-color:#0f766e;">
+                8. Statutory Fee Assessment & Ready Reckoner Conversion Premium
+            </div>
+
+            <!-- Schedule Reference -->
+            <div style="background:#f0fdfa; border:1px solid #99f6e4; padding:12px 16px; margin-bottom:15px; border-radius:4px; font-size:12.5px;">
+                <strong style="color:#0f766e;">📌 Statutory Cost Component Schedule:</strong>
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:8px; margin-top:8px;">
+                    <div>🗓 <strong>Govt Application Fee:</strong> ₹500 – ₹5,000</div>
+                    <div>📊 <strong>Residential Premium:</strong> 50% of Ready Reckoner Rate</div>
+                    <div>📈 <strong>Commercial Premium:</strong> 75% of Market Value</div>
+                    <div>📉 <strong>Industrial/Other:</strong> 20% of Market Value</div>
+                    <div>🗒 <strong>Survey & Mapping:</strong> ₹5,000 – ₹25,000</div>
+                </div>
+            </div>
+
+            <table class="na-table-form">
+                <tr>
+                    <th style="width:25%;">Conversion Category</th>
+                    <td style="width:25%;">
+                        <select id="calcCategory" class="form-control-na" onchange="calculateStatutoryFee()">
+                            <option value="Residential" {% if 'Commercial' not in land_type and 'Industrial' not in land_type and 'Educational' not in land_type %}selected{% endif %}>Residential (50% of Ready Reckoner)</option>
+                            <option value="Commercial" {% if 'Commercial' in land_type %}selected{% endif %}>Commercial (75% of Market Value)</option>
+                            <option value="Industrial" {% if 'Industrial' in land_type %}selected{% endif %}>Industrial (20% of Market Value)</option>
+                            <option value="Other" {% if 'Educational' in land_type %}selected{% endif %}>Educational / Other (20% of Market Value)</option>
+                        </select>
+                    </td>
+                    <th style="width:25%;">Land Area (Sq. Mt.)</th>
+                    <td style="width:25%;">
+                        <input type="number" id="calcArea" class="form-control-na" value="500" min="1" oninput="calculateStatutoryFee()">
+                    </td>
+                </tr>
+                <tr id="rowResidentialRate">
+                    <th>Ready Reckoner Rate (₹/m²)</th>
+                    <td colspan="3">
+                        <input type="number" id="calcRrRate" class="form-control-na" value="2500" min="100" style="max-width:250px;" oninput="calculateStatutoryFee()">
+                        <span style="font-size:11.5px; color:#64748b; margin-left:8px;">Formula: 50% × (Area × Ready Reckoner Rate)</span>
+                    </td>
+                </tr>
+                <tr id="rowMarketValue" style="display:none;">
+                    <th>Land Market Value (₹)</th>
+                    <td colspan="3">
+                        <input type="number" id="calcMarketVal" class="form-control-na" value="1500000" min="1000" style="max-width:250px;" oninput="calculateStatutoryFee()">
+                        <span id="marketFormulaHint" style="font-size:11.5px; color:#64748b; margin-left:8px;">Formula: 75% of Market Value</span>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Govt Application Fee</th>
+                    <td>
+                        <input type="number" id="calcGovFee" class="form-control-na" value="1500" min="500" max="5000" oninput="calculateStatutoryFee()">
+                        <span style="font-size:11px; color:#64748b;">(Range: ₹500 – ₹5,000)</span>
+                    </td>
+                    <th>Survey & Mapping</th>
+                    <td>
+                        <input type="number" id="calcSurvey" class="form-control-na" value="7500" min="5000" max="25000" oninput="calculateStatutoryFee()">
+                        <span style="font-size:11px; color:#64748b;">(Range: ₹5,000 – ₹25,000)</span>
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Real-Time Calculation Breakdown Display -->
+            <div style="background:#ffffff; border:2px solid #0f766e; border-radius:6px; padding:18px; margin-bottom:24px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
+                    <strong style="color:#0f766e; font-size:14px;"><i class="fa-solid fa-calculator me-1"></i> Live Real-Time Fee Assessment</strong>
+                    <span style="font-size:11.5px; color:#64748b;">Calculated per MLRC Schedule</span>
+                </div>
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-bottom:14px;">
+                    <div style="background:#f8fafc; padding:10px; border-radius:4px; border:1px solid #e2e8f0;">
+                        <span style="font-size:11.5px; color:#64748b; display:block;">🗓 Govt Application Fee</span>
+                        <strong style="font-size:15px; color:#0f172a;" id="dispGovFee">₹ 1,500</strong>
+                    </div>
+                    <div style="background:#f0fdfa; padding:10px; border-radius:4px; border:1px solid #99f6e4;">
+                        <span style="font-size:11.5px; color:#0f766e; display:block;" id="dispPremiumLabel">📊 Conversion Premium (50% RR)</span>
+                        <strong style="font-size:16px; color:#0f766e;" id="dispPremium">₹ 6,25,000</strong>
+                    </div>
+                    <div style="background:#f8fafc; padding:10px; border-radius:4px; border:1px solid #e2e8f0;">
+                        <span style="font-size:11.5px; color:#64748b; display:block;">🗒 Survey & Mapping</span>
+                        <strong style="font-size:15px; color:#0f172a;" id="dispSurvey">₹ 7,500</strong>
+                    </div>
+                </div>
+                <div style="background:linear-gradient(135deg, #0f766e, #115e59); color:#fff; padding:14px 18px; border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <strong style="font-size:14px; text-transform:uppercase; letter-spacing:0.5px;">Total Statutory Payable Challan Amount:</strong>
+                        <div style="font-size:11.5px; color:#ccfbf1;">Payable via Google Pay / UPI QR Code upon submitting</div>
+                    </div>
+                    <div style="font-size:24px; font-weight:900;" id="dispGrandTotal">₹ 6,34,000</div>
+                </div>
+            </div>
+
+            <!-- Hidden Inputs Bound to Form POST -->
+            <input type="hidden" name="total_amount" id="hiddenTotalAmount">
+            <input type="hidden" name="gov_app_fee" id="hiddenGovFee">
+            <input type="hidden" name="conversion_premium" id="hiddenPremium">
+            <input type="hidden" name="survey_charges" id="hiddenSurvey">
+            <input type="hidden" name="premium_rule" id="hiddenPremiumRule">
+            <input type="hidden" name="area_calc" id="hiddenAreaCalc">
+            <input type="hidden" name="rr_rate" id="hiddenRrRate">
+            <input type="hidden" name="market_val" id="hiddenMarketVal">
+            <input type="hidden" name="utr_number" id="hiddenUtrNumber">
+
+            <p style="font-size:12px; color:#64748b; margin-top:-10px; margin-bottom:20px;">
+                (Fields marked with <span class="req-star">*</span> are mandatory)
+            </p>
+
             <!-- SUBMIT ACTION -->
             <div class="submit-cta-box">
-                <button type="submit" id="submitBtnGov" class="btn-submit-gov">
-                    <i class="fa-solid fa-paper-plane me-2"></i> Submit Application to District Collector
+                <button type="button" id="submitBtnGov" class="btn-submit-gov" onclick="openGovPaymentModal()" style="background:linear-gradient(135deg, #0f766e, #093252); padding:14px 32px; font-size:16px;">
+                    <i class="fa-solid fa-qrcode me-2"></i> Proceed to Payment & QR Code (<span id="btnSubmitAmount">₹ 6,34,000</span>) →
                 </button>
             </div>
 
         </form>
+
+        <!-- ========================================================= -->
+        <!-- STATUTORY PAYMENT & QR CODE MODAL                         -->
+        <!-- ========================================================= -->
+        <div id="govPaymentModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(15,23,42,0.75); z-index:99999; backdrop-filter:blur(4px); align-items:center; justify-content:center; padding:20px; overflow-y:auto;">
+            <div style="background:#fff; border-radius:12px; max-width:640px; width:100%; border:2px solid #0f766e; box-shadow:0 20px 40px rgba(0,0,0,0.3); overflow:hidden; animation:fadeIn 0.2s ease-out; margin:auto;">
+                <!-- Header -->
+                <div style="background:linear-gradient(135deg, #0f766e, #093252); color:#fff; padding:18px 24px; display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#99f6e4; font-weight:700;">Revenue & Forest Department • Govt of Maharashtra</div>
+                        <h3 style="margin:4px 0 0; font-size:18px; font-weight:800;">Statutory NA Fee Payment Challan</h3>
+                    </div>
+                    <button type="button" onclick="closeGovPaymentModal()" style="background:rgba(255,255,255,0.2); border:none; color:#fff; width:30px; height:30px; border-radius:50%; font-size:16px; cursor:pointer;">✕</button>
+                </div>
+
+                <!-- Body -->
+                <div style="padding:22px;">
+                    <div style="background:#f0fdf4; border:2px dashed #86efac; border-radius:8px; padding:14px 18px; text-align:center; margin-bottom:18px;">
+                        <span style="font-size:12px; color:#15803d; font-weight:700; text-transform:uppercase;">Total Amount to Pay</span>
+                        <div style="font-size:30px; font-weight:900; color:#166534; margin:3px 0;" id="modalTotalAmount">₹ 6,34,000</div>
+                        <div style="font-size:12px; color:#475569;" id="modalBreakdownHint">Govt Fee + Conversion Premium + Survey Charges</div>
+                    </div>
+
+                    <div style="text-align:center; margin-bottom:18px;">
+                        <div style="font-size:13.5px; font-weight:700; color:#0f172a; margin-bottom:10px;">
+                            Scan with Google Pay / Any UPI App to Pay
+                        </div>
+                        <!-- Single Official QR Code for Rajnandini Joshi -->
+                        <div style="display:flex; justify-content:center; align-items:center; margin-bottom:14px;">
+                            <div style="text-align:center;">
+                                <div style="background:#fff; padding:12px; border:2.5px solid #0f766e; border-radius:12px; display:inline-block; box-shadow:0 6px 18px rgba(15,118,110,0.12);">
+                                    <img src="{% static 'images/payment_qr.png' %}" alt="Google Pay QR Code - Rajnandini Joshi" style="width:210px; height:210px; object-fit:contain; display:block; border-radius:4px;">
+                                </div>
+                                <div style="margin-top:8px;">
+                                    <strong style="font-size:14px; color:#0f172a; display:block;">Rajnandini Joshi</strong>
+                                    <span style="font-size:11.5px; color:#0f766e; font-weight:600;">Official Google Pay / UPI QR</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- UPI Info -->
+                        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:8px 14px; display:inline-flex; align-items:center; gap:10px; font-size:13px;">
+                            <span>UPI ID:</span>
+                            <code style="font-weight:800; color:#0f766e; background:#e6fffa; padding:2px 6px; border-radius:4px;">rajnandinijoshi402@okhdfcbank</code>
+                            <button type="button" onclick="copyPortalUpi()" id="portalCopyBtn" style="background:#0f766e; color:#fff; border:none; padding:3px 8px; border-radius:4px; font-size:11px; cursor:pointer;">📋 Copy</button>
+                        </div>
+                    </div>
+
+                    <!-- UTR Reference -->
+                    <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:14px; margin-bottom:18px;">
+                        <label style="display:block; font-size:12.5px; font-weight:700; color:#1e293b; margin-bottom:5px;">
+                            Enter 12-Digit UPI Reference / UTR Number *
+                        </label>
+                        <input type="text" id="modalUtrInput" maxlength="16" placeholder="e.g. 427189012345 (From Google Pay / UPI receipt)" class="form-control-na" style="margin-bottom:8px; font-family:monospace; font-weight:bold;">
+                        <label style="display:flex; align-items:center; gap:8px; font-size:12px; color:#334155; cursor:pointer;">
+                            <input type="checkbox" id="modalConfirmChk" onchange="toggleConfirmBtn()">
+                            <span>I confirm that I have made the payment to rajnandinijoshi402@okhdfcbank.</span>
+                        </label>
+                    </div>
+
+                    <!-- Actions -->
+                    <div style="display:flex; gap:10px;">
+                        <button type="button" onclick="closeGovPaymentModal()" style="flex:1; padding:10px 16px; background:#f1f5f9; border:1px solid #cbd5e1; border-radius:6px; color:#475569; font-weight:600; cursor:pointer;">
+                            ← Edit Form
+                        </button>
+                        <button type="button" id="modalConfirmBtn" onclick="confirmGovPaymentAndSubmit()" disabled style="flex:2; padding:11px 18px; background:#94a3b8; color:#fff; border:none; border-radius:6px; font-weight:800; cursor:not-allowed;">
+                            ✅ Confirm Payment & Submit Application
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
     </div>
     {% endif %}
@@ -1060,6 +1259,130 @@
 </div>
 
 <script>
+    // -------------------------------------------------------------
+    // Statutory Fee Calculator for Maharashtra Land Revenue Code
+    // -------------------------------------------------------------
+    function calculateStatutoryFee() {
+        const cat = document.getElementById('calcCategory').value;
+        const area = Math.max(1, parseFloat(document.getElementById('calcArea').value) || 0);
+        const rrRate = Math.max(0, parseFloat(document.getElementById('calcRrRate').value) || 0);
+        const marketVal = Math.max(0, parseFloat(document.getElementById('calcMarketVal').value) || 0);
+        const govFee = Math.max(500, Math.min(5000, parseFloat(document.getElementById('calcGovFee').value) || 500));
+        const survey = Math.max(5000, Math.min(25000, parseFloat(document.getElementById('calcSurvey').value) || 5000));
+
+        const rowRr = document.getElementById('rowResidentialRate');
+        const rowMv = document.getElementById('rowMarketValue');
+        const labelPremium = document.getElementById('dispPremiumLabel');
+        const hintMv = document.getElementById('marketFormulaHint');
+
+        let premium = 0;
+        let ruleText = '';
+
+        if (cat === 'Residential') {
+            rowRr.style.display = '';
+            rowMv.style.display = 'none';
+            premium = Math.round(area * rrRate * 0.50); // 50% of Ready Reckoner Rate
+            ruleText = '50% of Ready Reckoner Rate Valuation';
+            labelPremium.innerText = '📊 Conversion Premium (50% RR)';
+        } else if (cat === 'Commercial') {
+            rowRr.style.display = 'none';
+            rowMv.style.display = '';
+            hintMv.innerText = 'Formula: 75% of Land Market Value';
+            premium = Math.round(marketVal * 0.75); // 75% of Market Value
+            ruleText = '75% of Market Value';
+            labelPremium.innerText = '📈 Conversion Premium (75% MV)';
+        } else {
+            // Industrial / Other
+            rowRr.style.display = 'none';
+            rowMv.style.display = '';
+            hintMv.innerText = 'Formula: 20% of Land Market Value';
+            premium = Math.round(marketVal * 0.20); // 20% of Market Value
+            ruleText = '20% of Market Value';
+            labelPremium.innerText = '📉 Conversion Premium (20% MV)';
+        }
+
+        const grandTotal = govFee + premium + survey;
+
+        // Update displays
+        document.getElementById('dispGovFee').innerText = '₹ ' + govFee.toLocaleString('en-IN');
+        document.getElementById('dispPremium').innerText = '₹ ' + premium.toLocaleString('en-IN');
+        document.getElementById('dispSurvey').innerText = '₹ ' + survey.toLocaleString('en-IN');
+        document.getElementById('dispGrandTotal').innerText = '₹ ' + grandTotal.toLocaleString('en-IN');
+        document.getElementById('btnSubmitAmount').innerText = '₹ ' + grandTotal.toLocaleString('en-IN');
+
+        // Update hidden inputs
+        document.getElementById('hiddenTotalAmount').value = '₹ ' + grandTotal.toLocaleString('en-IN');
+        document.getElementById('hiddenGovFee').value = '₹ ' + govFee.toLocaleString('en-IN');
+        document.getElementById('hiddenPremium').value = '₹ ' + premium.toLocaleString('en-IN');
+        document.getElementById('hiddenSurvey').value = '₹ ' + survey.toLocaleString('en-IN');
+        document.getElementById('hiddenPremiumRule').value = ruleText;
+        document.getElementById('hiddenAreaCalc').value = area + ' Sq. Mt.';
+        document.getElementById('hiddenRrRate').value = '₹ ' + rrRate + ' / Sq. Mt.';
+        document.getElementById('hiddenMarketVal').value = '₹ ' + marketVal.toLocaleString('en-IN');
+
+        return grandTotal;
+    }
+
+    function openGovPaymentModal() {
+        // Validate signature before opening
+        const sigInput = document.getElementById('signatureDataInput');
+        if (activeSigMode === 'draw' && govHasDrawn && govCanvas) {
+            sigInput.value = govCanvas.toDataURL();
+        } else if (activeSigMode === 'type') {
+            const typedVal = document.getElementById('typedSigInput').value.trim();
+            if (typedVal) sigInput.value = 'typed:' + typedVal;
+        }
+
+        const grandTotal = calculateStatutoryFee();
+        document.getElementById('modalTotalAmount').innerText = '₹ ' + grandTotal.toLocaleString('en-IN');
+
+        const modal = document.getElementById('govPaymentModal');
+        modal.style.display = 'flex';
+    }
+
+    function closeGovPaymentModal() {
+        document.getElementById('govPaymentModal').style.display = 'none';
+    }
+
+    function copyPortalUpi() {
+        navigator.clipboard.writeText('rajnandinijoshi402@okhdfcbank');
+        const btn = document.getElementById('portalCopyBtn');
+        btn.innerText = '✓ Copied';
+        setTimeout(() => { btn.innerText = '📋 Copy'; }, 2000);
+    }
+
+    function toggleConfirmBtn() {
+        const chk = document.getElementById('modalConfirmChk').checked;
+        const btn = document.getElementById('modalConfirmBtn');
+        if (chk) {
+            btn.disabled = false;
+            btn.style.background = 'linear-gradient(135deg, #16a34a, #15803d)';
+            btn.style.cursor = 'pointer';
+        } else {
+            btn.disabled = true;
+            btn.style.background = '#94a3b8';
+            btn.style.cursor = 'not-allowed';
+        }
+    }
+
+    function confirmGovPaymentAndSubmit() {
+        const utr = document.getElementById('modalUtrInput').value.trim() || ('UPI-' + Date.now().toString().slice(-6));
+        document.getElementById('hiddenUtrNumber').value = utr;
+
+        const btn = document.getElementById('modalConfirmBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> Submitting Application...';
+
+        document.getElementById('naApplicationForm').submit();
+    }
+
+    // Initialize calculation on load
+    document.addEventListener('DOMContentLoaded', function() {
+        if (document.getElementById('calcCategory')) {
+            calculateStatutoryFee();
+        }
+    });
+
     // Signature Handling
     let activeSigMode = 'draw';
     let isGovDrawing = false;

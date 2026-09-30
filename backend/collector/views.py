@@ -83,9 +83,25 @@ def application_detail(request, app_id):
 @login_required(login_url='/collector/login/')
 def approve_application(request, app_id):
     if request.method == 'POST':
+        remarks = request.POST.get('remarks', '') or request.POST.get('notes', '')
+        officer_name = request.POST.get('officer_name', '') or request.user.username
+        order_no = request.POST.get('order_no', '') or f"COLL/REV/NA-{timezone.now().year}/{app_id[:6].upper()}"
+        sanction_date = request.POST.get('sanction_date', timezone.now().strftime('%Y-%m-%d'))
+        factors = request.POST.getlist('factors')
+        conditions = request.POST.getlist('conditions')
+
+        summary_parts = [f"NA Sanction Order No. {order_no} issued on {sanction_date} by {officer_name}"]
+        if factors:
+            summary_parts.append(f"{len(factors)} Factors Adjudicated")
+        if remarks:
+            summary_parts.append(f"Decree: {remarks}")
+        if conditions:
+            summary_parts.append(f"Conditions: {'; '.join(conditions)}")
+
         update('na_applications', 'id', app_id, {
-            'status':      'collector_approved',
-            'reviewed_at': timezone.now().isoformat(),
+            'status':           'collector_approved',
+            'rejection_reason': " | ".join(summary_parts),
+            'reviewed_at':      timezone.now().isoformat(),
         })
     return redirect('/collector/applications/')
 

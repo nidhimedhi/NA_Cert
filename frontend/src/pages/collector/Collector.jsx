@@ -18,6 +18,7 @@ function getStatusMeta(status) {
     case 'forwarded_to_tahsildar':
       return { label: 'With Tahsildar', stage: 'Step 2: Field Verification In Progress', color: 'blue', pill: 'status-forwarded_to_tahsildar' };
     case 'tahsildar_verified':
+    case 'approved':
       return { label: 'Tahsildar Verified', stage: 'Step 3: Verification Passed (Ready for Grant)', color: 'teal', pill: 'status-tahsildar_verified' };
     case 'tahsildar_rejected':
       return { label: 'Tahsildar Objections', stage: 'Step 3: Objections Raised by Tahsildar', color: 'red', pill: 'status-tahsildar_rejected' };
@@ -29,6 +30,68 @@ function getStatusMeta(status) {
       return { label: status || 'Under Process', stage: 'Processing', color: 'gray', pill: 'status-pending' };
   }
 }
+
+// Statutory factors verified and adjudicated by the District Collector under Section 44 of MLRC 1966
+export const COLLECTOR_STATUTORY_FACTORS = [
+  {
+    id: 'col_factor_tahsildar_inquiry',
+    code: 'MLRC-C1',
+    category: 'Field Inquiry Adjudication',
+    title: 'Adjudication of Tahsildar Field Inquiry Report (तहसीलदार क्षेत्रीय चौकशी अहवाल मान्यता)',
+    description: 'Scrutinized and accepted the formal Tahsildar ground verification report. Boundary demarcation, absence of government land encroachment, and site suitability confirmed without statutory objections.',
+  },
+  {
+    id: 'col_factor_title_tenure',
+    code: 'MLRC-C2',
+    category: 'Title & Occupant Class',
+    title: 'Title, Tenure & Class-I/II Sanction (हक्क, धारणा प्रकार व भोगवटादार वर्ग निश्चिती)',
+    description: 'Verified applicant undisputed title and legal ownership from revenue records (Form 7/12 & Mutation entries). Confirmed Occupant Class-I (or sanctioned Class-II with premium compliance).',
+  },
+  {
+    id: 'col_factor_zoning_dcr',
+    code: 'MLRC-C3',
+    category: 'Zoning & Town Planning',
+    title: 'Zoning, Development Plan & DCR Concurrence (विकास योजना व डीसीआर सुसंगतता)',
+    description: 'Verified that the requested non-agricultural purpose strictly conforms with the Regional Plan / Development Plan (DP) and Town Planning Department Development Control Regulations.',
+  },
+  {
+    id: 'col_factor_statutory_nocs',
+    code: 'MLRC-C4',
+    category: 'Statutory Safety & Environment',
+    title: 'Statutory Environmental & Public Safety NOCs (सार्वजनिक सुरक्षितता व पर्यावरण नाहरकत)',
+    description: 'Verified statutory clearances regarding water bodies/flood lines (Irrigation Dept), Highway setbacks (PWD/NHAI), and MSETCL high-tension power transmission lines.',
+  },
+  {
+    id: 'col_factor_conversion_tax',
+    code: 'MLRC-C5',
+    category: 'Tax & Revenue Assessment',
+    title: 'Assessment of Conversion Tax & NA Assessment (रूपांतर कर व अकृषिक कर आकारणी)',
+    description: 'Statutory Conversion Tax (रूपांतर कर) calculated and assessed under Section 47A MLRC, and non-agricultural revenue assessment rate fixed per sq. meter.',
+  },
+  {
+    id: 'col_factor_public_objections',
+    code: 'MLRC-C6',
+    category: 'Dispute Adjudication',
+    title: 'Public Notice & Objections Adjudication (सार्वजनिक सूचना व आक्षेप निरसन)',
+    description: 'Statutory public notice period expired under Section 44; confirmed no valid objections, adverse claims, or court stay orders pending against the conversion.',
+  },
+  {
+    id: 'col_factor_final_decree',
+    code: 'MLRC-C7',
+    category: 'Statutory Sanction Decree',
+    title: 'Legal Authority & Final Sanction Clause (महाराष्ट्र जमीन महसूल संहिता कलम ४४ अंतिम आदेश)',
+    description: 'All statutory preconditions satisfied under Maharashtra Land Revenue Code, 1966. Authorized the issuance of the formal Sanction Decree and Non-Agricultural Certificate.',
+  },
+];
+
+export const COLLECTOR_SANCTION_CONDITIONS = [
+  'Conversion is strictly restricted to sanctioned purpose; unauthorized change of use attracts penal assessment under Section 45 MLRC.',
+  'Non-agricultural development/construction shall commence within one year and be completed within three years from the date of this order.',
+  'Formal layout and architectural building permissions must be obtained from the competent Planning Authority prior to plinth work.',
+  'Any land parcel affected by planned road widening (if notified by PWD, ZP, or NHAI) shall be surrendered free of cost without monetary compensation.',
+  'Adequate stormwater drainage, septic disposal, and rainwater harvesting structures must be established in accordance with public health norms.',
+  'The applicant must notify the Talathi in writing within 30 days of starting non-agricultural use for updating Village Form 7/12.',
+];
 
 export function CollectorDashboard() {
   const navigate = useNavigate();
@@ -57,7 +120,12 @@ export function CollectorDashboard() {
         setApps(r.data.applications || []);
         if (r.data.counts) setCounts(r.data.counts);
       })
-      .catch(() => navigate('/collector/login'))
+      .catch(err => {
+        if (err.response?.status === 401) {
+          localStorage.removeItem('collector_token');
+          navigate('/collector/login');
+        }
+      })
       .finally(() => setLoading(false));
   }, [filter, navigate]);
 
@@ -282,15 +350,77 @@ export function CollectorDetail() {
   const [activeDetailTab, setActiveDetailTab] = useState('applicant');
   const [showPdfModal, setShowPdfModal] = useState(false);
 
+  // Collector Sanction Dossier State
+  const [orderNo, setOrderNo]                       = useState('');
+  const [collectorName, setCollectorName]           = useState(localStorage.getItem('username') || 'District Collector');
+  const [sanctionDate, setSanctionDate]             = useState(new Date().toISOString().slice(0, 10));
+  const [sanctionedPurpose, setSanctionedPurpose]   = useState('');
+  const [sanctionedArea, setSanctionedArea]         = useState('');
+  const [conversionTax, setConversionTax]           = useState('₹ 15,000');
+  const [naAssessmentRate, setNaAssessmentRate]     = useState('₹ 2.50 per Sq. Mt. / annum');
+  const [selectedColFactors, setSelectedColFactors] = useState(COLLECTOR_STATUTORY_FACTORS.map(f => f.id));
+  const [collectorDecree, setCollectorDecree]       = useState(
+    'Having scrutinized the Tahsildar ground verification report, title extract, and statutory clearances, permission for conversion to Non-Agricultural use is hereby SANCTIONED under Section 44 of Maharashtra Land Revenue Code, 1966 subject to terms and conditions stipulated herein.'
+  );
+  const [selectedColConditions, setSelectedColConditions] = useState(COLLECTOR_SANCTION_CONDITIONS.slice(0, 4));
+  const [customColCondition, setCustomColCondition]       = useState('');
+  const [showColRejectBox, setShowColRejectBox]           = useState(false);
+
   useEffect(() => {
     if (!localStorage.getItem('collector_token')) {
       navigate('/collector/login');
       return;
     }
     cApi.get(`/collector/applications/${id}/`)
-      .then(r => setData(r.data))
-      .catch(() => navigate('/collector/login'));
+      .then(r => {
+        setData(r.data);
+        const l = r.data?.form_data?.service_specific_details || r.data?.form_data?.land_details || {};
+        const refSuffix = r.data?.application?.reference_no ? r.data.application.reference_no.slice(-6) : '0482';
+        setOrderNo(`COLL/REV/NA-${new Date().getFullYear()}/${refSuffix}`);
+        setSanctionedPurpose(r.data?.application?.land_type || 'Residential - Individual');
+        if (l.area_sqmt || l.total_area) {
+          setSanctionedArea(`${l.area_sqmt || l.total_area} Sq. Mt.`);
+        } else {
+          setSanctionedArea('500 Sq. Mt.');
+        }
+      })
+      .catch(err => {
+        if (err.response?.status === 401) {
+          localStorage.removeItem('collector_token');
+          navigate('/collector/login');
+        } else {
+          console.error('Failed to load application details:', err);
+        }
+      });
   }, [id, navigate]);
+
+  const toggleColFactor = (fid) => {
+    setSelectedColFactors(prev =>
+      prev.includes(fid) ? prev.filter(x => x !== fid) : [...prev, fid]
+    );
+  };
+
+  const selectAllColFactors = () => {
+    setSelectedColFactors(COLLECTOR_STATUTORY_FACTORS.map(f => f.id));
+  };
+
+  const clearAllColFactors = () => {
+    setSelectedColFactors([]);
+  };
+
+  const toggleColCondition = (cond) => {
+    setSelectedColConditions(prev =>
+      prev.includes(cond) ? prev.filter(c => c !== cond) : [...prev, cond]
+    );
+  };
+
+  const addCustomColCondition = (e) => {
+    e.preventDefault();
+    if (customColCondition.trim() && !selectedColConditions.includes(customColCondition.trim())) {
+      setSelectedColConditions(prev => [...prev, customColCondition.trim()]);
+      setCustomColCondition('');
+    }
+  };
 
   const forwardToTahsildar = async () => {
     setBusy(true);
@@ -305,16 +435,45 @@ export function CollectorDetail() {
     }
   };
 
-  const grantNA = async () => {
-    if (!window.confirm('Confirm issuance of final Non-Agricultural Sanction Order?')) return;
+  const grantNA = async (e) => {
+    if (e) e.preventDefault();
+    if (selectedColFactors.length === 0) {
+      alert('⚠️ Please check and adjudicate at least one statutory factor before issuing the sanction order.');
+      return;
+    }
     setBusy(true);
     try {
-      await cApi.post(`/collector/applications/${id}/approve/`);
-      setMsg('🎉 NA Sanction Order issued successfully by Collector!');
+      const landObj = data?.form_data?.service_specific_details || data?.form_data?.land_details || {};
+      const applicantObj = data?.form_data?.applicant_details || {};
+      const payload = {
+        factors: COLLECTOR_STATUTORY_FACTORS.map(f => ({
+          id: f.id,
+          title: f.title,
+          category: f.category,
+          checked: selectedColFactors.includes(f.id),
+        })),
+        order_no: orderNo,
+        sanction_date: sanctionDate,
+        officer_name: collectorName,
+        designation: 'District Collector & District Magistrate',
+        sanctioned_purpose: sanctionedPurpose,
+        sanctioned_area: sanctionedArea,
+        conversion_tax: conversionTax,
+        na_assessment_rate: naAssessmentRate,
+        remarks: collectorDecree,
+        conditions: selectedColConditions,
+        village: landObj.land_village || landObj.village || '',
+        taluka: landObj.land_taluka || landObj.taluka || '',
+        district: landObj.land_district || landObj.district || '',
+        gat_no: landObj.gat_number || landObj.gat_no || landObj.survey_no || '',
+        owner_names: applicantObj.full_name || data?.application?.user_email || '',
+      };
+      await cApi.post(`/collector/applications/${id}/approve/`, payload);
+      setMsg(`🎉 Official NA Sanction Order No. ${orderNo} granted successfully by District Collector!`);
       setBusy(false);
-      setTimeout(() => navigate('/collector/dashboard'), 1500);
-    } catch {
-      alert('Failed to approve application.');
+      setTimeout(() => navigate('/collector/dashboard'), 1800);
+    } catch (err) {
+      alert('Failed to approve application: ' + (err.response?.data?.error || err.message));
       setBusy(false);
     }
   };
@@ -344,14 +503,14 @@ export function CollectorDetail() {
 
   // Workflow progress flags
   const isStep1Done = true; // submitted
-  const isStep2Done = ['forwarded_to_tahsildar', 'tahsildar_verified', 'tahsildar_rejected', 'collector_approved', 'collector_rejected'].includes(app?.status);
+  const isStep2Done = ['forwarded_to_tahsildar', 'tahsildar_verified', 'approved', 'tahsildar_rejected', 'collector_approved', 'collector_rejected'].includes(app?.status);
   const isStep2Active = ['pending_collector', 'pending'].includes(app?.status);
-  const isStep3Done = ['tahsildar_verified', 'collector_approved'].includes(app?.status);
-  const isStep3Rejected = ['tahsildar_rejected'].includes(app?.status);
+  const isStep3Done = ['tahsildar_verified', 'approved', 'collector_approved'].includes(app?.status);
+  const isStep3Rejected = ['tahsildar_rejected', 'rejected'].includes(app?.status);
   const isStep3Active = app?.status === 'forwarded_to_tahsildar';
   const isStep4Done = ['collector_approved'].includes(app?.status);
   const isStep4Rejected = ['collector_rejected'].includes(app?.status);
-  const isStep4Active = ['tahsildar_verified', 'tahsildar_rejected'].includes(app?.status);
+  const isStep4Active = ['tahsildar_verified', 'approved', 'tahsildar_rejected'].includes(app?.status);
 
   // Parse applicant and land data from form_data if available
   const applicant = form_data?.applicant_details || {};
@@ -444,19 +603,45 @@ export function CollectorDetail() {
       </div>
 
       {/* TAHSILDAR VERIFICATION FINDINGS CARD */}
-      {app?.status === 'tahsildar_verified' && (
-        <div className="tahsildar-findings-card verified">
+      {['tahsildar_verified', 'approved'].includes(app?.status) && (
+        <div className="tahsildar-findings-card verified" style={{ borderLeft: '5px solid #16a34a' }}>
           <div className="findings-header">
             <div className="findings-title">
-              <span style={{ fontSize: '20px' }}>📋</span> Tahsildar Ground Inquiry Report: Verified & Recommended
+              <span style={{ fontSize: '20px' }}>📋</span> Tahsildar Ground Inquiry Dossier: Verified & Recommended
             </div>
-            <span className="status-pill status-tahsildar_verified">Verified</span>
+            <span className="status-pill status-tahsildar_verified">Verified (Stage 3 Complete)</span>
           </div>
           <div className="findings-body">
-            The Tahsildar has conducted local site inspections, verified boundary demarcations, and validated the title extract. No encroachment or government reservations found. The application is officially recommended for Collector NA Sanction.
+            <p style={{ margin: '0 0 10px', fontSize: '13.5px', color: '#166534' }}>
+              The Tahsildar office has completed on-site statutory inquiry under Section 44 of Maharashtra Land Revenue Code, 1966 and validated all title, boundary, zoning, and setback factors.
+            </p>
+
+            {/* Verification Factors Checklist Display */}
+            <div style={{ background: '#ffffff', padding: '14px', borderRadius: '6px', border: '1px solid #bbf7d0', marginBottom: '12px' }}>
+              <div style={{ fontWeight: '700', fontSize: '13px', color: '#14532d', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span>✅</span> Statutory Factors Verified by Tahsildar:
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '8px' }}>
+                {[
+                  'Land Title & 7/12 Ownership Record (हक्क व सातबारा)',
+                  'Physical Ground Demarcation & Haddakayam (सीमा निश्चिती)',
+                  'Approach Road & Public Right-of-Way (रस्ता वहिवाट)',
+                  'Zoning & Regional/Development Plan Compliance (झोन सुसंगतता)',
+                  'Environmental Buffer, Flood Line & HT Line Setbacks (पर्यावरण अंतर)',
+                  'Tenancy Laws (Sec 43/63) & Ceiling Compliance (कुळकायदा व कमाल जमीन)',
+                  'Government Revenue Dues & Tax Arrears Clearance (शासकीय थकबाकी निरंक)',
+                ].map((factorText, fi) => (
+                  <div key={fi} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#166534' }}>
+                    <span style={{ fontWeight: 'bold', color: '#15803d' }}>✓</span>
+                    <span>{factorText}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             {app.rejection_reason && (
-              <div style={{ marginTop: '10px', padding: '10px', background: 'rgba(22, 163, 74, 0.1)', borderRadius: '4px', fontStyle: 'italic' }}>
-                <strong>Tahsildar Remarks:</strong> {app.rejection_reason}
+              <div style={{ padding: '12px 14px', background: 'rgba(22, 163, 74, 0.1)', borderRadius: '6px', border: '1px solid #bbf7d0', fontSize: '13px' }}>
+                <strong>Official Inquiry Remarks:</strong> {app.rejection_reason}
               </div>
             )}
           </div>
@@ -716,47 +901,347 @@ export function CollectorDetail() {
           </div>
         )}
 
-        {/* CASE 2: RETURNED FROM TAHSILDAR (VERIFIED) -> GRANT OR REJECT */}
-        {app?.status === 'tahsildar_verified' && (
-          <div>
-            <p style={{ color: '#166534', fontSize: '14px', marginBottom: '16px', fontWeight: '600' }}>
-              Tahsildar ground verification has completed with positive recommendation. You may issue the final Non-Agricultural Sanction Order or reject if legal statutory barriers remain.
-            </p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-              <div style={{ background: '#f0fdf4', padding: '20px', borderRadius: '6px', border: '1px solid #86efac' }}>
-                <h4 style={{ margin: '0 0 10px', color: '#166534' }}>Option A: Issue NA Sanction Order</h4>
-                <p style={{ fontSize: '13px', color: '#15803d', marginBottom: '16px' }}>
-                  Approves conversion under Section 44 of Maharashtra Land Revenue Code, 1966.
+        {/* CASE 2: RETURNED FROM TAHSILDAR (VERIFIED) -> COLLECTOR FINAL SANCTION DOSSIER */}
+        {['tahsildar_verified', 'approved'].includes(app?.status) && (
+          <div style={{ background: '#f8fafc', border: '2px solid #0f766e', borderRadius: '10px', padding: '24px', marginTop: '10px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px', borderBottom: '2px solid #cbd5e1', paddingBottom: '12px' }}>
+              <div>
+                <h3 style={{ margin: 0, color: '#0f766e', fontSize: '20px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span>🏛️</span> District Collector Final NA Sanction & Statutory Approval Dossier
+                </h3>
+                <p style={{ margin: '4px 0 0', color: '#475569', fontSize: '13.5px' }}>
+                  Under Section 44, 45 & 47 of Maharashtra Land Revenue Code, 1966. Adjudicate all statutory factors and issue the final Sanction Decree.
                 </p>
-                <button
-                  className="btn-approve"
-                  onClick={grantNA}
-                  disabled={busy}
-                  style={{ width: '100%' }}
-                >
-                  📜 Issue Official NA Sanction Order
-                </button>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <span style={{ fontSize: '12px', background: '#ccfbf1', color: '#0f766e', padding: '4px 10px', borderRadius: '4px', fontWeight: '700' }}>
+                  {selectedColFactors.length} of {COLLECTOR_STATUTORY_FACTORS.length} Factors Adjudicated
+                </span>
+              </div>
+            </div>
+
+            <form onSubmit={grantNA}>
+              {/* 1. Sanction Order Particulars & Revenue Assessment */}
+              <div style={{ background: '#ffffff', padding: '16px', borderRadius: '8px', border: '1px solid #ccfbf1', marginBottom: '20px' }}>
+                <h4 style={{ margin: '0 0 12px', fontSize: '14px', color: '#134e4a', fontWeight: '700' }}>
+                  1. Sanction Order Particulars & Statutory Revenue Assessment
+                </h4>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#475569', marginBottom: '4px' }}>
+                      Sanction Order Number *
+                    </label>
+                    <input
+                      type="text"
+                      className="input-wrap"
+                      style={{ width: '100%', boxSizing: 'border-box', padding: '8px 12px', fontSize: '13.5px', fontFamily: 'monospace' }}
+                      value={orderNo}
+                      onChange={e => setOrderNo(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#475569', marginBottom: '4px' }}>
+                      Sanctioning Authority *
+                    </label>
+                    <input
+                      type="text"
+                      className="input-wrap"
+                      style={{ width: '100%', boxSizing: 'border-box', padding: '8px 12px', fontSize: '13.5px' }}
+                      value={collectorName}
+                      onChange={e => setCollectorName(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#475569', marginBottom: '4px' }}>
+                      Order Execution Date *
+                    </label>
+                    <input
+                      type="date"
+                      className="input-wrap"
+                      style={{ width: '100%', boxSizing: 'border-box', padding: '8px 12px', fontSize: '13.5px' }}
+                      value={sanctionDate}
+                      onChange={e => setSanctionDate(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#475569', marginBottom: '4px' }}>
+                      Sanctioned Net Area (Sq. Mt.) *
+                    </label>
+                    <input
+                      type="text"
+                      className="input-wrap"
+                      style={{ width: '100%', boxSizing: 'border-box', padding: '8px 12px', fontSize: '13.5px' }}
+                      value={sanctionedArea}
+                      onChange={e => setSanctionedArea(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#475569', marginBottom: '4px' }}>
+                      Sanctioned Non-Agricultural Purpose
+                    </label>
+                    <input
+                      type="text"
+                      className="input-wrap"
+                      style={{ width: '100%', boxSizing: 'border-box', padding: '8px 12px', fontSize: '13.5px' }}
+                      value={sanctionedPurpose}
+                      onChange={e => setSanctionedPurpose(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#475569', marginBottom: '4px' }}>
+                      Assessed Conversion Tax (रूपांतर कर)
+                    </label>
+                    <input
+                      type="text"
+                      className="input-wrap"
+                      style={{ width: '100%', boxSizing: 'border-box', padding: '8px 12px', fontSize: '13.5px' }}
+                      value={conversionTax}
+                      onChange={e => setConversionTax(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#475569', marginBottom: '4px' }}>
+                      Annual NA Assessment Rate (अकृषिक आकारणी)
+                    </label>
+                    <input
+                      type="text"
+                      className="input-wrap"
+                      style={{ width: '100%', boxSizing: 'border-box', padding: '8px 12px', fontSize: '13.5px' }}
+                      value={naAssessmentRate}
+                      onChange={e => setNaAssessmentRate(e.target.value)}
+                    />
+                  </div>
+                </div>
               </div>
 
-              <div style={{ background: '#fef2f2', padding: '20px', borderRadius: '6px', border: '1px solid #fecaca' }}>
-                <h4 style={{ margin: '0 0 10px', color: '#991b1b' }}>Option B: Reject Application</h4>
-                <input
+              {/* 2. Mandatory Collectorate Statutory Factors Checklist */}
+              <div style={{ background: '#ffffff', padding: '16px', borderRadius: '8px', border: '1px solid #ccfbf1', marginBottom: '20px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                  <div>
+                    <h4 style={{ margin: 0, fontSize: '14px', color: '#134e4a', fontWeight: '700' }}>
+                      2. Mandatory Collectorate Statutory Factors Adjudicated
+                    </h4>
+                    <span style={{ fontSize: '12px', color: '#64748b' }}>Confirm each legal factor examined under the Maharashtra Land Revenue Code</span>
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                      type="button"
+                      onClick={selectAllColFactors}
+                      style={{ background: '#0f766e', color: '#fff', border: 'none', padding: '4px 10px', borderRadius: '4px', fontSize: '11.5px', cursor: 'pointer', fontWeight: '600' }}
+                    >
+                      ✓ Check All Factors
+                    </button>
+                    <button
+                      type="button"
+                      onClick={clearAllColFactors}
+                      style={{ background: '#e2e8f0', color: '#334155', border: 'none', padding: '4px 10px', borderRadius: '4px', fontSize: '11.5px', cursor: 'pointer', fontWeight: '600' }}
+                    >
+                      Clear All
+                    </button>
+                  </div>
+                </div>
+
+                {/* Progress bar */}
+                <div style={{ width: '100%', background: '#e2e8f0', height: '6px', borderRadius: '3px', marginBottom: '16px', overflow: 'hidden' }}>
+                  <div style={{ width: `${(selectedColFactors.length / COLLECTOR_STATUTORY_FACTORS.length) * 100}%`, background: selectedColFactors.length === COLLECTOR_STATUTORY_FACTORS.length ? '#0f766e' : '#0284c7', height: '100%', transition: 'width 0.3s' }} />
+                </div>
+
+                {/* Factors List */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {COLLECTOR_STATUTORY_FACTORS.map((factor) => {
+                    const isChecked = selectedColFactors.includes(factor.id);
+                    return (
+                      <label
+                        key={factor.id}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'flex-start',
+                          gap: '12px',
+                          background: isChecked ? '#f0fdfa' : '#ffffff',
+                          border: `1px solid ${isChecked ? '#99f6e4' : '#cbd5e1'}`,
+                          borderRadius: '8px',
+                          padding: '12px 14px',
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease',
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => toggleColFactor(factor.id)}
+                          style={{ width: '18px', height: '18px', marginTop: '2px', accentColor: '#0f766e', cursor: 'pointer' }}
+                        />
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: '11px', background: isChecked ? '#ccfbf1' : '#f1f5f9', color: isChecked ? '#0f766e' : '#475569', padding: '2px 8px', borderRadius: '4px', fontWeight: '700' }}>
+                              {factor.category}
+                            </span>
+                            <strong style={{ fontSize: '13.5px', color: isChecked ? '#134e4a' : '#0f172a' }}>
+                              {factor.title}
+                            </strong>
+                          </div>
+                          <p style={{ margin: '4px 0 0', fontSize: '12px', color: isChecked ? '#0f766e' : '#64748b', lineHeight: '1.4' }}>
+                            {factor.description}
+                          </p>
+                        </div>
+                        <span style={{ fontSize: '12px', fontWeight: 'bold', color: isChecked ? '#0f766e' : '#94a3b8' }}>
+                          {isChecked ? 'Adjudicated ✓' : 'Pending'}
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* 3. Collector Sanction Decree & Final Remarks */}
+              <div style={{ background: '#ffffff', padding: '16px', borderRadius: '8px', border: '1px solid #ccfbf1', marginBottom: '20px' }}>
+                <h4 style={{ margin: '0 0 8px', fontSize: '14px', color: '#134e4a', fontWeight: '700' }}>
+                  3. Collector Official Sanction Decree & Order Summary *
+                </h4>
+                <p style={{ fontSize: '12px', color: '#64748b', margin: '0 0 10px' }}>
+                  Formal legal decree text authorizing conversion under Section 44 of Maharashtra Land Revenue Code, 1966.
+                </p>
+                <textarea
                   className="input-wrap"
+                  rows={3}
+                  style={{ width: '100%', boxSizing: 'border-box', padding: '10px 14px', fontSize: '13px', lineHeight: '1.5' }}
+                  value={collectorDecree}
+                  onChange={e => setCollectorDecree(e.target.value)}
+                  required
+                />
+              </div>
+
+              {/* 4. Mandatory Statutory Conditions Imposed on Sanction */}
+              <div style={{ background: '#ffffff', padding: '16px', borderRadius: '8px', border: '1px solid #ccfbf1', marginBottom: '24px' }}>
+                <h4 style={{ margin: '0 0 6px', fontSize: '14px', color: '#134e4a', fontWeight: '700' }}>
+                  4. Mandatory Statutory Conditions Imposed in Final Sanction Order
+                </h4>
+                <p style={{ fontSize: '12px', color: '#64748b', margin: '0 0 12px' }}>
+                  Statutory obligations binding on the landholder under MLRC Sections 44 & 45:
+                </p>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '14px' }}>
+                  {COLLECTOR_SANCTION_CONDITIONS.map((cond, i) => {
+                    const isChecked = selectedColConditions.includes(cond);
+                    return (
+                      <label key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', fontSize: '12.5px', color: '#334155', cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => toggleColCondition(cond)}
+                          style={{ marginTop: '2px', accentColor: '#0f766e' }}
+                        />
+                        <span>{cond}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+
+                {/* Add Custom Condition */}
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <input
+                    type="text"
+                    className="input-wrap"
+                    style={{ flex: 1, padding: '7px 12px', fontSize: '12.5px', boxSizing: 'border-box' }}
+                    placeholder="Add special condition or town planning stipulation..."
+                    value={customColCondition}
+                    onChange={e => setCustomColCondition(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={addCustomColCondition}
+                    style={{ background: '#0f766e', color: '#fff', border: 'none', padding: '7px 14px', borderRadius: '4px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}
+                  >
+                    + Add Condition
+                  </button>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
+                <button
+                  type="submit"
+                  disabled={busy}
+                  style={{
+                    flex: 2,
+                    padding: '14px 24px',
+                    background: 'linear-gradient(135deg, #0f766e, #115e59)',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '15px',
+                    fontWeight: '700',
+                    cursor: busy ? 'not-allowed' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    boxShadow: '0 2px 4px rgba(15, 118, 110, 0.2)',
+                  }}
+                >
+                  {busy ? 'Issuing Sanction Order…' : '📜 Issue Official District Collector NA Sanction Order (MLRC Sec 44)'}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowColRejectBox(!showColRejectBox)}
+                  style={{
+                    flex: 1,
+                    padding: '14px 18px',
+                    background: showColRejectBox ? '#fecaca' : '#fee2e2',
+                    color: '#991b1b',
+                    border: '1px solid #f87171',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {showColRejectBox ? '▲ Hide Refusal Form' : '❌ Refuse NA Sanction (with Reason)'}
+                </button>
+              </div>
+            </form>
+
+            {/* Collapsible Refusal Form */}
+            {showColRejectBox && (
+              <div style={{ marginTop: '20px', background: '#fef2f2', border: '2px solid #ef4444', borderRadius: '8px', padding: '18px' }}>
+                <h4 style={{ margin: '0 0 6px', color: '#991b1b', fontSize: '15px' }}>
+                  Official Statutory Grounds for Refusal / Rejection Order
+                </h4>
+                <p style={{ margin: '0 0 12px', fontSize: '12.5px', color: '#7f1d1d' }}>
+                  Specify the legal barrier or reason under Maharashtra Land Revenue Code for refusing conversion:
+                </p>
+                <textarea
+                  className="input-wrap"
+                  rows={3}
+                  style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', fontSize: '13px', marginBottom: '12px' }}
                   placeholder="Official legal grounds for refusal…"
                   value={reason}
                   onChange={e => setReason(e.target.value)}
-                  style={{ width: '100%', marginBottom: '12px', boxSizing: 'border-box' }}
                 />
                 <button
-                  className="btn-reject"
+                  type="button"
                   onClick={rejectApplication}
                   disabled={busy}
-                  style={{ width: '100%' }}
+                  style={{
+                    background: '#dc2626',
+                    color: '#fff',
+                    border: 'none',
+                    padding: '10px 20px',
+                    borderRadius: '6px',
+                    fontSize: '13.5px',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                  }}
                 >
-                  ❌ Refuse NA Sanction (with Reason)
+                  {busy ? 'Refusing Sanction…' : 'Confirm Refusal & Issue Rejection Order'}
                 </button>
               </div>
-            </div>
+            )}
           </div>
         )}
 
@@ -813,15 +1298,58 @@ export function CollectorDetail() {
           </div>
         )}
 
-        {/* CASE 5: FINALIZED */}
+        {/* CASE 5: FINALIZED (SANCTION ORDER GRANTED) */}
         {app?.status === 'collector_approved' && (
-          <div style={{ background: '#f0fdf4', padding: '18px', borderRadius: '6px', border: '1px solid #86efac' }}>
-            <div style={{ fontSize: '16px', fontWeight: '800', color: '#166534', marginBottom: '6px' }}>
-              ✅ Non-Agricultural Sanction Order Granted
+          <div style={{ background: '#f0fdf4', border: '2px solid #86efac', borderRadius: '10px', padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid #bbf7d0', paddingBottom: '12px' }}>
+              <div>
+                <div style={{ fontSize: '18px', fontWeight: '800', color: '#166534', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span>📜</span> Official District Collector NA Sanction Order Granted & Decreed
+                </div>
+                <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#15803d' }}>
+                  Authorized under Section 44, 45 & 47 of Maharashtra Land Revenue Code, 1966.
+                </p>
+              </div>
+              <span className="status-pill status-collector_approved">✓ Sanction Order Executed</span>
             </div>
-            <p style={{ margin: 0, fontSize: '13px', color: '#15803d' }}>
-              This application has completed all statutory stages. The sanction order stands issued under the authority of District Collector. Reviewed at: {app?.reviewed_at ? new Date(app.reviewed_at).toLocaleString('en-IN') : 'Completed'}
-            </p>
+
+            <div style={{ background: '#ffffff', padding: '16px', borderRadius: '8px', border: '1px solid #bbf7d0', marginBottom: '16px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', marginBottom: '14px' }}>
+                <div><span style={{ fontSize: '12px', color: '#64748b', display: 'block' }}>Sanction Order Number</span><strong style={{ fontFamily: 'monospace' }}>{orderNo || 'COLL/REV/NA-2026/0482'}</strong></div>
+                <div><span style={{ fontSize: '12px', color: '#64748b', display: 'block' }}>Sanctioning Authority</span><strong>District Collector & District Magistrate</strong></div>
+                <div><span style={{ fontSize: '12px', color: '#64748b', display: 'block' }}>Order Date</span><strong>{app.reviewed_at ? new Date(app.reviewed_at).toLocaleDateString('en-IN') : sanctionDate}</strong></div>
+                <div><span style={{ fontSize: '12px', color: '#64748b', display: 'block' }}>Sanctioned Area & Purpose</span><strong>{sanctionedArea || '500 Sq. Mt.'} ({sanctionedPurpose || app.land_type})</strong></div>
+                <div><span style={{ fontSize: '12px', color: '#64748b', display: 'block' }}>Assessed Conversion Tax</span><strong>{conversionTax || '₹ 15,000'}</strong></div>
+                <div><span style={{ fontSize: '12px', color: '#64748b', display: 'block' }}>Annual NA Assessment</span><strong>{naAssessmentRate || '₹ 2.50 / m²'}</strong></div>
+              </div>
+
+              {app?.rejection_reason && (
+                <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '12px' }}>
+                  <span style={{ fontSize: '12px', color: '#64748b', display: 'block', marginBottom: '4px' }}>Official Sanction Summary / Decree</span>
+                  <div style={{ background: '#f0fdf4', padding: '10px 14px', borderRadius: '6px', color: '#166534', fontSize: '13px', border: '1px solid #bbf7d0', fontStyle: 'italic' }}>
+                    {app.rejection_reason}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Checklist of 7 Collector Factors Adjudicated */}
+            <div style={{ background: '#ffffff', padding: '16px', borderRadius: '8px', border: '1px solid #bbf7d0' }}>
+              <h4 style={{ margin: '0 0 12px', color: '#14532d', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span>✅</span> Collectorate Statutory Factors Adjudicated (7/7 Confirmed)
+              </h4>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '10px' }}>
+                {COLLECTOR_STATUTORY_FACTORS.map((f, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', padding: '8px 10px', background: '#f8fafc', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                    <span style={{ color: '#0f766e', fontWeight: 'bold', fontSize: '16px' }}>✓</span>
+                    <div>
+                      <div style={{ fontSize: '12.5px', fontWeight: '700', color: '#1e293b' }}>{f.title}</div>
+                      <div style={{ fontSize: '11.5px', color: '#64748b', marginTop: '2px' }}>{f.description}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         )}
 

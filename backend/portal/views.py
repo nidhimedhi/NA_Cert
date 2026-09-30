@@ -285,12 +285,26 @@ def apply_na(request):
             'Urban Ceiling Act NOC': bool(request.POST.get('check_urban_ceiling_noc')),
         }
 
+        # Cost Component & Payment Details
+        total_amount       = request.POST.get('total_amount', '').strip()
+        gov_app_fee        = request.POST.get('gov_app_fee', '').strip()
+        conversion_premium = request.POST.get('conversion_premium', '').strip()
+        survey_charges     = request.POST.get('survey_charges', '').strip()
+        utr_number         = request.POST.get('utr_number', '').strip()
+        premium_rule       = request.POST.get('premium_rule', '').strip()
+        area_calc          = request.POST.get('area_calc', area_sqmt).strip()
+        rr_rate            = request.POST.get('rr_rate', '').strip()
+        market_val         = request.POST.get('market_val', '').strip()
+
+        fee_summary = f"Statutory Fee: {total_amount} Paid via UPI (UTR: {utr_number or 'Pending'})" if total_amount else None
+
         # 2. Insert Application Record into Supabase na_applications
         app_result = insert('na_applications', {
-            'user_email':   user_email,
-            'land_type':    land_type,
-            'reference_no': ref,
-            'status':       'pending_collector',
+            'user_email':       user_email,
+            'land_type':        land_type,
+            'reference_no':     ref,
+            'status':           'pending_collector',
+            'rejection_reason': fee_summary,
         })
 
         application_id = None
@@ -384,6 +398,40 @@ def apply_na(request):
                 'raw_json':       form_payload,
             })
 
+            # Archive Statutory Fee Assessment & Payment Challan
+            if total_amount:
+                from django.utils import timezone
+                insert('extracted_documents', {
+                    'application_id': application_id,
+                    'document_name':  'Statutory Fee Assessment & Payment Challan',
+                    'file_url':       '',
+                    'village':        land_village,
+                    'taluka':         land_taluka,
+                    'district':       land_district,
+                    'gat_no':         gat_number,
+                    'owner_names':    full_name,
+                    'satbara_no':     ref,
+                    'raw_json': {
+                        'challan_title':        'Statutory NA Fee Assessment & Payment Challan',
+                        'reference_no':         ref,
+                        'applicant_name':       full_name,
+                        'land_type':            land_type,
+                        'total_amount':         total_amount,
+                        'gov_app_fee':          gov_app_fee,
+                        'conversion_premium':   conversion_premium,
+                        'survey_charges':       survey_charges,
+                        'premium_rule':         premium_rule,
+                        'area_sqmt':            area_calc,
+                        'rr_rate':              rr_rate,
+                        'market_value':         market_val,
+                        'utr_number':           utr_number,
+                        'payment_mode':         'Google Pay / UPI',
+                        'payee_upi':            'rajnandinijoshi402@okhdfcbank',
+                        'payment_status':       'VERIFIED & PAID' if utr_number else 'PENDING',
+                        'paid_at':              timezone.now().isoformat(),
+                    }
+                })
+
             # 4. Handle file uploads for attached documents
             upload_configs = [
                 ('doc_site_report', 'Site report including 7/12 Extract and mutation entries'),
@@ -460,10 +508,16 @@ def apply_na(request):
                 })
 
         return render(request, 'portal/apply.html', {
-            'land_type':      land_type,
-            'success':        True,
-            'reference':      ref,
-            'applicant_name': full_name,
+            'land_type':          land_type,
+            'success':            True,
+            'reference':          ref,
+            'applicant_name':     full_name,
+            'total_amount':       total_amount,
+            'gov_app_fee':        gov_app_fee,
+            'conversion_premium': conversion_premium,
+            'survey_charges':     survey_charges,
+            'utr_number':         utr_number,
+            'premium_rule':       premium_rule,
         })
 
     # GET

@@ -16,7 +16,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ── Security ──────────────────────────────────────────────────────────
 SECRET_KEY   = 'django-insecure-)4t(@#s#mn-z!jv!^+^6e!z%nk(o6%p!$80e2!#kryx^+^z3)'
 DEBUG        = True
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver']
 
 # ── Apps ──────────────────────────────────────────────────────────────
 INSTALLED_APPS = [
@@ -119,7 +119,7 @@ USE_I18N      = True
 USE_TZ        = True
 
 # ── Static ────────────────────────────────────────────────────────────
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'portal/static']
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

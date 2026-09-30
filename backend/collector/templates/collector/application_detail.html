@@ -165,20 +165,148 @@
 </div>
 
 <!-- ACTION BUTTONS -->
-{% if app.status == 'approved' %}
-<div class="c-action-section">
+{% if app.status == 'approved' or app.status == 'tahsildar_verified' %}
+<div class="c-action-section" style="margin-top:30px; background:#f0fdfa; border:2px solid #0f766e; border-radius:10px; padding:24px;">
+  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; border-bottom:2px solid #99f6e4; padding-bottom:12px;">
+    <div>
+      <h2 style="color:#0f766e; margin:0; font-size:20px; font-weight:700;">
+        <i class="fa-solid fa-stamp me-2" style="color:#0d9488;"></i> District Collector Final NA Sanction & Statutory Order Dossier
+      </h2>
+      <p style="margin:4px 0 0; color:#475569; font-size:13px;">Under Section 44, 45 & 47 of Maharashtra Land Revenue Code, 1966</p>
+    </div>
+    <span class="c-badge c-badge-approved">Final Statutory Authority</span>
+  </div>
+
   <form method="POST" action="/collector/approve/{{ app.id }}/">
     {% csrf_token %}
-    <button type="submit" class="c-approve-btn-large">✅ Grant NA Certificate</button>
+
+    <div style="background:#fff; border:1px solid #ccfbf1; border-radius:8px; padding:16px; margin-bottom:20px;">
+      <h3 style="color:#134e4a; font-size:15px; margin:0 0 12px; font-weight:700;">1. Sanction Order Particulars & Revenue Assessment</h3>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:16px;">
+        <div>
+          <label style="display:block; font-size:12px; font-weight:600; color:#475569; margin-bottom:4px;">Sanction Order Number</label>
+          <input type="text" name="order_no" value="COLL/REV/NA-{% now 'Y' %}/{{ app.reference_no|slice:'-6:' }}" class="c-reject-textarea" style="height:38px; padding:6px 12px; font-family:monospace;" required />
+        </div>
+        <div>
+          <label style="display:block; font-size:12px; font-weight:600; color:#475569; margin-bottom:4px;">Sanctioning Officer</label>
+          <input type="text" name="officer_name" value="{{ request.user.username }}" class="c-reject-textarea" style="height:38px; padding:6px 12px;" required />
+        </div>
+        <div>
+          <label style="display:block; font-size:12px; font-weight:600; color:#475569; margin-bottom:4px;">Sanction Date</label>
+          <input type="date" name="sanction_date" value="{% now 'Y-m-d' %}" class="c-reject-textarea" style="height:38px; padding:6px 12px;" required />
+        </div>
+        <div>
+          <label style="display:block; font-size:12px; font-weight:600; color:#475569; margin-bottom:4px;">Assessed Conversion Tax (रूपांतर कर)</label>
+          <input type="text" name="conversion_tax" value="₹ 15,000" class="c-reject-textarea" style="height:38px; padding:6px 12px;" />
+        </div>
+      </div>
+    </div>
+
+    <div style="background:#fff; border:1px solid #ccfbf1; border-radius:8px; padding:16px; margin-bottom:20px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3 style="color:#134e4a; font-size:15px; margin:0; font-weight:700;">2. Statutory Collectorate Factors Adjudicated</h3>
+        <button type="button" onclick="document.querySelectorAll('.c-factor-chk').forEach(c => c.checked=true)" style="background:#ccfbf1; color:#0f766e; border:1px solid #99f6e4; border-radius:4px; padding:4px 10px; font-size:12px; font-weight:600; cursor:pointer;">
+          ✓ Check All Factors
+        </button>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <label style="display:flex; align-items:flex-start; gap:10px; background:#f0fdf4; border:1px solid #bbf7d0; padding:12px; border-radius:6px; cursor:pointer;">
+          <input type="checkbox" name="factors" value="Tahsildar Field Inquiry Report Adjudicated & Accepted" class="c-factor-chk" checked style="width:18px; height:18px; margin-top:2px;" />
+          <div>
+            <strong style="color:#166534; font-size:14px;">Tahsildar Field Inquiry Report Adjudicated (तहसीलदार क्षेत्रीय अहवाल मान्यता)</strong>
+            <p style="margin:2px 0 0; color:#15803d; font-size:12px;">Ground inspection findings by jurisdictional Tahsildar scrutinized and accepted without adverse reservations.</p>
+          </div>
+        </label>
+
+        <label style="display:flex; align-items:flex-start; gap:10px; background:#f0fdf4; border:1px solid #bbf7d0; padding:12px; border-radius:6px; cursor:pointer;">
+          <input type="checkbox" name="factors" value="Title, Tenure & Class-I Holder Sanction" class="c-factor-chk" checked style="width:18px; height:18px; margin-top:2px;" />
+          <div>
+            <strong style="color:#166534; font-size:14px;">Title, Tenure & Occupant Class Sanction (हक्क व भोगवटादार वर्ग निश्चिती)</strong>
+            <p style="margin:2px 0 0; color:#15803d; font-size:12px;">Bona fide title and tenure of applicant verified; occupant category confirmed eligible for non-agricultural grant.</p>
+          </div>
+        </label>
+
+        <label style="display:flex; align-items:flex-start; gap:10px; background:#f0fdf4; border:1px solid #bbf7d0; padding:12px; border-radius:6px; cursor:pointer;">
+          <input type="checkbox" name="factors" value="Zoning & Development Control Regulations Concurrence" class="c-factor-chk" checked style="width:18px; height:18px; margin-top:2px;" />
+          <div>
+            <strong style="color:#166534; font-size:14px;">Zoning & Development Control Concurrence (विकास योजना व डीसीआर सुसंगतता)</strong>
+            <p style="margin:2px 0 0; color:#15803d; font-size:12px;">Proposed land use complies with Regional Plan zoning and Town Planning Department Development Control Regulations.</p>
+          </div>
+        </label>
+
+        <label style="display:flex; align-items:flex-start; gap:10px; background:#f0fdf4; border:1px solid #bbf7d0; padding:12px; border-radius:6px; cursor:pointer;">
+          <input type="checkbox" name="factors" value="Statutory Environmental & Public Safety NOCs" class="c-factor-chk" checked style="width:18px; height:18px; margin-top:2px;" />
+          <div>
+            <strong style="color:#166534; font-size:14px;">Statutory Environmental & Public Safety NOCs (पर्यावरण व सुरक्षितता नाहरकत)</strong>
+            <p style="margin:2px 0 0; color:#15803d; font-size:12px;">Safe buffer from river/nallah flood lines, highway control margins, and electrical transmission corridors validated.</p>
+          </div>
+        </label>
+
+        <label style="display:flex; align-items:flex-start; gap:10px; background:#f0fdf4; border:1px solid #bbf7d0; padding:12px; border-radius:6px; cursor:pointer;">
+          <input type="checkbox" name="factors" value="Conversion Tax & NA Assessment Fixed" class="c-factor-chk" checked style="width:18px; height:18px; margin-top:2px;" />
+          <div>
+            <strong style="color:#166534; font-size:14px;">Conversion Tax & NA Assessment (रूपांतर कर व अकृषिक आकारणी निश्चिती)</strong>
+            <p style="margin:2px 0 0; color:#15803d; font-size:12px;">Conversion tax assessed under Section 47A MLRC and revised annual non-agricultural assessment rate fixed.</p>
+          </div>
+        </label>
+
+        <label style="display:flex; align-items:flex-start; gap:10px; background:#f0fdf4; border:1px solid #bbf7d0; padding:12px; border-radius:6px; cursor:pointer;">
+          <input type="checkbox" name="factors" value="Public Objections & Dispute Adjudication Clear" class="c-factor-chk" checked style="width:18px; height:18px; margin-top:2px;" />
+          <div>
+            <strong style="color:#166534; font-size:14px;">Public Objections & Dispute Adjudication (हरकती व आक्षेप निरसन)</strong>
+            <p style="margin:2px 0 0; color:#15803d; font-size:12px;">Statutory notice period completed; zero legal stays, boundary disputes, or public objections pending on file.</p>
+          </div>
+        </label>
+
+        <label style="display:flex; align-items:flex-start; gap:10px; background:#f0fdf4; border:1px solid #bbf7d0; padding:12px; border-radius:6px; cursor:pointer;">
+          <input type="checkbox" name="factors" value="Legal Authority & Final Sanction Clause (MLRC Sec 44)" class="c-factor-chk" checked style="width:18px; height:18px; margin-top:2px;" />
+          <div>
+            <strong style="color:#166534; font-size:14px;">Legal Authority & Sanction Decree (महाराष्ट्र जमीन महसूल संहिता कलम ४४ अंतिम आदेश)</strong>
+            <p style="margin:2px 0 0; color:#15803d; font-size:12px;">All statutory preconditions satisfied. Authorization granted for final Sanction Order and Non-Agricultural Certificate.</p>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <div style="background:#fff; border:1px solid #ccfbf1; border-radius:8px; padding:16px; margin-bottom:20px;">
+      <h3 style="color:#134e4a; font-size:15px; margin:0 0 8px; font-weight:700;">3. Collector Official Decree & Mandatory Sanction Conditions</h3>
+      <textarea name="remarks" class="c-reject-textarea" rows="3" style="width:100%; box-sizing:border-box; padding:10px; margin-bottom:12px;">Having scrutinized the Tahsildar Ground Inquiry Report, title extract, and statutory clearances, permission for conversion to Non-Agricultural use is hereby SANCTIONED under Section 44 of Maharashtra Land Revenue Code, 1966.</textarea>
+
+      <div style="font-size:13px; font-weight:600; color:#334155; margin-bottom:6px;">Mandatory Sanction Conditions:</div>
+      <div style="display:grid; grid-template-columns:1fr; gap:6px; font-size:12.5px; color:#475569;">
+        <label style="display:flex; align-items:center; gap:8px;">
+          <input type="checkbox" name="conditions" value="Conversion is strictly restricted to sanctioned purpose; unauthorized use attracts penal assessment under Sec 45 MLRC." checked />
+          Conversion strictly restricted to sanctioned use; unauthorized change triggers penalty (MLRC Sec 45).
+        </label>
+        <label style="display:flex; align-items:center; gap:8px;">
+          <input type="checkbox" name="conditions" value="Development must commence within 1 year and complete within 3 years." checked />
+          Development must commence within 1 year and complete within 3 years of this order.
+        </label>
+        <label style="display:flex; align-items:center; gap:8px;">
+          <input type="checkbox" name="conditions" value="Building layout and architectural plans must be formally sanctioned by Competent Planning Authority." checked />
+          Building layout and architectural plans must be formally approved by competent Planning Authority.
+        </label>
+        <label style="display:flex; align-items:center; gap:8px;">
+          <input type="checkbox" name="conditions" value="Road widening setback strip shall be surrendered free of cost if required by PWD/NHAI." checked />
+          Road widening setback strip shall be surrendered free of cost if required by PWD/NHAI.
+        </label>
+      </div>
+    </div>
+
+    <button type="submit" class="c-approve-btn-large" style="width:100%; font-size:16px; padding:14px; background:#0f766e;">
+      <i class="fa-solid fa-stamp me-2"></i> Issue Official District Collector NA Sanction Order (MLRC Sec 44)
+    </button>
   </form>
-  <div class="c-reject-section" style="margin-top:20px;">
-    <div class="c-reject-title">❌ Reject Application</div>
-    <p class="c-reject-sub">Write a clear reason. The applicant will be notified.</p>
+
+  <div class="c-reject-section" style="margin-top:24px;">
+    <div class="c-reject-title">❌ Refuse NA Sanction (Issue Rejection Order)</div>
+    <p class="c-reject-sub">State official legal statutory grounds for refusal. An appealable rejection order will be generated.</p>
     <form method="POST" action="/collector/reject/{{ app.id }}/">
       {% csrf_token %}
       <textarea name="reason" class="c-reject-textarea"
-        placeholder="Write rejection reason here..." rows="4" required></textarea>
-      <button type="submit" class="c-reject-submit">❌ Submit Rejection</button>
+        placeholder="Write official refusal grounds here..." rows="3" required></textarea>
+      <button type="submit" class="c-reject-submit" style="margin-top:10px;">❌ Issue Rejection Order</button>
     </form>
   </div>
 </div>

@@ -378,12 +378,129 @@
 </div>
 
 <!-- 4. ACTION BUTTONS (TAHSILDAR REVIEW) -->
-{% if app.status == 'pending' %}
-<div class="t-action-section" style="margin-top:30px;">
+{% if app.status == 'pending' or app.status == 'forwarded_to_tahsildar' %}
+<div class="t-action-section" style="margin-top:30px; background:#f8fafc; border:2px solid #093252; border-radius:10px; padding:24px;">
+  <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; border-bottom:2px solid #cbd5e1; padding-bottom:12px;">
+    <div>
+      <h2 style="color:#093252; margin:0; font-size:20px; font-weight:700;">
+        <i class="fa-solid fa-clipboard-check me-2" style="color:#16a34a;"></i> Tahsildar Statutory Field Verification Dossier
+      </h2>
+      <p style="margin:4px 0 0; color:#475569; font-size:13px;">Under Section 44 of Maharashtra Land Revenue Code, 1966</p>
+    </div>
+    <span class="t-badge t-badge-pending">Mandatory Checklist</span>
+  </div>
+
   <form method="POST" action="/tahsildar/approve/{{ app.id }}/">
     {% csrf_token %}
-    <button type="submit" class="t-approve-btn-large">
-      <i class="fa-solid fa-check me-2"></i> Approve Application
+
+    <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:16px; margin-bottom:20px;">
+      <h3 style="color:#1e293b; font-size:15px; margin:0 0 12px; font-weight:700;">1. Inspecting Officer & Site Metadata</h3>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:16px;">
+        <div>
+          <label style="display:block; font-size:12px; font-weight:600; color:#475569; margin-bottom:4px;">Inspecting Officer Name</label>
+          <input type="text" name="officer_name" value="{{ request.user.username }}" class="t-reject-textarea" style="height:38px; padding:6px 12px;" required />
+        </div>
+        <div>
+          <label style="display:block; font-size:12px; font-weight:600; color:#475569; margin-bottom:4px;">Field Inspection Date</label>
+          <input type="date" name="inspection_date" value="{% now 'Y-m-d' %}" class="t-reject-textarea" style="height:38px; padding:6px 12px;" required />
+        </div>
+        <div>
+          <label style="display:block; font-size:12px; font-weight:600; color:#475569; margin-bottom:4px;">Approach Road Width (Meters)</label>
+          <input type="text" name="road_access" value="12 Meters Public Road" class="t-reject-textarea" style="height:38px; padding:6px 12px;" />
+        </div>
+      </div>
+    </div>
+
+    <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:16px; margin-bottom:20px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3 style="color:#1e293b; font-size:15px; margin:0; font-weight:700;">2. Statutory Factors Checked & Validated</h3>
+        <button type="button" onclick="document.querySelectorAll('.t-factor-chk').forEach(c => c.checked=true)" style="background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; border-radius:4px; padding:4px 10px; font-size:12px; font-weight:600; cursor:pointer;">
+          ✓ Check All Factors
+        </button>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <label style="display:flex; align-items:flex-start; gap:10px; background:#f0fdf4; border:1px solid #bbf7d0; padding:12px; border-radius:6px; cursor:pointer;">
+          <input type="checkbox" name="factors" value="Title & Ownership Authenticity (7/12 & Ferfar)" class="t-factor-chk" checked style="width:18px; height:18px; margin-top:2px;" />
+          <div>
+            <strong style="color:#166534; font-size:14px;">Land Title & 7/12 Ownership Record (हक्क व सातबारा तपासणी)</strong>
+            <p style="margin:2px 0 0; color:#15803d; font-size:12px;">Verified 7/12 extract, Mutation entries (Ferfar), and Form 8-A. Applicant is the lawful occupant with clear title.</p>
+          </div>
+        </label>
+
+        <label style="display:flex; align-items:flex-start; gap:10px; background:#f0fdf4; border:1px solid #bbf7d0; padding:12px; border-radius:6px; cursor:pointer;">
+          <input type="checkbox" name="factors" value="Physical Demarcation & Boundary Verification" class="t-factor-chk" checked style="width:18px; height:18px; margin-top:2px;" />
+          <div>
+            <strong style="color:#166534; font-size:14px;">Physical Demarcation & Boundary Verification (सीमा निश्चिती व अतिक्रमण नसणे)</strong>
+            <p style="margin:2px 0 0; color:#15803d; font-size:12px;">On-site boundary demarcation (Haddakayam) matches village records. Zero encroachment on Government or Gaothan land.</p>
+          </div>
+        </label>
+
+        <label style="display:flex; align-items:flex-start; gap:10px; background:#f0fdf4; border:1px solid #bbf7d0; padding:12px; border-radius:6px; cursor:pointer;">
+          <input type="checkbox" name="factors" value="Approach Road & Right-of-Way Access" class="t-factor-chk" checked style="width:18px; height:18px; margin-top:2px;" />
+          <div>
+            <strong style="color:#166534; font-size:14px;">Approach Road & Right-of-Way Access (रस्ता व वहिवाट पोहोच)</strong>
+            <p style="margin:2px 0 0; color:#15803d; font-size:12px;">Direct public road approach of standard width exists. No dispute over access right across adjoining plots.</p>
+          </div>
+        </label>
+
+        <label style="display:flex; align-items:flex-start; gap:10px; background:#f0fdf4; border:1px solid #bbf7d0; padding:12px; border-radius:6px; cursor:pointer;">
+          <input type="checkbox" name="factors" value="Zoning & Master Plan Compliance" class="t-factor-chk" checked style="width:18px; height:18px; margin-top:2px;" />
+          <div>
+            <strong style="color:#166534; font-size:14px;">Zoning & Master Plan Compliance (विकास योजना व झोन सुसंगतता)</strong>
+            <p style="margin:2px 0 0; color:#15803d; font-size:12px;">Plot falls within permissible conversion zone under approved Regional Plan / Development Plan.</p>
+          </div>
+        </label>
+
+        <label style="display:flex; align-items:flex-start; gap:10px; background:#f0fdf4; border:1px solid #bbf7d0; padding:12px; border-radius:6px; cursor:pointer;">
+          <input type="checkbox" name="factors" value="Environmental, Water Body & HT Line Setbacks" class="t-factor-chk" checked style="width:18px; height:18px; margin-top:2px;" />
+          <div>
+            <strong style="color:#166534; font-size:14px;">Environmental, Water Body & HT Line Setbacks (पर्यावरण व सुरक्षित अंतर)</strong>
+            <p style="margin:2px 0 0; color:#15803d; font-size:12px;">Outside river/nallah flood buffer zones (Blue & Red lines clear); safe clearance from high-tension electricity corridors.</p>
+          </div>
+        </label>
+
+        <label style="display:flex; align-items:flex-start; gap:10px; background:#f0fdf4; border:1px solid #bbf7d0; padding:12px; border-radius:6px; cursor:pointer;">
+          <input type="checkbox" name="factors" value="Tenancy Laws & Land Ceiling Compliance" class="t-factor-chk" checked style="width:18px; height:18px; margin-top:2px;" />
+          <div>
+            <strong style="color:#166534; font-size:14px;">Tenancy Laws & Land Ceiling Compliance (कुळकायदा व कमाल जमीन धारणा)</strong>
+            <p style="margin:2px 0 0; color:#15803d; font-size:12px;">No violation of BTAL Act 1948 (Sec 43/63), Ceiling Act 1961, and plot is NOT restricted tribal land under Sec 36/36A.</p>
+          </div>
+        </label>
+
+        <label style="display:flex; align-items:flex-start; gap:10px; background:#f0fdf4; border:1px solid #bbf7d0; padding:12px; border-radius:6px; cursor:pointer;">
+          <input type="checkbox" name="factors" value="Government Revenue Dues & Tax Arrears Clearance" class="t-factor-chk" checked style="width:18px; height:18px; margin-top:2px;" />
+          <div>
+            <strong style="color:#166534; font-size:14px;">Government Revenue Dues & Tax Arrears Clearance (शासकीय थकबाकी निरंक)</strong>
+            <p style="margin:2px 0 0; color:#15803d; font-size:12px;">All agricultural land assessment, local cess, and development dues are completely paid with Nil arrears.</p>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <div style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:16px; margin-bottom:20px;">
+      <h3 style="color:#1e293b; font-size:15px; margin:0 0 8px; font-weight:700;">3. Field Inspection Remarks & Recommended Conditions</h3>
+      <textarea name="remarks" class="t-reject-textarea" rows="3" placeholder="Enter specific field inspection observations (e.g. Plot is vacant, demarcated, approach road verified without dispute)..." style="width:100%; box-sizing:border-box; padding:10px; margin-bottom:12px;">Site physically inspected. Boundary Haddakayam verified, 12m road approach confirmed, title undisputed. All 7 statutory factors verified without objections.</textarea>
+
+      <div style="font-size:13px; font-weight:600; color:#334155; margin-bottom:6px;">Recommended Conditions to Collector:</div>
+      <div style="display:grid; grid-template-columns:1fr; gap:6px; font-size:12.5px; color:#475569;">
+        <label style="display:flex; align-items:center; gap:8px;">
+          <input type="checkbox" name="conditions" value="Development must commence within one year of Sanction Order." checked />
+          Development must commence within one year of Sanction Order (MLRC Sec 44).
+        </label>
+        <label style="display:flex; align-items:center; gap:8px;">
+          <input type="checkbox" name="conditions" value="Road widening setback must be kept open without claim for compensation." checked />
+          Road widening setback must be surrendered free of cost if notified by PWD/NHAI.
+        </label>
+        <label style="display:flex; align-items:center; gap:8px;">
+          <input type="checkbox" name="conditions" value="Must obtain building layout plan sanction from competent Planning Authority." checked />
+          Must obtain layout & building plan sanction from competent Town Planning Authority.
+        </label>
+      </div>
+    </div>
+
+    <button type="submit" class="t-approve-btn-large" style="width:100%; font-size:16px; padding:14px;">
+      <i class="fa-solid fa-file-signature me-2"></i> Submit Official Tahsildar Verification Report & Forward to Collector
     </button>
   </form>
 

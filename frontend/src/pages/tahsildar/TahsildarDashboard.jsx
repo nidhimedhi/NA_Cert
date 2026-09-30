@@ -14,14 +14,24 @@ export default function TahsildarDashboard() {
   const [apps, setApps]     = useState([]);
   const [filter, setFilter] = useState('pending');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (!localStorage.getItem('tahsildar_token')) { navigate('/tahsildar/login'); return; }
+    setLoading(true);
+    setError('');
     tApi.get(`/tahsildar/applications/?status=${filter}`)
-      .then(r => setApps(r.data.applications))
-      .catch(() => navigate('/tahsildar/login'))
+      .then(r => setApps(r.data.applications || []))
+      .catch((err) => {
+        if (err.response?.status === 401) {
+          localStorage.removeItem('tahsildar_token');
+          navigate('/tahsildar/login');
+        } else {
+          setError(err.response?.data?.error || 'Failed to load applications.');
+        }
+      })
       .finally(() => setLoading(false));
-  }, [filter]);
+  }, [filter, navigate]);
 
   const logout = () => { localStorage.removeItem('tahsildar_token'); navigate('/tahsildar/login'); };
 
@@ -47,6 +57,7 @@ export default function TahsildarDashboard() {
           <span className="badge-count">{apps.length}</span>
         </div>
 
+        {error && <div className="error-box" style={{ marginBottom: '1rem' }}>⚠️ {error}</div>}
         {loading ? <p className="loading-txt">Loading…</p> :
          apps.length === 0 ? <p className="empty-txt">No {filter} applications.</p> : (
           <div className="apps-table-wrap">
