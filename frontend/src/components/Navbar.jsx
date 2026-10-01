@@ -121,6 +121,10 @@ export default function Navbar() {
             
             <Link to="/track" onClick={() => setMobileOpen(false)}>{t.track}</Link>
             
+            <Link to="/maharashtra-govt" onClick={() => setMobileOpen(false)} style={{ color: '#d97706', fontWeight: 'bold' }}>
+              🏛️ State Govt Portal
+            </Link>
+            
             <Link to="/about" onClick={() => setMobileOpen(false)}>{t.about}</Link>
             
             <div className="nav-spacer"></div>

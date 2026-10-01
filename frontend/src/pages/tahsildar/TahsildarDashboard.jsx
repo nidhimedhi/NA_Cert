@@ -57,6 +57,10 @@ export default function TahsildarDashboard() {
           <span className="badge-count">{apps.length}</span>
         </div>
 
+        <div style={{ background: '#f0fdfa', border: '1px solid #ccfbf1', borderRadius: '6px', padding: '10px 14px', marginBottom: '16px', fontSize: '12.5px', color: '#0f766e' }}>
+          <strong>Jurisdiction Scope:</strong> Tahsildar Desk conducts on-site field inquiry for routine non-granted lands (Residential, Private Commercial/Industrial). Granted & Semi-Granted Educational, Commercial, and Industrial lands are routed directly to District Collector → Maharashtra State Government Secretariat.
+        </div>
+
         {error && <div className="error-box" style={{ marginBottom: '1rem' }}>⚠️ {error}</div>}
         {loading ? <p className="loading-txt">Loading…</p> :
          apps.length === 0 ? <p className="empty-txt">No {filter} applications.</p> : (

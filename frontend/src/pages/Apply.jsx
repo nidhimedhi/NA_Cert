@@ -6,6 +6,14 @@ import api from '../services/api';
 const UPI_PAYEE_ID = 'rajnandinijoshi402@okhdfcbank';
 const UPI_PAYEE_NAME = 'Maharashtra Revenue Department / Rajnandini Joshi';
 
+const isGrantedEduComInd = (lt) => {
+  const s = (lt || '').toLowerCase();
+  const isGrant = s.includes('granted') || s.includes('semi-granted');
+  const isTarget = s.includes('educational') || s.includes('commercial') || s.includes('industrial');
+  const isPrivate = s.includes('private');
+  return isGrant && isTarget && !isPrivate;
+};
+
 export default function Apply() {
   const [params]   = useSearchParams();
   const navigate   = useNavigate();
@@ -206,7 +214,15 @@ export default function Apply() {
             Application & Statutory Fee Submitted Successfully!
           </h2>
           <p style={{ color: '#4b5563', fontSize: '15px', marginBottom: '24px' }}>
-            Your NA Certificate Application and <strong>Government Revenue Challan</strong> have been recorded and forwarded to the <strong>District Collectorate</strong>.
+            {isGrantedEduComInd(success.land_type) ? (
+              <>
+                Your application qualifies as <strong>Educational, Commercial or Industrial Granted / Semi-Granted Land</strong> and has been routed directly to the <strong>District Collector</strong> for statutory referral to the <strong>Maharashtra State Government Secretariat</strong>.
+              </>
+            ) : (
+              <>
+                Your application has been recorded and routed directly to the <strong>Tahsildar Portal</strong> for local ground verification and panchnama inspection.
+              </>
+            )}
           </p>
 
           {/* Official Payment Challan Summary */}
@@ -342,6 +358,26 @@ export default function Apply() {
           <p style={{ color: '#64748b', margin: 0, fontSize: '14px' }}>
             Applying for Land Purpose: <strong style={{ color: '#0f766e' }}>{landType}</strong>
           </p>
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '6px 14px',
+            borderRadius: '20px',
+            background: isGrantedEduComInd(landType) ? '#eff6ff' : '#f8fafc',
+            border: isGrantedEduComInd(landType) ? '1px solid #bfdbfe' : '1px solid #e2e8f0',
+            color: isGrantedEduComInd(landType) ? '#1e40af' : '#475569',
+            fontSize: '12.5px',
+            fontWeight: '600',
+            marginTop: '8px'
+          }}>
+            <span>{isGrantedEduComInd(landType) ? '🏛️' : '⚡'}</span>
+            <span>
+              {isGrantedEduComInd(landType)
+                ? 'Statutory Route: District Collector Desk → Maharashtra State Government Portal'
+                : 'Standard Route: Directly forwarded to Tahsildar Portal'}
+            </span>
+          </div>
         </div>
 
         {error && (

@@ -29,9 +29,16 @@ urlpatterns = [
     path('tahsildar/applications/<str:app_id>/reject/',  views.tahsildar_reject),
 
     # ── Collector dashboard ───────────────────────────────────────────
-    path('collector/applications/',                     views.collector_applications),
-    path('collector/applications/<str:app_id>/',        views.collector_application_detail),
-    path('collector/applications/<str:app_id>/forward/', views.collector_forward),
-    path('collector/applications/<str:app_id>/approve/', views.collector_approve),
-    path('collector/applications/<str:app_id>/reject/',  views.collector_reject),
+    path('collector/applications/',                                  views.collector_applications),
+    path('collector/applications/<str:app_id>/',                     views.collector_application_detail),
+    path('collector/applications/<str:app_id>/forward/',              views.collector_forward),
+    path('collector/applications/<str:app_id>/forward-state-govt/',   views.collector_forward_state_govt),
+    path('collector/applications/<str:app_id>/approve/',              views.collector_approve),
+    path('collector/applications/<str:app_id>/reject/',               views.collector_reject),
+
+    # ── Maharashtra State Government Secretariat (Granted & Semi-Granted)
+    path('state-govt/applications/',                                 views.state_govt_applications),
+    path('state-govt/applications/<str:app_id>/',                    views.state_govt_application_detail),
+    path('state-govt/applications/<str:app_id>/approve/',            views.state_govt_approve),
+    path('state-govt/applications/<str:app_id>/reject/',             views.state_govt_reject),
 ]

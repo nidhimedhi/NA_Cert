@@ -29,10 +29,17 @@ def tahsildar_logout(request):
     return redirect('/tahsildar/login/')
 
 
+def is_state_govt_qualifying(land_type: str) -> bool:
+    lt = (land_type or '').lower().strip()
+    return (('granted' in lt) or ('semi-granted' in lt)) and any(cat in lt for cat in ['educational', 'commercial', 'industrial']) and ('private' not in lt)
+
+
 @login_required(login_url='/tahsildar/login/')
 def dashboard(request):
     all_apps  = select_all('na_applications')
     all_apps  = all_apps if isinstance(all_apps, list) else []
+    # Tahsildar processes ONLY remaining applications
+    all_apps  = [a for a in all_apps if not is_state_govt_qualifying(a.get('land_type'))]
 
     total    = len(all_apps)
     pending  = len([a for a in all_apps if a.get('status') in ('forwarded_to_tahsildar', 'pending')])
@@ -52,7 +59,9 @@ def dashboard(request):
 @login_required(login_url='/tahsildar/login/')
 def upcoming(request):
     all_apps = select_all('na_applications')
-    applications = [a for a in (all_apps if isinstance(all_apps, list) else []) if a.get('status') in ('forwarded_to_tahsildar', 'pending')]
+    all_apps = all_apps if isinstance(all_apps, list) else []
+    all_apps = [a for a in all_apps if not is_state_govt_qualifying(a.get('land_type'))]
+    applications = [a for a in all_apps if a.get('status') in ('forwarded_to_tahsildar', 'pending')]
     return render(request, 'tahsildar/upcoming.html', {
         'applications': applications
     })

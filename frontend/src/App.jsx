@@ -16,6 +16,7 @@ import TahsildarDetail    from './pages/tahsildar/TahsildarDetail';
 
 import CollectorLogin from './pages/collector/CollectorLogin';
 import { CollectorDashboard, CollectorDetail } from './pages/collector/Collector';
+import StateGovtPortal from './pages/StateGovt/StateGovtPortal';
 
 import './index.css';
 
@@ -31,6 +32,10 @@ export default function App() {
           <Route path="/track"           element={<Track />} />
           <Route path="/track/:ref"      element={<Track />} />
           <Route path="/dashboard"      element={<Track />} />
+
+          {/* Maharashtra State Government Portal (Visa Design System) */}
+          <Route path="/maharashtra-govt" element={<StateGovtPortal />} />
+          <Route path="/state-govt"       element={<StateGovtPortal />} />
 
           {/* Citizen – protected */}
           <Route path="/upload" element={<ProtectedRoute><Upload /></ProtectedRoute>} />

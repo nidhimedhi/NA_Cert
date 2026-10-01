@@ -22,6 +22,12 @@ function getStatusMeta(status) {
       return { label: 'Tahsildar Verified', stage: 'Step 3: Verification Passed (Ready for Grant)', color: 'teal', pill: 'status-tahsildar_verified' };
     case 'tahsildar_rejected':
       return { label: 'Tahsildar Objections', stage: 'Step 3: Objections Raised by Tahsildar', color: 'red', pill: 'status-tahsildar_rejected' };
+    case 'forwarded_to_state_govt':
+      return { label: 'With State Govt', stage: 'Step 3b: State Secretariat Review (Granted Land)', color: 'indigo', pill: 'status-forwarded_to_tahsildar' };
+    case 'state_govt_approved':
+      return { label: 'State Approved (GR)', stage: 'Step 3c: State Concurrence Sanctioned', color: 'teal', pill: 'status-tahsildar_verified' };
+    case 'state_govt_rejected':
+      return { label: 'State Query/Rejected', stage: 'Step 3c: State Objections Raised', color: 'red', pill: 'status-collector_rejected' };
     case 'collector_approved':
       return { label: 'NA Granted', stage: 'Step 4: Final NA Sanction Issued', color: 'green', pill: 'status-collector_approved' };
     case 'collector_rejected':
@@ -102,6 +108,7 @@ export function CollectorDashboard() {
     forwarded_to_tahsildar: 0,
     tahsildar_verified: 0,
     tahsildar_rejected: 0,
+    state_govt_referral: 0,
     collector_approved: 0,
     collector_rejected: 0,
   });
@@ -139,6 +146,7 @@ export function CollectorDashboard() {
     { key: 'forwarded_to_tahsildar', label: '⏳ With Tahsildar', count: counts.forwarded_to_tahsildar, desc: 'Forwarded to Tahsildar for physical site inspection and boundary validation.' },
     { key: 'tahsildar_verified', label: '📋 Tahsildar Verified', count: counts.tahsildar_verified, desc: 'Field inquiry completed by Tahsildar. Ready for final NA Sanction Order.' },
     { key: 'tahsildar_rejected', label: '⚠️ Tahsildar Objections', count: counts.tahsildar_rejected, desc: 'Tahsildar raised discrepancies or field objections. Requires Collector adjudication.' },
+    { key: 'state_govt_referral', label: '🏛️ State Referrals (Edu, Com, Ind)', count: counts.state_govt_referral, desc: 'Granted and Semi-Granted Educational, Commercial, and Industrial applications redirected to Maharashtra State Government.' },
     { key: 'collector_approved', label: '📜 NA Granted', count: counts.collector_approved, desc: 'Final Non-Agricultural Sanction Orders issued by District Collector.' },
     { key: 'collector_rejected', label: '🚫 Final Rejected', count: counts.collector_rejected, desc: 'Applications rejected with official statutory findings.' },
     { key: 'all', label: '📊 All Applications', count: counts.all, desc: 'Complete registry of all NA permission requests across all workflow stages.' },
@@ -196,6 +204,27 @@ export function CollectorDashboard() {
         </nav>
 
         <div style={{ marginTop: 'auto', padding: '16px 20px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+          <Link
+            to="/maharashtra-govt"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              padding: '10px 14px',
+              marginBottom: '12px',
+              background: 'rgba(247, 182, 0, 0.15)',
+              border: '1px solid rgba(247, 182, 0, 0.4)',
+              color: '#f7b600',
+              textDecoration: 'none',
+              borderRadius: '6px',
+              fontSize: '12.5px',
+              fontWeight: '700',
+              textAlign: 'center',
+            }}
+          >
+            <span>🏛️</span> State Govt Portal ↗
+          </Link>
           <button className="sidebar-logout" style={{ margin: 0, width: '100%', borderRadius: '6px' }} onClick={logout}>
             Sign Out Authority
           </button>
@@ -225,6 +254,10 @@ export function CollectorDashboard() {
           <div className={`collector-metric-card color-green ${filter === 'collector_approved' ? 'active-metric' : ''}`} onClick={() => setFilter('collector_approved')}>
             <div className="collector-metric-label">4. NA Granted</div>
             <div className="collector-metric-val">{counts.collector_approved}</div>
+          </div>
+          <div className={`collector-metric-card color-teal ${filter === 'state_govt_referral' ? 'active-metric' : ''}`} onClick={() => setFilter('state_govt_referral')} style={{ borderTop: '4px solid #f7b600' }}>
+            <div className="collector-metric-label" style={{ color: '#b45309', fontWeight: 'bold' }}>🏛️ State Referrals (Granted)</div>
+            <div className="collector-metric-val" style={{ color: '#b45309' }}>{counts.state_govt_referral}</div>
           </div>
         </div>
 
@@ -496,10 +529,35 @@ export function CollectorDetail() {
     }
   };
 
+  const [stateReferralMemo, setStateReferralMemo] = useState('');
+  const [stateReferralBusy, setStateReferralBusy] = useState(false);
+
+  const forwardToStateGovt = async () => {
+    setStateReferralBusy(true);
+    try {
+      await cApi.post(`/collector/applications/${id}/forward-state-govt/`, {
+        memo: stateReferralMemo || `Statutory Referral under MLRC Section 44 for ${data?.application?.land_type}. Recommended for State Government Grant-in-aid concurrence.`,
+        officer_name: collectorName || 'District Collector',
+      });
+      setMsg('🏛️ Application successfully referred & dispatched to Maharashtra State Government Secretariat Portal!');
+      setStateReferralBusy(false);
+      setTimeout(() => navigate('/collector/dashboard'), 1800);
+    } catch (err) {
+      alert('Failed to refer application to State Government: ' + (err.response?.data?.error || err.message));
+      setStateReferralBusy(false);
+    }
+  };
+
   if (!data) return <div className="detail-page"><p className="loading-txt">Loading complete application dossier…</p></div>;
 
   const { application: app, documents, form_data } = data;
   const meta = getStatusMeta(app?.status);
+
+  const isGrantedOrSemiGranted = app?.land_type && (
+    (app.land_type.toLowerCase().includes('granted') || app.land_type.toLowerCase().includes('semi-granted')) &&
+    (app.land_type.toLowerCase().includes('educational') || app.land_type.toLowerCase().includes('commercial') || app.land_type.toLowerCase().includes('industrial')) &&
+    !app.land_type.toLowerCase().includes('private')
+  );
 
   // Workflow progress flags
   const isStep1Done = true; // submitted
@@ -552,6 +610,25 @@ export function CollectorDetail() {
       </div>
 
       {msg && <div className="success-msg">{msg}</div>}
+
+      {/* STATUTORY MANDATE BANNER FOR GRANTED & SEMI-GRANTED */}
+      {isGrantedOrSemiGranted && (
+        <div style={{ background: '#fffbeb', border: '2px solid #f59e0b', borderRadius: '8px', padding: '16px 20px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+          <div>
+            <div style={{ fontWeight: '800', color: '#92400e', fontSize: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span>🏛️</span> Statutory Requirement: Maharashtra State Government Referral Mandate
+            </div>
+            <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#78350f' }}>
+              Under Section 44 of Maharashtra Land Revenue Code, 1966 and State Grant Rules, this conversion on <strong>{app?.land_type}</strong> requires <strong>Maharashtra State Government Secretariat Referral & Ministerial Concurrence (मंत्रालय, मुंबई)</strong>.
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <Link to="/maharashtra-govt" target="_blank" style={{ background: '#b45309', color: '#fff', padding: '8px 16px', borderRadius: '6px', fontSize: '12.5px', fontWeight: 'bold', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              Open State Govt Portal ↗
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* HEADER BAR */}
       <div className="detail-header" style={{ alignItems: 'flex-start' }}>
@@ -869,8 +946,117 @@ export function CollectorDetail() {
       <div className="action-card" style={{ borderTop: '4px solid #0f172a' }}>
         <h3 style={{ fontSize: '18px', marginBottom: '8px' }}>Collectorate Official Action Determination</h3>
 
-        {/* CASE 1: NEW SUBMISSION -> FORWARD TO TAHSILDAR */}
-        {(app?.status === 'pending_collector' || app?.status === 'pending') && (
+        {/* STATE GOVERNMENT STATUS & REFERRAL NOTICES */}
+        {app?.status === 'forwarded_to_state_govt' && (
+          <div style={{ background: '#eff6ff', border: '2px solid #3b82f6', borderRadius: '8px', padding: '20px', marginBottom: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
+              <div>
+                <div style={{ fontSize: '17px', fontWeight: '800', color: '#1e40af', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span>🏛️</span> File Dispatched: Under Review at Maharashtra State Government Secretariat (मंत्रालय, मुंबई)
+                </div>
+                <p style={{ margin: '6px 0 0', fontSize: '13.5px', color: '#1e3a8a', lineHeight: '1.5' }}>
+                  This Granted/Semi-Granted application was forwarded with Collector recommendation memo. The State Revenue Secretariat is reviewing the reservation dossier for Government Resolution (GR) issuance.
+                </p>
+              </div>
+              <Link
+                to="/maharashtra-govt"
+                style={{
+                  background: '#1d4ed8',
+                  color: '#ffffff',
+                  padding: '10px 20px',
+                  borderRadius: '6px',
+                  fontSize: '13px',
+                  fontWeight: '700',
+                  textDecoration: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 2px 8px rgba(29, 78, 216, 0.3)',
+                }}
+              >
+                Review in State Govt Portal ↗
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {app?.status === 'state_govt_approved' && (
+          <div style={{ background: '#f0fdf4', border: '2px solid #22c55e', borderRadius: '8px', padding: '18px 20px', marginBottom: '20px' }}>
+            <div style={{ fontSize: '16px', fontWeight: '800', color: '#166534', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span>✅</span> Maharashtra State Government Concurrence Granted (GR Executed)
+            </div>
+            <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#15803d' }}>
+              Official State Government Resolution (GR) has been sanctioned. District Collector may now execute the Final Sanction Order below!
+            </p>
+          </div>
+        )}
+
+        {/* STATE REFERRAL DISPATCH FORM FOR GRANTED & SEMI-GRANTED */}
+        {isGrantedOrSemiGranted && app?.status !== 'forwarded_to_state_govt' && app?.status !== 'state_govt_approved' && (
+          <div style={{ background: '#fffbeb', border: '2px solid #d97706', borderRadius: '8px', padding: '20px', marginBottom: '20px' }}>
+            <h4 style={{ margin: '0 0 8px', color: '#92400e', fontSize: '16px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span>🏛️</span> Refer to Maharashtra State Government Secretariat (मंत्रालय मंजुरीसाठी पाठवा)
+            </h4>
+            <p style={{ margin: '0 0 14px', fontSize: '13px', color: '#78350f', lineHeight: '1.5' }}>
+              As per Section 44 of Maharashtra Land Revenue Code, 1966, this conversion for <strong>{app?.land_type}</strong> requires State Government Sanction & Resolution (GR). Enter Collector referral memorandum and dispatch this dossier to the Maharashtra State Government Website.
+            </p>
+            <div style={{ marginBottom: '14px' }}>
+              <label style={{ display: 'block', fontSize: '12.5px', fontWeight: '700', color: '#92400e', marginBottom: '6px' }}>
+                Collectorate Referral Memorandum to State Secretariat:
+              </label>
+              <textarea
+                className="input-wrap"
+                rows={2}
+                style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', fontSize: '13px' }}
+                placeholder={`e.g. Scrutinized ground verification report. Found in accordance with MLRC Sec 44 and UDCPR 2020. Forwarded to State Government Secretariat for ${app?.land_type} concurrence.`}
+                value={stateReferralMemo}
+                onChange={e => setStateReferralMemo(e.target.value)}
+              />
+            </div>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={forwardToStateGovt}
+                disabled={stateReferralBusy}
+                style={{
+                  background: 'linear-gradient(135deg, #d97706, #b45309)',
+                  color: '#ffffff',
+                  border: 'none',
+                  padding: '12px 24px',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontWeight: '700',
+                  cursor: stateReferralBusy ? 'not-allowed' : 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  boxShadow: '0 2px 6px rgba(217, 119, 6, 0.3)',
+                }}
+              >
+                {stateReferralBusy ? 'Dispatching to State Govt…' : '🏛️ Refer & Forward to Maharashtra State Government Portal →'}
+              </button>
+              <Link
+                to="/maharashtra-govt"
+                target="_blank"
+                style={{
+                  background: '#fef3c7',
+                  color: '#92400e',
+                  border: '1px solid #fde68a',
+                  padding: '12px 18px',
+                  borderRadius: '6px',
+                  fontSize: '13px',
+                  fontWeight: '700',
+                  textDecoration: 'none',
+                }}
+              >
+                🌐 Open State Government Portal ↗
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* CASE 1: NEW SUBMISSION -> FORWARD TO TAHSILDAR (ROUTINE APPLICATIONS ONLY) */}
+        {(app?.status === 'pending_collector' || app?.status === 'pending') && !isGrantedOrSemiGranted && (
           <div>
             <p style={{ color: '#475569', fontSize: '14px', marginBottom: '16px' }}>
               This is a newly submitted application received directly at the Collectorate. Review the application dossier and documents above, add any special directions, and forward to the jurisdictional Tahsildar for field inspection.

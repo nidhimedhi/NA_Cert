@@ -21,6 +21,14 @@ export default function Upload() {
     api.get('/land-types/').then(r => setDocs(r.data.documents));
   }, []);
 
+  const isStateGovtRoute = (landTypeStr) => {
+    const s = (landTypeStr || '').toLowerCase();
+    const isGrant = s.includes('granted') || s.includes('semi-granted');
+    const isTarget = s.includes('educational') || s.includes('commercial') || s.includes('industrial');
+    const isPrivate = s.includes('private');
+    return isGrant && isTarget && !isPrivate;
+  };
+
   const openModal = (landType) => { setModal({ landType }); setAccepted(false); };
   const proceed   = () => { navigate(`/apply?type=${encodeURIComponent(modal.landType)}`); };
 
@@ -39,6 +47,7 @@ export default function Upload() {
             const tab = activeTab[cat.key] || cat.sub[0];
             const landType = `${cat.key} - ${tab}`;
             const required = docs[landType] || [];
+            const isGovt = isStateGovtRoute(landType);
             return (
               <div className="land-card" key={cat.key} style={{ '--card-color': cat.color }}>
                 <div className="card-header">
@@ -56,6 +65,28 @@ export default function Upload() {
                       onClick={() => setActiveTab(p => ({ ...p, [cat.key]: s }))}>{s}</button>
                   ))}
                 </div>
+
+                <div style={{
+                  fontSize: '12px',
+                  padding: '6px 12px',
+                  borderRadius: '6px',
+                  margin: '8px 0 12px',
+                  fontWeight: '600',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: isGovt ? '#eff6ff' : '#f8fafc',
+                  color: isGovt ? '#1e40af' : '#475569',
+                  border: isGovt ? '1px solid #bfdbfe' : '1px solid #e2e8f0',
+                }}>
+                  <span>{isGovt ? '🏛️' : '⚡'}</span>
+                  <span>
+                    {isGovt
+                      ? 'Collector Desk → State Government Portal'
+                      : 'Direct Tahsildar Portal Route'}
+                  </span>
+                </div>
+
                 <ul className="doc-list">
                   {required.map((d, i) => <li key={i} className="doc-item"><span className="doc-num">{i+1}</span>{d}</li>)}
                 </ul>
@@ -78,6 +109,26 @@ export default function Upload() {
             </div>
             <div className="modal-body">
               <div className="modal-land-badge">Applying for: <strong>{modal.landType}</strong></div>
+              <div style={{
+                fontSize: '13px',
+                padding: '8px 14px',
+                borderRadius: '6px',
+                margin: '10px 0 16px',
+                fontWeight: '600',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: isStateGovtRoute(modal.landType) ? '#eff6ff' : '#f8fafc',
+                color: isStateGovtRoute(modal.landType) ? '#1e40af' : '#475569',
+                border: isStateGovtRoute(modal.landType) ? '1px solid #bfdbfe' : '1px solid #e2e8f0',
+              }}>
+                <span>{isStateGovtRoute(modal.landType) ? '🏛️' : '⚡'}</span>
+                <span>
+                  {isStateGovtRoute(modal.landType)
+                    ? 'Statutory Destination: Directly routed to District Collector for Maharashtra State Government referral.'
+                    : 'Standard Destination: Directly routed to Tahsildar Portal for field inquiry.'}
+                </span>
+              </div>
               <ul className="instr-list">
                 {[
                   'All documents must be clear, legible, and complete.',

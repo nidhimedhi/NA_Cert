@@ -108,6 +108,25 @@ DOCUMENTS = {
 }
 
 
+def is_state_govt_qualifying(land_type: str) -> bool:
+    """
+    Returns True ONLY for Granted & Semi-Granted applications of Educational, Commercial, and Industrial categories:
+      - Educational - Granted
+      - Educational - Semi-Granted
+      - Commercial - Granted
+      - Commercial - Semi-Granted
+      - Industrial - Granted
+      - Industrial - Semi-Granted
+    All remaining applications (Residential, Private Educational, Private Commercial, Private Industrial, etc.)
+    return False and are routed to the Tahsildar Portal.
+    """
+    lt = (land_type or '').lower().strip()
+    is_granted_or_semi = ('granted' in lt) or ('semi-granted' in lt)
+    is_target_cat = any(cat in lt for cat in ['educational', 'commercial', 'industrial'])
+    is_private = 'private' in lt
+    return is_granted_or_semi and is_target_cat and not is_private
+
+
 def _make_citizen_token(user: dict) -> str:
     """Issue a simple JWT for a citizen (Supabase user)."""
     payload = {
@@ -291,11 +310,15 @@ def apply_na(request):
     if total_amount:
         fee_summary = f"Statutory Fee: {total_amount} Paid via UPI (UTR: {utr_number or 'Pending'})"
 
+    # Educational, Commercial & Industrial Granted/Semi-Granted go to Collector (then redirected to State Govt)
+    # Remaining applications go directly to Tahsildar portal
+    initial_status = 'pending_collector' if is_state_govt_qualifying(land_type) else 'forwarded_to_tahsildar'
+
     app_result = insert('na_applications', {
         'user_email':       user_email,
         'land_type':        land_type,
         'reference_no':     ref,
-        'status':           'pending_collector',
+        'status':           initial_status,
         'rejection_reason': fee_summary if fee_summary else None,
     })
 
@@ -397,13 +420,17 @@ def tahsildar_applications(request):
     apps = select_all('na_applications')
     apps = apps if isinstance(apps, list) else []
 
+    # Tahsildar processes ONLY remaining applications (Residential, Private Educational/Commercial/Industrial)
+    # Granted & Semi-Granted Educational, Commercial, Industrial bypass Tahsildar to Collector -> State Govt
+    apps = [a for a in apps if not is_state_govt_qualifying(a.get('land_type'))]
+
     if status_filter == 'pending':
         apps = [a for a in apps if a.get('status') in ('forwarded_to_tahsildar', 'pending')]
     elif status_filter == 'approved':
         apps = [a for a in apps if a.get('status') in ('tahsildar_verified', 'approved', 'collector_approved')]
     elif status_filter == 'rejected':
         apps = [a for a in apps if a.get('status') in ('tahsildar_rejected', 'rejected', 'collector_rejected')]
-    elif status_filter:
+    elif status_filter and status_filter != 'all':
         apps = [a for a in apps if a.get('status') == status_filter]
     return Response({'applications': apps})
 
@@ -564,6 +591,9 @@ def collector_applications(request):
         'forwarded_to_tahsildar': len([a for a in all_apps if a.get('status') == 'forwarded_to_tahsildar']),
         'tahsildar_verified': len([a for a in all_apps if a.get('status') in ('tahsildar_verified', 'approved')]),
         'tahsildar_rejected': len([a for a in all_apps if a.get('status') in ('tahsildar_rejected', 'rejected')]),
+        'state_govt_referral': len([a for a in all_apps if is_state_govt_qualifying(a.get('land_type'))]),
+        'forwarded_to_state_govt': len([a for a in all_apps if a.get('status') == 'forwarded_to_state_govt' and is_state_govt_qualifying(a.get('land_type'))]),
+        'state_govt_approved': len([a for a in all_apps if a.get('status') == 'state_govt_approved' and is_state_govt_qualifying(a.get('land_type'))]),
         'collector_approved': len([a for a in all_apps if a.get('status') == 'collector_approved']),
         'collector_rejected': len([a for a in all_apps if a.get('status') == 'collector_rejected']),
     }
@@ -576,6 +606,12 @@ def collector_applications(request):
         filtered = [a for a in all_apps if a.get('status') in ('tahsildar_verified', 'approved')]
     elif status_filter == 'tahsildar_rejected':
         filtered = [a for a in all_apps if a.get('status') in ('tahsildar_rejected', 'rejected')]
+    elif status_filter == 'state_govt_referral':
+        filtered = [a for a in all_apps if is_state_govt_qualifying(a.get('land_type'))]
+    elif status_filter == 'forwarded_to_state_govt':
+        filtered = [a for a in all_apps if a.get('status') == 'forwarded_to_state_govt']
+    elif status_filter == 'state_govt_approved':
+        filtered = [a for a in all_apps if a.get('status') == 'state_govt_approved']
     elif status_filter == 'collector_approved':
         filtered = [a for a in all_apps if a.get('status') == 'collector_approved']
     elif status_filter == 'collector_rejected':
@@ -626,6 +662,64 @@ def collector_forward(request, app_id):
         update_data['rejection_reason'] = f"Collector Directions: {remarks}"
     c_update('na_applications', 'id', app_id, update_data)
     return Response({'message': 'Application forwarded to Tahsildar for field verification.'})
+
+
+@api_view(['POST'])
+def collector_forward_state_govt(request, app_id):
+    """
+    Collector forwards a Granted or Semi-Granted NA Application to the
+    Maharashtra State Government Secretariat (Revenue & Forest Department, Mantralaya).
+    """
+    from collector.supabase_client import update as c_update, select_one
+    from portal.supabase_client import insert as p_insert
+
+    memo = request.data.get('memo', '') or request.data.get('remarks', '')
+    officer_name = request.data.get('officer_name', '') or getattr(request.user, 'username', 'District Collector')
+    referral_no = request.data.get('referral_no', '') or f"MAH/REV/SEC-{timezone.now().year}/{app_id[:6].upper()}"
+
+    app = select_one('na_applications', 'id', app_id)
+    land_type = app.get('land_type', 'Granted Land') if isinstance(app, dict) else 'Granted Land'
+
+    summary = f"Referred to Maharashtra State Government Secretariat (Ref: {referral_no}) by {officer_name}. Memo: {memo or 'Statutory clearance requested for ' + land_type}"
+
+    c_update('na_applications', 'id', app_id, {
+        'status': 'forwarded_to_state_govt',
+        'rejection_reason': summary,
+        'reviewed_at': timezone.now().isoformat(),
+    })
+
+    # Archive referral memorandum into extracted_documents
+    try:
+        report_payload = {
+            'application_id': app_id,
+            'document_name': 'Collector State Government Referral Memorandum',
+            'village': app.get('village', '') if isinstance(app, dict) else '',
+            'taluka': app.get('taluka', '') if isinstance(app, dict) else '',
+            'district': app.get('district', '') if isinstance(app, dict) else '',
+            'gat_no': app.get('gat_no', '') if isinstance(app, dict) else '',
+            'owner_names': app.get('applicant_name', '') if isinstance(app, dict) else '',
+            'raw_json': {
+                'report_title': 'Collectorate Referral Memorandum to Maharashtra State Government',
+                'referral_no': referral_no,
+                'forwarded_at': timezone.now().isoformat(),
+                'referring_authority': officer_name,
+                'designation': 'District Collector & District Magistrate',
+                'land_type': land_type,
+                'memorandum_text': memo,
+                'statutory_provision': 'Section 44 of Maharashtra Land Revenue Code, 1966 & State Grant Rules',
+            }
+        }
+        p_insert('extracted_documents', report_payload)
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning("Could not persist collector state referral document: %s", e)
+
+    return Response({
+        'message': 'Application successfully referred and dispatched to Maharashtra State Government Portal.',
+        'referral_no': referral_no,
+        'status': 'forwarded_to_state_govt',
+    })
+
 
 
 @api_view(['POST'])
@@ -730,6 +824,193 @@ def collector_reject(request, app_id):
 
 
 # ─────────────────────────────────────────────────────────────────────
+# Maharashtra State Government Secretariat (Granted & Semi-Granted)
+# ─────────────────────────────────────────────────────────────────────
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def state_govt_applications(request):
+    """
+    Returns all Granted and Semi-Granted NA Applications referred to / managed by
+    the Maharashtra State Government Secretariat.
+    """
+    from collector.supabase_client import select_all
+    all_apps = select_all('na_applications')
+    all_apps = all_apps if isinstance(all_apps, list) else []
+
+    # Strictly and ONLY Educational, Commercial, Industrial Granted & Semi-Granted applications
+    state_apps = [a for a in all_apps if is_state_govt_qualifying(a.get('land_type'))]
+
+    status_filter = request.GET.get('status', 'all')
+    category_filter = request.GET.get('category', 'all')
+    search = request.GET.get('search', '').lower().strip()
+
+    filtered = state_apps
+
+    if status_filter == 'pending_state':
+        filtered = [a for a in filtered if a.get('status') in ('forwarded_to_state_govt', 'tahsildar_verified', 'approved', 'pending_collector', 'pending')]
+    elif status_filter == 'forwarded_to_state_govt':
+        filtered = [a for a in filtered if a.get('status') == 'forwarded_to_state_govt']
+    elif status_filter == 'state_govt_approved':
+        filtered = [a for a in filtered if a.get('status') == 'state_govt_approved']
+    elif status_filter == 'state_govt_rejected':
+        filtered = [a for a in filtered if a.get('status') == 'state_govt_rejected']
+
+    if category_filter == 'educational':
+        filtered = [a for a in filtered if 'educational' in (a.get('land_type') or '').lower()]
+    elif category_filter == 'industrial':
+        filtered = [a for a in filtered if 'industrial' in (a.get('land_type') or '').lower()]
+    elif category_filter == 'commercial':
+        filtered = [a for a in filtered if 'commercial' in (a.get('land_type') or '').lower()]
+    elif category_filter == 'granted_only':
+        filtered = [a for a in filtered if 'semi-granted' not in (a.get('land_type') or '').lower() and 'granted' in (a.get('land_type') or '').lower()]
+    elif category_filter == 'semi_granted_only':
+        filtered = [a for a in filtered if 'semi-granted' in (a.get('land_type') or '').lower()]
+
+    if search:
+        filtered = [a for a in filtered if (
+            search in (a.get('reference_no') or '').lower() or
+            search in (a.get('applicant_name') or '').lower() or
+            search in (a.get('user_email') or '').lower() or
+            search in (a.get('land_type') or '').lower()
+        )]
+
+    counts = {
+        'total_referrals': len(state_apps),
+        'pending_state': len([a for a in state_apps if a.get('status') in ('forwarded_to_state_govt', 'tahsildar_verified', 'approved', 'pending_collector', 'pending')]),
+        'forwarded_from_collector': len([a for a in state_apps if a.get('status') == 'forwarded_to_state_govt']),
+        'state_govt_approved': len([a for a in state_apps if a.get('status') == 'state_govt_approved']),
+        'state_govt_rejected': len([a for a in state_apps if a.get('status') == 'state_govt_rejected']),
+        'educational': len([a for a in state_apps if 'educational' in (a.get('land_type') or '').lower()]),
+        'industrial': len([a for a in state_apps if 'industrial' in (a.get('land_type') or '').lower()]),
+        'commercial': len([a for a in state_apps if 'commercial' in (a.get('land_type') or '').lower()]),
+        'granted': len([a for a in state_apps if 'semi-granted' not in (a.get('land_type') or '').lower() and 'granted' in (a.get('land_type') or '').lower()]),
+        'semi_granted': len([a for a in state_apps if 'semi-granted' in (a.get('land_type') or '').lower()]),
+    }
+
+    return Response({
+        'applications': filtered,
+        'counts': counts,
+    })
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def state_govt_application_detail(request, app_id):
+    """
+    Returns full dossier for a Granted or Semi-Granted NA application for State Review.
+    """
+    from collector.supabase_client import select_one, get_documents
+    app = select_one('na_applications', 'id', app_id)
+    docs = get_documents(app_id)
+    docs = docs if isinstance(docs, list) else []
+
+    form_data = None
+    supporting_docs = []
+    referral_doc = None
+    gr_doc = None
+
+    for doc in docs:
+        if doc.get('document_name') == 'Application Form - e-District Maharashtra':
+            form_data = _normalize_form_data(doc.get('raw_json'))
+        elif doc.get('document_name') == 'Collector State Government Referral Memorandum':
+            referral_doc = doc
+        elif doc.get('document_name') == 'Maharashtra State Government Resolution (GR)':
+            gr_doc = doc
+        else:
+            supporting_docs.append(doc)
+
+    return Response({
+        'application': app,
+        'documents': docs,
+        'form_data': form_data,
+        'supporting_docs': supporting_docs,
+        'referral_doc': referral_doc,
+        'gr_doc': gr_doc,
+    })
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def state_govt_approve(request, app_id):
+    """
+    Maharashtra State Government Secretariat issues official Government Resolution (GR)
+    and grants State Approval / Concurrence for Granted or Semi-Granted NA application.
+    """
+    from collector.supabase_client import update as c_update, select_one
+    from portal.supabase_client import insert as p_insert
+
+    gr_number = request.data.get('gr_number', '') or f"शासन निर्णय क्र. महसूल/अकृ-२०२६/प्र.क्र.{app_id[:4].upper()}/ज-१"
+    officer_name = request.data.get('officer_name', 'श्री. व्ही. के. सावंत (भा.प्र.से.)')
+    designation = request.data.get('designation', 'सह-सचिव, महसूल व वन विभाग, महाराष्ट्र शासन')
+    sanction_date = request.data.get('sanction_date', timezone.now().strftime('%Y-%m-%d'))
+    remarks = request.data.get('remarks', 'शासकीय अनुदानित जागेच्या अकृषिक वापरास शासन मंजुरी प्रदान करण्यात येत आहे.')
+    stipulations = request.data.get('stipulations', [
+        'जमिनीचा वापर केवळ मंजूर हेतूसाठीच बंधनकारक राहील.',
+        'अनुदानित अटी व शर्तींचे उल्लंघन झाल्यास मंजुरी रद्दबातल ठरेल.',
+        'संबंधित जिल्हाधिकाऱ्यांनी महसूल संहितेनुसार पुढील अंतिम कार्यवाही करावी.'
+    ])
+
+    app = select_one('na_applications', 'id', app_id)
+
+    summary = f"Maharashtra State Government Resolution (GR No. {gr_number}) executed on {sanction_date} by {officer_name} ({designation}). Decree: {remarks}"
+
+    c_update('na_applications', 'id', app_id, {
+        'status': 'state_govt_approved',
+        'rejection_reason': summary,
+        'reviewed_at': timezone.now().isoformat(),
+    })
+
+    # Archive official Government Resolution (GR)
+    try:
+        report_payload = {
+            'application_id': app_id,
+            'document_name': 'Maharashtra State Government Resolution (GR)',
+            'village': app.get('village', '') if isinstance(app, dict) else '',
+            'taluka': app.get('taluka', '') if isinstance(app, dict) else '',
+            'district': app.get('district', '') if isinstance(app, dict) else '',
+            'gat_no': app.get('gat_no', '') if isinstance(app, dict) else '',
+            'owner_names': app.get('applicant_name', '') if isinstance(app, dict) else '',
+            'raw_json': {
+                'report_title': 'महाराष्ट्र शासन - महसूल व वन विभाग - शासन निर्णय (Government Resolution)',
+                'gr_number': gr_number,
+                'sanction_date': sanction_date,
+                'signatory': officer_name,
+                'designation': designation,
+                'department': 'महसूल व वन विभाग, मंत्रालय, मुंबई - ४०००३२',
+                'sanctioned_purpose': app.get('land_type', 'Granted NA Conversion') if isinstance(app, dict) else 'Granted NA Conversion',
+                'decree_text': remarks,
+                'statutory_conditions': stipulations,
+                'issued_at': timezone.now().isoformat(),
+            }
+        }
+        p_insert('extracted_documents', report_payload)
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning("Could not persist state GR document: %s", e)
+
+    return Response({
+        'message': 'Official State Government Resolution (GR) issued and granted successfully.',
+        'gr_number': gr_number,
+        'status': 'state_govt_approved',
+    })
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def state_govt_reject(request, app_id):
+    from collector.supabase_client import update as c_update
+    reason = request.data.get('reason', '')
+    summary = f"State Government Secretariat Query / Rejection: {reason}"
+    c_update('na_applications', 'id', app_id, {
+        'status': 'state_govt_rejected',
+        'rejection_reason': summary,
+        'reviewed_at': timezone.now().isoformat(),
+    })
+    return Response({'message': 'State Government query / rejection recorded.'})
+
+
+# ─────────────────────────────────────────────────────────────────────
 # Citizen Tracking & Application History endpoints (Public / Citizen)
 # ─────────────────────────────────────────────────────────────────────
 
@@ -787,46 +1068,77 @@ def track_application(request, ref=None):
     reviewed_at = app.get('reviewed_at')
     rejection_reason = app.get('rejection_reason', '')
 
+    is_granted_flow = is_state_govt_qualifying(app.get('land_type')) or status in ('forwarded_to_state_govt', 'state_govt_approved', 'state_govt_rejected')
+
     # Compute high-level status meta
     if status in ('pending_collector', 'pending'):
-        status_meta = {
-            'label': 'Submitted to Collectorate',
-            'stage': 'Step 1 of 4: Received at Collectorate',
-            'color': 'amber',
-            'summary': 'Application has been successfully filed and is undergoing preliminary intake review at the District Collectorate.',
-        }
+        if is_granted_flow:
+            status_meta = {
+                'label': 'Pending Collector Review',
+                'stage': 'Step 1 of 4: District Collector Desk',
+                'color': 'amber',
+                'summary': 'Educational, Commercial or Industrial Granted land received at District Collectorate. Under review for statutory referral to State Government.',
+            }
+        else:
+            status_meta = {
+                'label': 'Submitted to Collectorate',
+                'stage': 'Step 1: Intake & Processing',
+                'color': 'amber',
+                'summary': 'Application has been successfully filed and is undergoing preliminary intake review.',
+            }
     elif status == 'forwarded_to_tahsildar':
         status_meta = {
             'label': 'Under Tahsildar Field Inquiry',
-            'stage': 'Step 2 of 4: Forwarded for Ground Inspection',
+            'stage': 'Step 2: Forwarded to Tahsildar Portal',
             'color': 'blue',
-            'summary': 'Forwarded by District Collector to the jurisdictional Tahsildar for on-site boundary verification and title check.',
+            'summary': 'Routed to the jurisdictional Tahsildar Portal for physical on-site ground inspection, panchnama, and title verification.',
         }
     elif status == 'tahsildar_verified':
         status_meta = {
-            'label': 'Tahsildar Verified — Pending Sanction',
-            'stage': 'Step 3 of 4: Field Inquiry Passed',
+            'label': 'Tahsildar Verified — Pending Collector Sanction',
+            'stage': 'Step 3: Tahsildar Ground Inquiry Passed',
             'color': 'teal',
-            'summary': 'Field verification completed by Tahsildar with positive recommendation. Returned to District Collector for final Sanction Order.',
+            'summary': 'Field verification completed by Tahsildar with positive statutory recommendation. Returned to District Collector for final Sanction Order.',
         }
     elif status == 'tahsildar_rejected':
         status_meta = {
-            'label': 'Tahsildar Objections — Under Review',
-            'stage': 'Step 3 of 4: Field Objections Raised',
+            'label': 'Tahsildar Objections Raised',
+            'stage': 'Step 3: Field Inspection Objections',
             'color': 'red',
-            'summary': 'Tahsildar raised ground inspection objections. Application returned to District Collector for official determination.',
+            'summary': 'Tahsildar raised ground inspection objections or boundary discrepancies. Returned to District Collector for review.',
+        }
+    elif status == 'forwarded_to_state_govt':
+        status_meta = {
+            'label': 'Referred to Maharashtra State Government',
+            'stage': 'Step 2: State Secretariat Review (Granted Land)',
+            'color': 'indigo',
+            'summary': 'Redirected by District Collector to Maharashtra State Government Secretariat (मंत्रालय, मुंबई) for statutory Grant clearance.',
+        }
+    elif status == 'state_govt_approved':
+        status_meta = {
+            'label': 'State Government Resolution (GR) Issued',
+            'stage': 'Step 3: State Sanction Granted',
+            'color': 'teal',
+            'summary': 'Maharashtra State Government has sanctioned the land grant and issued Government Resolution (GR). Ready for final Collector decree.',
+        }
+    elif status == 'state_govt_rejected':
+        status_meta = {
+            'label': 'State Government Query / Refusal',
+            'stage': 'Step 3: State Refusal / Objections',
+            'color': 'red',
+            'summary': 'State Government Secretariat raised statutory objections regarding grant conditions.',
         }
     elif status == 'collector_approved':
         status_meta = {
             'label': 'NA Permission Granted',
-            'stage': 'Step 4 of 4: Final Sanction Order Issued',
+            'stage': 'Final Step: Sanction Order Issued',
             'color': 'green',
-            'summary': 'Congratulations! Non-Agricultural Permission has been officially granted under the Maharashtra Land Revenue Code, 1966.',
+            'summary': 'Non-Agricultural Permission has been officially granted under the Maharashtra Land Revenue Code, 1966.',
         }
     elif status == 'collector_rejected':
         status_meta = {
             'label': 'Application Refused',
-            'stage': 'Step 4 of 4: Final Rejection Order Issued',
+            'stage': 'Final Step: Rejection Order Issued',
             'color': 'red',
             'summary': 'The application for Non-Agricultural permission has been rejected with official statutory reasons.',
         }
@@ -838,41 +1150,71 @@ def track_application(request, ref=None):
             'summary': 'Application is currently under administrative processing.',
         }
 
-    # Build 4 Milestone steps
-    steps = [
-        {
-            'step': 1,
-            'title': 'Application Submission',
-            'subtitle': 'Citizen Filing & Collectorate Intake',
-            'status': 'completed',
-            'timestamp': submitted_at,
-            'description': 'Application dossier and required documents filed online. Registered at District Collectorate.',
-        },
-        {
-            'step': 2,
-            'title': 'Collector Intake & Referral',
-            'subtitle': 'Forwarded to Local Revenue Office',
-            'status': 'completed' if status in ('forwarded_to_tahsildar', 'tahsildar_verified', 'tahsildar_rejected', 'collector_approved', 'collector_rejected') else 'active',
-            'timestamp': reviewed_at if status in ('forwarded_to_tahsildar', 'tahsildar_verified', 'tahsildar_rejected', 'collector_approved', 'collector_rejected') else None,
-            'description': 'Collector scrutinized documents and referred the case to the jurisdictional Tahsildar for field inspection.' if status in ('forwarded_to_tahsildar', 'tahsildar_verified', 'tahsildar_rejected', 'collector_approved', 'collector_rejected') else 'Under preliminary review by District Collectorate for dispatch to Tahsildar.',
-        },
-        {
-            'step': 3,
-            'title': 'Tahsildar Field Inquiry',
-            'subtitle': 'Ground Verification & Boundary Demarcation',
-            'status': 'completed' if status in ('tahsildar_verified', 'collector_approved') else ('rejected' if status == 'tahsildar_rejected' else ('active' if status == 'forwarded_to_tahsildar' else 'upcoming')),
-            'timestamp': reviewed_at if status in ('tahsildar_verified', 'tahsildar_rejected') else None,
-            'description': 'Site inspected, boundaries verified, and verification report submitted to Collector.' if status in ('tahsildar_verified', 'collector_approved') else ('Tahsildar identified discrepancies or statutory objections during site inspection.' if status == 'tahsildar_rejected' else ('Tahsildar conducting physical site inspection, boundary verification, and title check.' if status == 'forwarded_to_tahsildar' else 'Awaiting local site verification by Tahsildar.')),
-        },
-        {
-            'step': 4,
-            'title': 'District Collector Final Determination',
-            'subtitle': 'NA Sanction Order Issuance',
-            'status': 'completed' if status == 'collector_approved' else ('rejected' if status == 'collector_rejected' else ('active' if status in ('tahsildar_verified', 'tahsildar_rejected') else 'upcoming')),
-            'timestamp': reviewed_at if status in ('collector_approved', 'collector_rejected') else None,
-            'description': 'Final NA Sanction Order granted and authorized under Maharashtra Land Revenue Code, 1966.' if status == 'collector_approved' else ('Official rejection order issued by District Collector.' if status == 'collector_rejected' else ('Returned from Tahsildar. District Collector reviewing file for final order.' if status in ('tahsildar_verified', 'tahsildar_rejected') else 'Final order pending completion of field verification.')),
-        },
-    ]
+    # Build Milestone steps
+    if is_granted_flow:
+        # Strictly Collector -> State Govt -> Final Collector Sanction
+        steps = [
+            {
+                'step': 1,
+                'title': 'Application Submission & Collector Intake',
+                'subtitle': 'Direct to District Collector Desk',
+                'status': 'completed',
+                'timestamp': submitted_at,
+                'description': 'Educational / Commercial / Industrial Granted land dossier filed online and routed to District Collector desk.',
+            },
+            {
+                'step': 2,
+                'title': 'District Collector Referral',
+                'subtitle': 'Forwarded to State Government Secretariat',
+                'status': 'completed' if status in ('forwarded_to_state_govt', 'state_govt_approved', 'state_govt_rejected', 'collector_approved', 'collector_rejected') else ('active' if status in ('pending_collector', 'pending') else 'upcoming'),
+                'timestamp': reviewed_at if status in ('forwarded_to_state_govt', 'state_govt_approved', 'state_govt_rejected') else None,
+                'description': 'Collector reviewed statutory conditions and redirected the dossier to the Maharashtra State Government Secretariat.' if status != 'pending_collector' else 'Under scrutiny by District Collector for referral memo generation.',
+            },
+            {
+                'step': 3,
+                'title': 'Maharashtra State Govt Secretariat',
+                'subtitle': 'Government Resolution (GR) Sanction Desk',
+                'status': 'completed' if status in ('state_govt_approved', 'collector_approved') else ('rejected' if status == 'state_govt_rejected' else ('active' if status == 'forwarded_to_state_govt' else 'upcoming')),
+                'timestamp': reviewed_at if status in ('state_govt_approved', 'state_govt_rejected') else None,
+                'description': 'State Government issued official Government Resolution (GR) and sanctioned conversion.' if status in ('state_govt_approved', 'collector_approved') else ('Under ministerial scrutiny by Revenue & Forest Department Secretariat, Mantralaya Mumbai.' if status == 'forwarded_to_state_govt' else 'Awaiting State Government review and GR generation.'),
+            },
+            {
+                'step': 4,
+                'title': 'District Collector Sanction Order',
+                'subtitle': 'Final NA Sanction Decree',
+                'status': 'completed' if status == 'collector_approved' else ('rejected' if status == 'collector_rejected' else ('active' if status == 'state_govt_approved' else 'upcoming')),
+                'timestamp': reviewed_at if status in ('collector_approved', 'collector_rejected') else None,
+                'description': 'Final NA Sanction Order granted and authorized under Maharashtra Land Revenue Code, 1966.' if status == 'collector_approved' else ('Official rejection order issued by District Collector.' if status == 'collector_rejected' else ('District Collector executing final sanction decree upon receipt of State GR.' if status == 'state_govt_approved' else 'Pending State Government clearance.')),
+            },
+        ]
+    else:
+        # Remaining Applications: Direct to Tahsildar Portal -> Tahsildar Verification -> Collector Sanction
+        steps = [
+            {
+                'step': 1,
+                'title': 'Application Submission',
+                'subtitle': 'Citizen Filing & Auto-Route to Tahsildar',
+                'status': 'completed',
+                'timestamp': submitted_at,
+                'description': 'Application dossier and required documents submitted online. Routed directly to Tahsildar Portal.',
+            },
+            {
+                'step': 2,
+                'title': 'Tahsildar Field Inquiry & Panchnama',
+                'subtitle': 'On-Site Verification & Ground Report',
+                'status': 'completed' if status in ('tahsildar_verified', 'collector_approved') else ('rejected' if status == 'tahsildar_rejected' else ('active' if status == 'forwarded_to_tahsildar' else 'upcoming')),
+                'timestamp': reviewed_at if status in ('tahsildar_verified', 'tahsildar_rejected') else None,
+                'description': 'Site inspected, boundaries verified, and verification dossier submitted.' if status in ('tahsildar_verified', 'collector_approved') else ('Tahsildar identified discrepancies during ground inspection.' if status == 'tahsildar_rejected' else 'Tahsildar conducting physical site inspection, boundary verification, and title check.'),
+            },
+            {
+                'step': 3,
+                'title': 'District Collector Final Determination',
+                'subtitle': 'Final NA Sanction Order Issuance',
+                'status': 'completed' if status == 'collector_approved' else ('rejected' if status == 'collector_rejected' else ('active' if status in ('tahsildar_verified', 'tahsildar_rejected') else 'upcoming')),
+                'timestamp': reviewed_at if status in ('collector_approved', 'collector_rejected') else None,
+                'description': 'Final NA Sanction Order granted and authorized under Maharashtra Land Revenue Code, 1966.' if status == 'collector_approved' else ('Official rejection order issued by District Collector.' if status == 'collector_rejected' else ('District Collector reviewing Tahsildar verification report for final decree.' if status == 'tahsildar_verified' else 'Pending Tahsildar ground verification completion.')),
+            },
+        ]
 
     return Response({
         'application': app,
