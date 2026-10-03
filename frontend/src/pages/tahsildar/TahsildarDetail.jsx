@@ -80,7 +80,7 @@ export default function TahsildarDetail() {
   const [showPdfModal, setShowPdfModal] = useState(false);
 
   // Verification Dossier Form State
-  const [officerName, setOfficerName]     = useState(localStorage.getItem('username') || 'Nidhi');
+  const [officerName, setOfficerName]     = useState(localStorage.getItem('username') || 'Tahsildar Officer');
   const [designation, setDesignation]     = useState('Tahsildar & Executive Magistrate');
   const [inspectionDate, setInspectionDate] = useState(new Date().toISOString().slice(0, 10));
   const [roadAccess, setRoadAccess]       = useState('12.0 Meters Public Asphalt Road');

@@ -101,6 +101,33 @@ def resources(request):
     return render(request, 'portal/resources.html')
 
 
+def resource_pdf_redirect(request, filename):
+    from django.conf import settings
+    from django.http import Http404, HttpResponseRedirect
+    import os
+
+    docs_dir = settings.BASE_DIR / 'portal/static/docs'
+    # Direct match
+    target = docs_dir / filename
+    if target.is_file():
+        return HttpResponseRedirect(f"{settings.STATIC_URL}docs/{filename}")
+    
+    # Clean and match fuzzy filename
+    clean_target = filename.lower().replace('_', ' ').replace('-', ' ').strip()
+    if clean_target.endswith('.pdf'):
+        clean_target = clean_target[:-4].strip()
+
+    if os.path.exists(docs_dir):
+        for f in os.listdir(docs_dir):
+            f_clean = f.lower().replace('_', ' ').replace('-', ' ').strip()
+            if f_clean.endswith('.pdf'):
+                f_clean = f_clean[:-4].strip()
+            if (clean_target in f_clean or f_clean in clean_target) and f.lower().endswith('.pdf'):
+                return HttpResponseRedirect(f"{settings.STATIC_URL}docs/{f}")
+                
+    raise Http404("Document not found.")
+
+
 def contact(request):
     return render(request, 'portal/contact.html')
 
@@ -167,17 +194,25 @@ def register(request):
 
 def login_user(request):
     if request.method == "POST":
-        username = request.POST.get('username', '')
+        username = request.POST.get('username', '').strip()
         password = request.POST.get('password', '')
 
-        # Get user from Supabase
-        result = select('users', {'username': username})
+        # Get user from Supabase (by email or username)
+        result = select('users', {'email': username})
+        if not result or isinstance(result, dict) or len(result) == 0:
+            result = select('users', {'username': username})
 
         if result and not isinstance(result, dict) and check_password(password, result[0]['password']):
             user = result[0]
+            display_name = (user.get('first_name') or '').strip()
+            if not display_name:
+                display_name = (user.get('username') or '').strip()
+            if not display_name:
+                display_name = user.get('email', '').split('@')[0].strip()
+
             request.session['user_id']    = str(user['id'])
             request.session['user_email'] = user['email']
-            request.session['user_name']  = user['first_name']
+            request.session['user_name']  = display_name
             return redirect('/')
         else:
             return render(request, 'portal/login.html', {

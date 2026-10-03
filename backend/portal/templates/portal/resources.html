@@ -156,9 +156,21 @@
 
   .video-card {
     border: 1px solid #eee;
-    border-radius: 4px;
+    border-radius: 6px;
     padding: 10px;
     text-align: center;
+    text-decoration: none;
+    display: block;
+    color: inherit;
+    background: #fff;
+    transition: all 0.25s ease;
+    cursor: pointer;
+  }
+
+  .video-card:hover {
+    border-color: #cbd5e1;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
   }
 
   .video-card img {
@@ -166,13 +178,23 @@
     height: 200px;
     object-fit: cover;
     margin-bottom: 15px;
-    border-radius: 2px;
+    border-radius: 4px;
+    transition: transform 0.3s ease;
+  }
+
+  .video-card:hover img {
+    transform: scale(1.02);
   }
 
   .video-card p {
     font-size: 14px;
     color: var(--uidai-blue);
     font-weight: 600;
+    margin: 5px 0;
+  }
+
+  .video-card:hover p {
+    color: var(--uidai-orange);
   }
 </style>
 
@@ -223,22 +245,26 @@
             <tr>
               <td>12-Aug-2026</td>
               <td>Revised Premium Rates for Commercial NA Conversion in Tier-2 Cities</td>
-              <td><a href="#" class="download-link"><i class="fa-solid fa-file-pdf pdf-icon"></i> PDF (1.2 MB)</a></td>
+              <td><a href="{% static 'docs/Revised.pdf' %}" target="_blank" rel="noopener noreferrer"
+                  class="download-link"><i class="fa-solid fa-file-pdf pdf-icon"></i> PDF (1.2 MB)</a></td>
             </tr>
             <tr>
               <td>05-Jun-2026</td>
               <td>Notification regarding mandatory online processing of NA Certificates</td>
-              <td><a href="#" class="download-link"><i class="fa-solid fa-file-pdf pdf-icon"></i> PDF (0.8 MB)</a></td>
+              <td><a href="{% static 'docs/Notification.pdf' %}" target="_blank" rel="noopener noreferrer"
+                  class="download-link"><i class="fa-solid fa-file-pdf pdf-icon"></i> PDF (0.8 MB)</a></td>
             </tr>
             <tr>
               <td>22-Mar-2026</td>
               <td>Amendments in the Maharashtra Land Revenue Code for Educational Trusts</td>
-              <td><a href="#" class="download-link"><i class="fa-solid fa-file-pdf pdf-icon"></i> PDF (2.5 MB)</a></td>
+              <td><a href="{% static 'docs/amendments.pdf' %}" target="_blank" rel="noopener noreferrer"
+                  class="download-link"><i class="fa-solid fa-file-pdf pdf-icon"></i> PDF (2.5 MB)</a></td>
             </tr>
             <tr>
               <td>10-Jan-2026</td>
               <td>Guidelines for Expedited Industrial NA Clearance</td>
-              <td><a href="#" class="download-link"><i class="fa-solid fa-file-pdf pdf-icon"></i> PDF (1.5 MB)</a></td>
+              <td><a href="{% static 'docs/Guidelines.pdf' %}" target="_blank" rel="noopener noreferrer"
+                  class="download-link"><i class="fa-solid fa-file-pdf pdf-icon"></i> PDF (1.5 MB)</a></td>
             </tr>
           </tbody>
         </table>
@@ -261,17 +287,20 @@
             <tr>
               <td>1966</td>
               <td>Maharashtra Land Revenue Code, 1966 (Updated 2026)</td>
-              <td><a href="#" class="download-link"><i class="fa-solid fa-file-pdf pdf-icon"></i> PDF (4.5 MB)</a></td>
+              <td><a href="{% static 'docs/Maharashtra_Land_Revenue.pdf' %}" target="_blank" rel="noopener noreferrer"
+                  class="download-link"><i class="fa-solid fa-file-pdf pdf-icon"></i> PDF (4.5 MB)</a></td>
             </tr>
             <tr>
               <td>2014</td>
               <td>Maharashtra Gunthewari Developments Act</td>
-              <td><a href="#" class="download-link"><i class="fa-solid fa-file-pdf pdf-icon"></i> PDF (2.1 MB)</a></td>
+              <td><a href="{% static 'docs/Maharashtra_Gunthewari.pdf' %}" target="_blank" rel="noopener noreferrer"
+                  class="download-link"><i class="fa-solid fa-file-pdf pdf-icon"></i> PDF (2.1 MB)</a></td>
             </tr>
             <tr>
               <td>2020</td>
               <td>Unified Comprehensive Development Control Regulations (UDCPR)</td>
-              <td><a href="#" class="download-link"><i class="fa-solid fa-file-pdf pdf-icon"></i> PDF (8.0 MB)</a></td>
+              <td><a href="{% static 'docs/Unified.pdf' %}" target="_blank" rel="noopener noreferrer"
+                  class="download-link"><i class="fa-solid fa-file-pdf pdf-icon"></i> PDF (8.0 MB)</a></td>
             </tr>
           </tbody>
         </table>
@@ -292,15 +321,18 @@
           <tbody>
             <tr>
               <td>Step-by-step Guide for Online NA Certificate Application</td>
-              <td><a href="#" class="download-link"><i class="fa-solid fa-file-pdf pdf-icon"></i> PDF (3.2 MB)</a></td>
+              <td><a href="{% static 'docs/Step-by-step_guide.pdf' %}" target="_blank" rel="noopener noreferrer"
+                  class="download-link"><i class="fa-solid fa-file-pdf pdf-icon"></i> PDF (3.2 MB)</a></td>
             </tr>
             <tr>
               <td>How to check your 7/12 Extract details online</td>
-              <td><a href="#" class="download-link"><i class="fa-solid fa-file-pdf pdf-icon"></i> PDF (1.1 MB)</a></td>
+              <td><a href="{% static 'docs/How_to_check_your_712_Extract.pdf' %}" target="_blank"
+                  rel="noopener noreferrer" class="download-link"><i class="fa-solid fa-file-pdf pdf-icon"></i> PDF (1.1 MB)</a></td>
             </tr>
             <tr>
               <td>Fee Calculation Reference Manual</td>
-              <td><a href="#" class="download-link"><i class="fa-solid fa-file-pdf pdf-icon"></i> PDF (0.9 MB)</a></td>
+              <td><a href="{% static 'docs/Fee.pdf' %}" target="_blank" rel="noopener noreferrer"
+                  class="download-link"><i class="fa-solid fa-file-pdf pdf-icon"></i> PDF (0.9 MB)</a></td>
             </tr>
           </tbody>
         </table>
@@ -312,16 +344,16 @@
         <div class="title-underline"></div>
 
         <div class="video-grid">
-          <div class="video-card">
-            <!-- Placeholder for YouTube Thumbnail -->
+          <a href="https://youtu.be/LuTymNxOnm4?si=JrUf7bq33oRH5Ywh" target="_blank" rel="noopener noreferrer" class="video-card">
+            <!-- YouTube Thumbnail -->
             <div
-              style="width:100%; height:200px; background:#ddd; display:flex; align-items:center; justify-content:center; border-radius:2px; margin-bottom:15px; position:relative;">
-              <i class="fa-brands fa-youtube" style="font-size: 50px; color: #ff0000; position:absolute;"></i>
-              <img src="{% static 'images/educational_land.png' %}"
-                style="width:100%; height:100%; object-fit:cover; opacity:0.6;">
+              style="width:100%; height:200px; background:#111; display:flex; align-items:center; justify-content:center; border-radius:4px; margin-bottom:15px; position:relative; overflow:hidden;">
+              <i class="fa-brands fa-youtube" style="font-size: 50px; color: #ff0000; position:absolute; z-index:2; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.6));"></i>
+              <img src="https://img.youtube.com/vi/LuTymNxOnm4/hqdefault.jpg" alt="How to Register on LandScope Portal"
+                style="width:100%; height:100%; object-fit:cover; opacity:0.85;">
             </div>
-            <p>How to Register on LandScope Portal</p>
-          </div>
+            <p>How to Register on LandScope Portal <i class="fa-solid fa-arrow-up-right-from-square ms-1" style="font-size:12px;"></i></p>
+          </a>
           <div class="video-card">
             <div
               style="width:100%; height:200px; background:#ddd; display:flex; align-items:center; justify-content:center; border-radius:2px; margin-bottom:15px; position:relative;">

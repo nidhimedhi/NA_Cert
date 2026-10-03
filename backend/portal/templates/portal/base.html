@@ -299,8 +299,7 @@
 
             <ul class="nav-list nav-right">
                 {% if request.session.user_email %}
-    <li><a href="#" style="color:#FF9933;"><i class="fa-solid fa-user me-2"></i>Nidhi</a></li>
-
+                <li><a href="#" style="color:#FF9933;"><i class="fa-solid fa-user me-2"></i>{{ request.session.user_name|default:request.session.user_email }}</a></li>
                 <li><a href="/logout/" class="auth-btn">Logout</a></li>
                 {% else %}
                 <li><a href="/login/" id="txt-login">Login</a></li>
@@ -323,7 +322,6 @@
                 <!-- Column 1 -->
                 <div class="col-lg-3 pe-4">
                     <div class="footer-gov-logo">
-                        <img src="{% static 'images/emblem.png' %}" alt="Emblem" style="height: 45px; display: none;">
                         <i class="fa-solid fa-building-flag fa-3x me-2" style="color: #ccc;"></i>
                         <div style="line-height: 1.2; font-size:13px; font-weight:bold;">
                             भारत सरकार<br>GOVERNMENT<br>OF INDIA
