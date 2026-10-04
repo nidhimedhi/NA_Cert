@@ -180,9 +180,19 @@ export default function StateGovtPortal() {
             <option value="mr">मराठी</option>
           </select>
 
-          <Link to="/" className="gov-link-pill">Citizen Portal</Link>
-          <Link to="/collector/dashboard" className="gov-badge-collector">Collector Portal</Link>
-          <Link to="/tahsildar/dashboard" className="gov-link-pill">Tahsildar Desk</Link>
+          <button
+            className="gov-access-btn"
+            style={{ background: '#b91c1c', color: '#fff', marginLeft: '8px', padding: '3px 10px', borderRadius: '4px', fontWeight: 'bold' }}
+            onClick={() => {
+              localStorage.removeItem('state_govt_token');
+              localStorage.removeItem('state_govt_username');
+              localStorage.removeItem('state_govt_biometric_auth');
+              window.location.href = '/state-govt/login';
+            }}
+            title="Sign Out of Secretariat Desk"
+          >
+            🚪 Sign Out
+          </button>
         </div>
       </div>
 

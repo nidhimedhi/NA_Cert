@@ -27,3 +27,18 @@ export function TahsildarRoute({ children }) {
   }
   return children;
 }
+
+/**
+ * Route guard for Maharashtra State Government Secretariat Portal.
+ * Redirects to /state-govt/login if state_govt_token is absent.
+ */
+export function StateGovtRoute({ children }) {
+  const token = localStorage.getItem('state_govt_token');
+  const location = useLocation();
+
+  if (!token) {
+    return <Navigate to="/state-govt/login" state={{ from: location }} replace />;
+  }
+  return children;
+}
+

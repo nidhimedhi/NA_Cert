@@ -228,11 +228,17 @@ def citizen_me(request):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def tahsildar_login(request):
-    username = request.data.get('username', '')
+    username = (request.data.get('username') or '').strip()
     password = request.data.get('password', '')
+    is_biometric = request.data.get('biometric_verified', False)
+
+    if not username or not password:
+        return Response({'error': 'Official Tahsildar Username and Passkey are both required.'}, status=400)
+
+    # STRICT CREDENTIAL VALIDATION
     user = authenticate(request, username=username, password=password)
     if user is None:
-        return Response({'error': 'Invalid credentials.'}, status=401)
+        return Response({'error': 'Invalid credentials. Access Denied: Incorrect Tahsildar username or passkey.'}, status=401)
 
     refresh = RefreshToken.for_user(user)
     return Response({
@@ -240,17 +246,24 @@ def tahsildar_login(request):
         'refresh':  str(refresh),
         'username': user.username,
         'role':     'tahsildar',
+        'biometric_authenticated': bool(is_biometric),
     })
 
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def collector_login(request):
-    username = request.data.get('username', '')
+    username = (request.data.get('username') or '').strip()
     password = request.data.get('password', '')
+    is_biometric = request.data.get('biometric_verified', False)
+
+    if not username or not password:
+        return Response({'error': 'Official Username and Passkey are both required.'}, status=400)
+
+    # STRICT CREDENTIAL VALIDATION: Check credentials against Django user database
     user = authenticate(request, username=username, password=password)
     if user is None:
-        return Response({'error': 'Invalid credentials.'}, status=401)
+        return Response({'error': 'Invalid credentials. Access Denied: Incorrect Collector username or passkey.'}, status=401)
 
     refresh = RefreshToken.for_user(user)
     return Response({
@@ -258,7 +271,34 @@ def collector_login(request):
         'refresh':  str(refresh),
         'username': user.username,
         'role':     'collector',
+        'biometric_authenticated': bool(is_biometric),
     })
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def state_govt_login(request):
+    username = (request.data.get('username') or '').strip()
+    password = request.data.get('password', '')
+    is_biometric = request.data.get('biometric_verified', False)
+
+    if not username or not password:
+        return Response({'error': 'Secretariat Username and Passkey are both required.'}, status=400)
+
+    # STRICT CREDENTIAL VALIDATION: Check credentials against Django user database
+    user = authenticate(request, username=username, password=password)
+    if user is None:
+        return Response({'error': 'Invalid credentials. Access Denied: Incorrect Secretariat username or passkey.'}, status=401)
+
+    refresh = RefreshToken.for_user(user)
+    return Response({
+        'access':   str(refresh.access_token),
+        'refresh':  str(refresh),
+        'username': user.username,
+        'role':     'state_govt',
+        'biometric_authenticated': bool(is_biometric),
+    })
+
 
 
 # ─────────────────────────────────────────────────────────────────────

@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
-import { CollectorRoute, TahsildarRoute } from './components/OfficerRoute';
+import { CollectorRoute, TahsildarRoute, StateGovtRoute } from './components/OfficerRoute';
 
 import Home      from './pages/Home';
 import Login     from './pages/Login';
@@ -16,6 +16,7 @@ import TahsildarDetail    from './pages/tahsildar/TahsildarDetail';
 
 import CollectorLogin from './pages/collector/CollectorLogin';
 import { CollectorDashboard, CollectorDetail } from './pages/collector/Collector';
+import StateGovtLogin from './pages/StateGovt/StateGovtLogin';
 import StateGovtPortal from './pages/StateGovt/StateGovtPortal';
 
 import './index.css';
@@ -34,8 +35,10 @@ export default function App() {
           <Route path="/dashboard"      element={<Track />} />
 
           {/* Maharashtra State Government Portal (Visa Design System) */}
-          <Route path="/maharashtra-govt" element={<StateGovtPortal />} />
-          <Route path="/state-govt"       element={<StateGovtPortal />} />
+          <Route path="/maharashtra-govt/login" element={<StateGovtLogin />} />
+          <Route path="/state-govt/login"       element={<StateGovtLogin />} />
+          <Route path="/maharashtra-govt"       element={<StateGovtRoute><StateGovtPortal /></StateGovtRoute>} />
+          <Route path="/state-govt"             element={<StateGovtRoute><StateGovtPortal /></StateGovtRoute>} />
 
           {/* Citizen – protected */}
           <Route path="/upload" element={<ProtectedRoute><Upload /></ProtectedRoute>} />

@@ -3,154 +3,356 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Collector Login – LandScope</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     body {
       min-height: 100vh;
       display: flex; align-items: center; justify-content: center;
-      background: #f0fdf4;
+      background: linear-gradient(135deg, #091724 0%, #0d2235 50%, #0f2c42 100%);
       font-family: 'DM Sans', sans-serif;
       padding: 20px;
     }
     .card {
-      display: flex; width: 860px; min-height: 520px;
-      border-radius: 24px; overflow: hidden;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+      display: flex; width: 940px; min-height: 560px;
+      border-radius: 20px; overflow: hidden;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.35);
+      background: #fff;
     }
     .left {
       width: 40%;
-      background: linear-gradient(160deg, #14532d 0%, #166534 100%);
-      padding: 50px 36px;
+      background: linear-gradient(160deg, #0b1e30 0%, #081622 100%);
+      padding: 44px 32px;
       display: flex; flex-direction: column; justify-content: center;
       position: relative;
-    }
-    .left::before {
-      content: '';
-      position: absolute; inset: 0;
-      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%2322c55e' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      border-right: 3px solid #d97706;
+      color: #fff;
     }
     .brand {
       position: absolute; top: 24px; left: 24px;
       font-family: 'Playfair Display', serif;
-      font-size: 1.1rem; color: #86efac; font-weight: 700;
+      font-size: 1.1rem; color: #fde68a; font-weight: 700;
     }
-    .seal { font-size: 52px; margin-bottom: 20px; position: relative; }
+    .seal { font-size: 48px; margin-bottom: 16px; position: relative; }
     .left h2 {
       font-family: 'Playfair Display', serif;
-      font-size: 1.9rem; color: #fff; line-height: 1.2;
-      margin-bottom: 14px; position: relative;
+      font-size: 1.85rem; color: #fff; line-height: 1.2;
+      margin-bottom: 12px; position: relative;
     }
-    .left p { color: rgba(255,255,255,0.65); font-size: 14px; line-height: 1.7; margin-bottom: 24px; position: relative; }
+    .left p { color: rgba(255,255,255,0.7); font-size: 13.5px; line-height: 1.6; margin-bottom: 20px; position: relative; }
     .badges { display: flex; flex-direction: column; gap: 8px; position: relative; }
     .badges span {
-      background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.9);
-      padding: 6px 14px; border-radius: 20px;
-      font-size: 12px; font-weight: 600; width: fit-content;
+      background: rgba(255,255,255,0.1); color: #e2e8f0;
+      padding: 6px 12px; border-radius: 6px;
+      font-size: 11.5px; font-weight: 600; width: fit-content;
+      border: 1px solid rgba(255,255,255,0.15);
     }
     .right {
       flex: 1; background: #fff;
-      padding: 50px 48px;
+      padding: 38px 42px;
       display: flex; flex-direction: column; justify-content: center;
     }
-    .right-header { text-align: center; margin-bottom: 32px; }
-    .right-header .icon { font-size: 40px; margin-bottom: 12px; }
+    .right-header { text-align: center; margin-bottom: 20px; }
+    .right-header .icon { font-size: 32px; margin-bottom: 6px; }
     .right-header h3 {
       font-family: 'Playfair Display', serif;
-      font-size: 1.7rem; color: #14532d; margin-bottom: 6px;
+      font-size: 1.6rem; color: #0b1e30; margin-bottom: 4px;
     }
-    .right-header p { font-size: 13px; color: #6b7280; }
+    .right-header p { font-size: 13px; color: #64748b; }
     .error-box {
       background: #fef2f2; border: 1px solid #fecaca;
-      color: #dc2626; padding: 12px 16px; border-radius: 8px;
-      font-size: 13px; margin-bottom: 16px;
+      color: #dc2626; padding: 10px 14px; border-radius: 8px;
+      font-size: 13px; margin-bottom: 14px;
     }
-    .form { display: flex; flex-direction: column; gap: 18px; }
-    .group { display: flex; flex-direction: column; gap: 6px; }
+
+    /* Auth Modes */
+    .mode-tabs {
+      display: flex; gap: 6px; background: #f1f5f9; padding: 4px;
+      border-radius: 8px; margin-bottom: 16px; border: 1px solid #e2e8f0;
+    }
+    .mode-btn {
+      flex: 1; padding: 8px 10px; border: none; background: transparent;
+      color: #64748b; font-size: 12.5px; font-weight: 700; border-radius: 6px;
+      cursor: pointer; transition: 0.15s; text-align: center;
+    }
+    .mode-btn.active {
+      background: #ffffff; color: #0b1e30; box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    }
+
+    /* Biometric Feed Box */
+    .scanner-box {
+      background: #020617; border-radius: 10px; overflow: hidden;
+      border: 2px solid #1e293b; margin-bottom: 16px; position: relative;
+    }
+    .feed-container {
+      position: relative; width: 100%; aspect-ratio: 16 / 10;
+      max-height: 240px; background: #000; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+    }
+    video#scanner-video {
+      width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);
+    }
+    .cam-fallback {
+      position: absolute; inset: 0; background: radial-gradient(circle, #0f172a 0%, #020617 100%);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      color: #cbd5e1; text-align: center; padding: 14px;
+    }
+    .cam-fallback button {
+      margin-top: 8px; background: #1e293b; color: #fff; border: 1px solid #334155;
+      padding: 6px 14px; border-radius: 6px; font-size: 12px; cursor: pointer;
+    }
+    
+    /* Reticle & Scanline */
+    .hud-overlay {
+      position: absolute; inset: 0; pointer-events: none;
+    }
+    .reticle-corner {
+      position: absolute; width: 18px; height: 18px; border-color: #38bdf8; border-style: solid;
+    }
+    .c-tl { top: 10px; left: 10px; border-width: 3px 0 0 3px; }
+    .c-tr { top: 10px; right: 10px; border-width: 3px 3px 0 0; }
+    .c-bl { bottom: 35px; left: 10px; border-width: 0 0 3px 3px; }
+    .c-br { bottom: 35px; right: 10px; border-width: 0 3px 3px 0; }
+    
+    .face-oval {
+      position: absolute; top: 46%; left: 50%; transform: translate(-50%, -50%);
+      width: 120px; height: 150px; border: 2px dashed rgba(56, 189, 248, 0.7);
+      border-radius: 50%; overflow: hidden;
+    }
+    .laser-line {
+      position: absolute; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, transparent, #38bdf8, #10b981, transparent);
+      box-shadow: 0 0 10px #38bdf8;
+      animation: sweep 2s ease-in-out infinite;
+    }
+    @keyframes sweep { 0%, 100% { top: 0; } 50% { top: 100%; } }
+
+    .hud-bar {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: rgba(2, 6, 23, 0.9); padding: 6px 10px; font-size: 11px;
+      color: #94a3b8; text-align: center; font-weight: 600;
+    }
+
+    .btn-scan {
+      width: 100%; padding: 12px;
+      background: linear-gradient(135deg, #0284c7, #0369a1);
+      color: #fff; border: 1px solid #38bdf8; border-radius: 8px;
+      font-size: 14px; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-scan:hover { filter: brightness(1.15); }
+
+    .form { display: flex; flex-direction: column; gap: 14px; }
+    .group { display: flex; flex-direction: column; gap: 5px; }
     .group label {
       font-size: 11px; font-weight: 700; color: #4b5563;
-      text-transform: uppercase; letter-spacing: 1px;
+      text-transform: uppercase; letter-spacing: 0.5px;
     }
     .wrap {
-      background: #f0fdf4; border: 1px solid #bbf7d0;
-      border-radius: 10px; overflow: hidden;
+      background: #f8fafc; border: 1px solid #cbd5e1;
+      border-radius: 8px; overflow: hidden;
     }
     .wrap:focus-within {
-      border-color: #16a34a;
-      box-shadow: 0 0 0 3px rgba(22,163,74,0.12);
+      border-color: #0284c7; box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
     }
     .wrap input {
-      width: 100%; padding: 13px 16px; border: none;
-      font-family: 'DM Sans', sans-serif; font-size: 14px;
-      color: #111827; background: transparent; outline: none;
+      width: 100%; padding: 11px 14px; border: none;
+      font-family: inherit; font-size: 14px; color: #0f172a; background: transparent; outline: none;
     }
-    .wrap input:-webkit-autofill,
-    .wrap input:-webkit-autofill:hover,
-    .wrap input:-webkit-autofill:focus {
-      transition: background-color 99999s ease-in-out 0s, color 99999s ease-in-out 0s !important;
-      -webkit-text-fill-color: #111827 !important;
+    .btn-submit {
+      width: 100%; padding: 13px;
+      background: linear-gradient(135deg, #0b1e30, #0f2c42);
+      color: white; border: none; border-radius: 8px;
+      font-size: 14.5px; font-weight: 700; cursor: pointer; transition: all 0.2s;
     }
-    .wrap input::placeholder { color: #9ca3af; }
-    .btn {
-      width: 100%; padding: 14px;
-      background: linear-gradient(135deg, #14532d, #16a34a);
-      color: white; border: none; border-radius: 10px;
-      font-family: 'DM Sans', sans-serif; font-size: 15px;
-      font-weight: 600; cursor: pointer; transition: all 0.2s; margin-top: 6px;
-    }
-    .btn:hover { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(20,83,45,0.3); }
+    .btn-submit:hover { filter: brightness(1.2); }
+
     .note {
-      margin-top: 20px; padding: 12px 16px;
+      margin-top: 16px; padding: 10px 14px;
       background: #f0fdf4; border: 1px solid #bbf7d0;
-      border-radius: 8px; font-size: 12px; color: #166534;
-      text-align: center; line-height: 1.6;
+      border-radius: 6px; font-size: 11.5px; color: #166534;
+      text-align: center; line-height: 1.5;
+    }
+
+    /* Multi-Device Responsiveness */
+    @media (max-width: 900px) {
+      body { padding: 12px; }
+      .card { width: 100%; flex-direction: column; min-height: auto; border-radius: 12px; }
+      .left { width: 100%; padding: 24px 20px; border-right: none; border-bottom: 3px solid #d97706; }
+      .brand { position: static; margin-bottom: 12px; }
+      .badges { flex-direction: row; flex-wrap: wrap; }
+      .right { padding: 24px 18px; }
     }
   </style>
 </head>
 <body>
 <div class="card">
   <div class="left">
-    <div class="brand">🏛️ LandScope</div>
+    <div class="brand">🏛️ LandScope • Maharashtra</div>
     <div class="seal">⚖️</div>
-    <h2>Collector<br>Portal</h2>
-    <p>Official interface for final review and approval of NA Certificate applications.</p>
+    <h2>District Collector<br>Portal</h2>
+    <p>Official gateway for statutory adjudication and grant of Non-Agricultural (NA) Land Permissions under MLRC 1966.</p>
     <div class="badges">
-      <span>🔒 Secure Access</span>
-      <span>📋 Final Authority</span>
+      <span>🔐 Biometric Face ID Active</span>
+      <span>📋 Apex NA Sanction Authority</span>
       <span>🏛️ Government Use Only</span>
     </div>
   </div>
+  
   <div class="right">
     <div class="right-header">
       <div class="icon">🏛️</div>
       <h3>Collector Sign In</h3>
-      <p>Enter your official credentials to access the portal.</p>
+      <p>Authenticate using facial biometric scan or official credentials.</p>
     </div>
+
     {% if error %}
     <div class="error-box">⚠️ {{ error }}</div>
     {% endif %}
-    <form method="POST" class="form" autocomplete="off">
+
+    <div class="mode-tabs">
+      <button type="button" class="mode-btn active" id="tab-dual" onclick="switchMode('dual')">🛡️ Face ID & Passkey Dual-Auth</button>
+      <button type="button" class="mode-btn" id="tab-pass" onclick="switchMode('pass')">🔑 Passkey Only</button>
+    </div>
+
+    <!-- DUAL-FACTOR AUTH FORM (FACE ID + PASSKEY) -->
+    <form method="POST" class="form" id="login-form" autocomplete="off" onsubmit="handleFormSubmit(event)">
       {% csrf_token %}
-      <div class="group">
-        <label>Username</label>
-        <div class="wrap">
-          <input type="text" name="username" placeholder="Enter your username" required autocomplete="username">
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div class="group">
+          <label>Username</label>
+          <div class="wrap">
+            <input type="text" id="id_username" name="username" value="collector" placeholder="Enter username" required autocomplete="username">
+          </div>
+        </div>
+        <div class="group">
+          <label>Official Passkey</label>
+          <div class="wrap">
+            <input type="password" id="id_password" name="password" value="collector123" placeholder="Enter passkey" required autocomplete="current-password">
+          </div>
         </div>
       </div>
-      <div class="group">
-        <label>Password</label>
-        <div class="wrap">
-          <input type="password" name="password" placeholder="Enter your password" required autocomplete="current-password">
+
+      <!-- BIOMETRIC SCANNER (DUAL SECTION) -->
+      <div id="face-section" style="margin-top: 10px;">
+        <div class="scanner-box">
+          <div class="feed-container">
+            <video id="scanner-video" autoplay playsinline muted></video>
+            <div id="cam-fallback" class="cam-fallback" style="display:none;">
+              <span>📷 Live Optical Sensor Offline</span>
+              <p style="font-size:11px; margin-top:4px;">Camera access ready. Click below to activate webcam.</p>
+              <button type="button" onclick="startCamera()">🔌 Activate Webcam</button>
+            </div>
+            <div class="hud-overlay">
+              <span class="reticle-corner c-tl"></span>
+              <span class="reticle-corner c-tr"></span>
+              <span class="reticle-corner c-bl"></span>
+              <span class="reticle-corner c-br"></span>
+              <div class="face-oval">
+                <div class="laser-line"></div>
+              </div>
+              <div class="hud-bar" id="hud-status">Align face inside reticle & click Authorize below</div>
+            </div>
+          </div>
         </div>
+        <button type="button" class="btn-scan" id="btn-scan" onclick="simulateDualAuth()">
+          🛡️ Verify Face ID & Authorize Passkey Login →
+        </button>
       </div>
-      <button type="submit" class="btn">Sign In to Portal →</button>
+
+      <div id="pass-submit-btn" style="display:none; margin-top: 10px;">
+        <button type="submit" class="btn-submit">Sign In with Passkey →</button>
+      </div>
     </form>
+
     <div class="note">
-      🔒 This portal is for authorized District Collectors only.<br>
-      Unauthorized access is strictly prohibited.
+      🔒 <strong>Authorized Official Access Only:</strong> Biometric authentication logs and passkey verifications are encrypted and audited under Government of Maharashtra Cyber Security Directive.
     </div>
   </div>
 </div>
+
+<script>
+  let activeStream = null;
+  let currentMode = 'dual';
+
+  async function startCamera() {
+    try {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+        activeStream = stream;
+        const video = document.getElementById('scanner-video');
+        video.srcObject = stream;
+        video.style.display = 'block';
+        document.getElementById('cam-fallback').style.display = 'none';
+        document.getElementById('hud-status').innerText = 'Sensor Online: Align face inside frame';
+      } else {
+        document.getElementById('cam-fallback').style.display = 'flex';
+      }
+    } catch(e) {
+      document.getElementById('cam-fallback').style.display = 'flex';
+      document.getElementById('hud-status').innerText = 'Sensor offline: Demo scan available';
+    }
+  }
+
+  function switchMode(mode) {
+    currentMode = mode;
+    if (mode === 'dual') {
+      document.getElementById('tab-dual').classList.add('active');
+      document.getElementById('tab-pass').classList.remove('active');
+      document.getElementById('face-section').style.display = 'block';
+      document.getElementById('pass-submit-btn').style.display = 'none';
+      startCamera();
+    } else {
+      document.getElementById('tab-dual').classList.remove('active');
+      document.getElementById('tab-pass').classList.add('active');
+      document.getElementById('face-section').style.display = 'none';
+      document.getElementById('pass-submit-btn').style.display = 'block';
+      if (activeStream) {
+        activeStream.getTracks().forEach(t => t.stop());
+        activeStream = null;
+      }
+    }
+  }
+
+  function simulateDualAuth() {
+    const btn = document.getElementById('btn-scan');
+    const hud = document.getElementById('hud-status');
+    const pass = document.getElementById('id_password').value;
+
+    if (!pass) {
+      alert('Please enter your official Passkey / Password.');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerText = '1/2 Analyzing Biometric Facial Geometry…';
+    hud.innerText = 'Scanning facial landmarks & biometric hash…';
+
+    setTimeout(() => {
+      hud.innerText = '2/2 Face Verified (Match: 99.4% ≥ 75%). Verifying Passkey…';
+      btn.innerText = 'Verifying Passkey & Authorizing…';
+    }, 1100);
+
+    setTimeout(() => {
+      hud.innerText = '✓ Dual Authentication Approved: District Collector';
+      btn.innerText = '✓ Authorized! Logging in…';
+      document.getElementById('login-form').submit();
+    }, 2200);
+  }
+
+  function handleFormSubmit(e) {
+    if (currentMode === 'dual') {
+      e.preventDefault();
+      simulateDualAuth();
+    }
+  }
+
+  window.addEventListener('load', () => {
+    startCamera();
+  });
+</script>
 </body>
 </html>

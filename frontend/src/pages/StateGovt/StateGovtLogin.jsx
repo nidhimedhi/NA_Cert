@@ -4,13 +4,13 @@ import api from '../../services/api';
 import {
   extractBiometricVector,
   compareBiometricVectors,
-  getEnrolledCollectorFace,
-  saveEnrolledCollectorFace,
-  clearEnrolledCollectorFace,
+  getEnrolledStateGovtFace,
+  saveEnrolledStateGovtFace,
+  clearEnrolledStateGovtFace,
   MATCH_THRESHOLD,
 } from '../../services/biometricEngine';
 
-export default function CollectorLogin() {
+export default function StateGovtLogin() {
   const navigate = useNavigate();
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -18,7 +18,7 @@ export default function CollectorLogin() {
 
   // Authentication mode: 'dual' (Face ID + Passkey) | 'password' | 'enroll'
   const [authMode, setAuthMode] = useState('dual');
-  const [form, setForm] = useState({ username: 'collector', password: '' });
+  const [form, setForm] = useState({ username: 'stategovt', password: '' });
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -30,14 +30,14 @@ export default function CollectorLogin() {
   const [cameraError, setCameraError] = useState('');
   const [scanState, setScanState] = useState('idle'); // 'idle' | 'scanning' | 'success' | 'failed'
   const [scanProgress, setScanProgress] = useState(0);
-  const [statusMessage, setStatusMessage] = useState('Position your face within the optical biometric frame');
+  const [statusMessage, setStatusMessage] = useState('Position face within optical scanner frame');
   const [capturedImage, setCapturedImage] = useState(null);
   const [matchScore, setMatchScore] = useState(null);
   const [failedReason, setFailedReason] = useState('');
 
   // Load enrolled face on mount
   const refreshEnrolledProfile = useCallback(() => {
-    const profile = getEnrolledCollectorFace();
+    const profile = getEnrolledStateGovtFace();
     setEnrolledProfile(profile);
   }, []);
 
@@ -72,7 +72,7 @@ export default function CollectorLogin() {
         videoRef.current.play().catch(() => {});
       }
       setCameraActive(true);
-      setStatusMessage('Camera sensor active. Align face inside reticle oval.');
+      setStatusMessage('Sensor online: Align face inside frame and click Authorize');
     } catch (err) {
       setCameraError(err.message || 'Unable to access optical sensor.');
       setCameraActive(false);
@@ -92,7 +92,7 @@ export default function CollectorLogin() {
 
   const handleInput = e => setForm(p => ({ ...p, [e.target.name]: e.target.value }));
 
-  // ── ENROLL OFFICIAL FACE BIOMETRIC ──
+  // ── ENROLL SECRETARIAT OFFICER FACE BIOMETRIC ──
   const handleEnrollFace = () => {
     if (!videoRef.current || !canvasRef.current || !cameraActive) {
       alert('Camera is not active. Please ensure webcam access is granted.');
@@ -105,14 +105,14 @@ export default function CollectorLogin() {
       return;
     }
 
-    const ok = saveEnrolledCollectorFace(extraction.vector, extraction.snapshotUrl, 'District Collector');
+    const ok = saveEnrolledStateGovtFace(extraction.vector, extraction.snapshotUrl, 'Joint Secretary, Revenue & Forest');
     if (ok) {
       refreshEnrolledProfile();
       setCapturedImage(extraction.snapshotUrl);
       setAuthMode('dual');
       setScanState('idle');
       setError('');
-      alert('✅ Official Collector Biometric Profile Enrolled Successfully!\n\nDual security is now active: ONLY this face together with your official passkey will be authorized to access the Collector Portal.');
+      alert('✅ Official Maharashtra Secretariat Biometric Profile Enrolled Successfully!\n\nDual-Factor security is active: ONLY this face together with your official passkey will be authorized to access the Maharashtra State Govt Portal.');
     } else {
       setError('Failed to save biometric profile.');
     }
@@ -120,8 +120,8 @@ export default function CollectorLogin() {
 
   // ── RESET / RE-ENROLL ──
   const handleClearEnrollment = () => {
-    if (window.confirm('Reset the enrolled Collector biometric face profile? A new face profile must be enrolled to enable Face ID Dual authentication.')) {
-      clearEnrolledCollectorFace();
+    if (window.confirm('Reset enrolled Maharashtra State Govt Secretariat biometric profile? A new face profile must be enrolled to enable Face ID Dual authentication.')) {
+      clearEnrolledStateGovtFace();
       refreshEnrolledProfile();
       setScanState('idle');
       setCapturedImage(null);
@@ -141,13 +141,13 @@ export default function CollectorLogin() {
         biometric_verified: useBiometric,
       };
 
-      const res = await api.post('/collector/auth/login/', payload);
-      localStorage.setItem('collector_token', res.data.access);
-      localStorage.setItem('collector_username', res.data.username || form.username);
+      const res = await api.post('/state-govt/auth/login/', payload);
+      localStorage.setItem('state_govt_token', res.data.access);
+      localStorage.setItem('state_govt_username', res.data.username || form.username);
       if (useBiometric) {
-        localStorage.setItem('collector_biometric_auth', 'true');
+        localStorage.setItem('state_govt_biometric_auth', 'true');
       }
-      navigate('/collector/dashboard');
+      navigate('/state-govt');
     } catch (err) {
       setScanState('failed');
       const errMsg = err.response?.data?.error || 'Authentication rejected: Invalid username or passkey.';
@@ -166,14 +166,14 @@ export default function CollectorLogin() {
 
     // Check passkey
     if (!form.password.trim()) {
-      setError('Please enter your official Passkey / Password to proceed with Dual-Auth.');
+      setError('Please enter your official Secretariat Passkey / Password to proceed with Dual-Auth.');
       return;
     }
 
     // Check biometric enrollment
-    const enrolled = getEnrolledCollectorFace();
+    const enrolled = getEnrolledStateGovtFace();
     if (!enrolled || !enrolled.vector) {
-      setError('⚠️ No authorized face enrolled yet. Please click "Enroll Face" to register the Collector face profile first.');
+      setError('⚠️ No authorized face enrolled yet. Please click "Enroll Face" to register the Secretariat officer face profile first.');
       return;
     }
 
@@ -185,7 +185,7 @@ export default function CollectorLogin() {
     const steps = [
       { at: 25, msg: '1/4 Optical Sensor Active: Detecting live face boundary…' },
       { at: 50, msg: '2/4 Extracting 224-point luminance & gradient vector…' },
-      { at: 75, msg: '3/4 Matching live biometric with enrolled Collector profile…' },
+      { at: 75, msg: '3/4 Matching live biometric with Secretariat profile…' },
       { at: 100, msg: '4/4 Biometric analysis complete. Verifying passkey…' },
     ];
 
@@ -211,7 +211,7 @@ export default function CollectorLogin() {
 
         setCapturedImage(candidate.snapshotUrl);
 
-        // Compare candidate vector with enrolled Collector vector
+        // Compare candidate vector with enrolled Secretariat vector
         const result = compareBiometricVectors(candidate.vector, enrolled.vector);
         setMatchScore(result.similarity);
 
@@ -223,7 +223,7 @@ export default function CollectorLogin() {
         } else {
           // REJECTED - BIOMETRIC MISMATCH!
           setScanState('failed');
-          setFailedReason(`Biometric Mismatch: Match score is ${result.similarity}% (Security threshold required: ≥ ${MATCH_THRESHOLD}%). Unauthorized individual detected.`);
+          setFailedReason(`Biometric Mismatch: Match score is ${result.similarity}% (Security threshold required: ≥ ${MATCH_THRESHOLD}%). Scanning face does not match enrolled Secretariat profile.`);
           setStatusMessage('⛔ ACCESS DENIED: Biometric mismatch detected.');
         }
       }
@@ -240,25 +240,25 @@ export default function CollectorLogin() {
     <div className="auth-page collector-auth-page">
       <div className="auth-card collector-auth-card">
         {/* LEFT BRANDING PANEL */}
-        <div className="auth-left collector-auth-left">
-          <div className="auth-brand">🏛 LandScope • Revenue</div>
-          <div className="collector-crest-wrap">
-            <div className="collector-crest-icon">⚖️</div>
+        <div className="auth-left collector-auth-left" style={{ background: 'linear-gradient(160deg, #0f172a 0%, #1e1b4b 50%, #090d16 100%)', borderRight: '3px solid #f59e0b' }}>
+          <div className="auth-brand">🏛️ Govt of Maharashtra • Mantralaya</div>
+          <div className="collector-crest-wrap" style={{ borderColor: 'rgba(245, 158, 11, 0.4)' }}>
+            <div className="collector-crest-icon">🏛️</div>
           </div>
-          <h2>District Collectorate</h2>
-          <div className="auth-divider" />
-          <p>Apex Competent Authority under Section 44 of Maharashtra Land Revenue Code, 1966.</p>
+          <h2>State Secretariat Portal</h2>
+          <div className="auth-divider" style={{ background: 'linear-gradient(90deg, #f59e0b, transparent)' }} />
+          <p>Apex Sanction Authority for Granted & Semi-Granted NA Land Permissions under MLRC 1966 Section 44.</p>
 
           <div className="collector-security-tags">
             <span className="sec-tag">🛡️ Face ID & Passkey Dual Security</span>
             <span className="sec-tag">🔐 Biometric Vector Match (≥ 75%)</span>
-            <span className="sec-tag">👤 Authorized Officer Profile Lock</span>
+            <span className="sec-tag">🏛️ Mantralaya Secretariat Lock</span>
           </div>
 
           {/* ENROLLED OFFICER CARD */}
           <div className="enrolled-officer-box">
             <div className="enrolled-header">
-              <span style={{ fontSize: '13px', fontWeight: '800' }}>Official Profile Registry</span>
+              <span style={{ fontSize: '13px', fontWeight: '800' }}>Official Secretariat Registry</span>
               {enrolledProfile ? (
                 <span className="badge-enrolled-active">● Enrolled</span>
               ) : (
@@ -269,11 +269,11 @@ export default function CollectorLogin() {
             {enrolledProfile ? (
               <div className="enrolled-details">
                 {enrolledProfile.photo && (
-                  <img src={enrolledProfile.photo} alt="Enrolled Collector" className="enrolled-thumbnail" />
+                  <img src={enrolledProfile.photo} alt="Enrolled Officer" className="enrolled-thumbnail" />
                 )}
                 <div>
                   <div style={{ fontWeight: 'bold', fontSize: '13px', color: '#fff' }}>
-                    {enrolledProfile.meta?.officerName || 'District Collector'}
+                    {enrolledProfile.meta?.officerName || 'Joint Secretary'}
                   </div>
                   <div style={{ fontSize: '11px', color: '#94a3b8' }}>
                     Enrolled: {new Date(enrolledProfile.meta?.enrolledAt).toLocaleDateString('en-IN')}
@@ -312,8 +312,10 @@ export default function CollectorLogin() {
         <div className="auth-right collector-auth-right">
           <div className="auth-header-row">
             <div>
-              <span className="auth-badge">🔒 Dual-Factor Security Gateway</span>
-              <h2>Collector Sign In</h2>
+              <span className="auth-badge" style={{ background: '#fef3c7', color: '#b45309', border: '1px solid #fde68a' }}>
+                🔒 Mantralaya Secretariat Dual Security
+              </span>
+              <h2>State Government Sign In</h2>
               <p className="auth-sub">
                 {authMode === 'enroll'
                   ? 'Position your face within the frame and capture reference biometric profile.'
@@ -358,12 +360,12 @@ export default function CollectorLogin() {
               {/* CREDENTIAL FIELDS */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
-                  <label className="input-label">Collector Username</label>
+                  <label className="input-label">Secretariat Username</label>
                   <div className="input-wrap">
                     <input
                       className="auth-input"
                       name="username"
-                      placeholder="Official username"
+                      placeholder="e.g. stategovt or secretary"
                       value={form.username}
                       onChange={handleInput}
                       required
@@ -454,7 +456,7 @@ export default function CollectorLogin() {
                         <span className="verified-check">✓</span>
                         <div style={{ flex: 1 }}>
                           <strong style={{ color: '#10b981', fontSize: '13.5px' }}>
-                            Face Biometric Confirmed
+                            Secretariat Biometric Confirmed
                           </strong>
                           <div className="officer-meta">
                             Match Score: <strong>{matchScore}%</strong> (Security Threshold: ≥ {MATCH_THRESHOLD}%)
@@ -500,7 +502,7 @@ export default function CollectorLogin() {
                         Verifying Face & Passkey ({scanProgress}%)…
                       </>
                     ) : busy ? (
-                      'Authenticating Session…'
+                      'Authenticating Secretariat Session…'
                     ) : (
                       '🛡️ Verify Face ID & Authorize Passkey Login →'
                     )}
@@ -516,7 +518,7 @@ export default function CollectorLogin() {
           {authMode === 'password' && (
             <form onSubmit={handlePasswordOnlySubmit} className="auth-form" style={{ marginTop: '14px' }}>
               <div>
-                <label className="input-label">Collector Username</label>
+                <label className="input-label">Secretariat Username</label>
                 <div className="input-wrap">
                   <input
                     className="auth-input"
@@ -590,7 +592,7 @@ export default function CollectorLogin() {
                   </div>
                   <div className="hud-telemetry">
                     <span className="hud-badge red-pulse">● ENROLLMENT MODE</span>
-                    <span className="hud-badge">MH-COLL-REGISTRY</span>
+                    <span className="hud-badge">MAH-SECRETARIAT-REGISTRY</span>
                   </div>
                   <div className="hud-status-bar">
                     <span className="hud-status-text">Position face inside oval reticle and click Capture below</span>
@@ -605,10 +607,10 @@ export default function CollectorLogin() {
                   disabled={!cameraActive}
                   onClick={handleEnrollFace}
                 >
-                  📸 Capture & Enroll This Face as Official Collector
+                  📸 Capture & Enroll This Face as Official Secretariat Officer
                 </button>
                 <p style={{ margin: '6px 0 0', fontSize: '11.5px', color: '#94a3b8', textAlign: 'center' }}>
-                  Look directly at camera in good lighting. Only this biometric profile will be authorized to access the Collector Portal.
+                  Look directly at camera in good lighting. Only this biometric profile will be authorized to access the Maharashtra State Govt Portal.
                 </p>
               </div>
             </div>
@@ -616,7 +618,7 @@ export default function CollectorLogin() {
 
           <div className="auth-switch">
             <span style={{ color: '#64748b' }}>Switch portal: </span>
-            <a href="/login">Citizen Login</a> • <a href="/tahsildar/login">Tahsildar Desk</a>
+            <a href="/collector/login">Collector Portal</a> • <a href="/tahsildar/login">Tahsildar Desk</a> • <a href="/login">Citizen Login</a>
           </div>
         </div>
       </div>

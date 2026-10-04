@@ -232,7 +232,7 @@ export function CollectorDashboard() {
       </aside>
 
       {/* MAIN CONTENT */}
-      <main className="dashboard-main" style={{ marginLeft: '270px', padding: '36px 40px' }}>
+      <main className="dashboard-main">
         {/* TOP METRICS SUMMARY */}
         <div className="collector-metrics-grid">
           <div className={`collector-metric-card color-amber ${filter === 'pending_collector' ? 'active-metric' : ''}`} onClick={() => setFilter('pending_collector')}>
@@ -611,24 +611,6 @@ export function CollectorDetail() {
 
       {msg && <div className="success-msg">{msg}</div>}
 
-      {/* STATUTORY MANDATE BANNER FOR GRANTED & SEMI-GRANTED */}
-      {isGrantedOrSemiGranted && (
-        <div style={{ background: '#fffbeb', border: '2px solid #f59e0b', borderRadius: '8px', padding: '16px 20px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-          <div>
-            <div style={{ fontWeight: '800', color: '#92400e', fontSize: '15px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span>🏛️</span> Statutory Requirement: Maharashtra State Government Referral Mandate
-            </div>
-            <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#78350f' }}>
-              Under Section 44 of Maharashtra Land Revenue Code, 1966 and State Grant Rules, this conversion on <strong>{app?.land_type}</strong> requires <strong>Maharashtra State Government Secretariat Referral & Ministerial Concurrence (मंत्रालय, मुंबई)</strong>.
-            </p>
-          </div>
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <Link to="/maharashtra-govt" target="_blank" style={{ background: '#b45309', color: '#fff', padding: '8px 16px', borderRadius: '6px', fontSize: '12.5px', fontWeight: 'bold', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              Open State Govt Portal ↗
-            </Link>
-          </div>
-        </div>
-      )}
 
       {/* HEADER BAR */}
       <div className="detail-header" style={{ alignItems: 'flex-start' }}>

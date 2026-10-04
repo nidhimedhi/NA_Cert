@@ -37,6 +37,7 @@ urlpatterns = [
     path('collector/applications/<str:app_id>/reject/',               views.collector_reject),
 
     # ── Maharashtra State Government Secretariat (Granted & Semi-Granted)
+    path('state-govt/auth/login/',                                   views.state_govt_login),
     path('state-govt/applications/',                                 views.state_govt_applications),
     path('state-govt/applications/<str:app_id>/',                    views.state_govt_application_detail),
     path('state-govt/applications/<str:app_id>/approve/',            views.state_govt_approve),
