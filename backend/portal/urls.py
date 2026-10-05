@@ -10,6 +10,7 @@ urlpatterns = [
     path('upload/',    views.upload,       name='upload'),
     path('apply/',     views.apply_na,     name='apply'),
     path('track/',     views.track_view,   name='track'),
+    path('certificate/<str:ref>/', views.certificate_view, name='certificate_view'),
     
     path('residential/',  views.residential,  name='residential'),
     path('commercial/',   views.commercial,   name='commercial'),

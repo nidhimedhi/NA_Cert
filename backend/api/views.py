@@ -427,7 +427,7 @@ def apply_na(request):
                 'taluka':         specific.get('taluka', ''),
                 'district':       specific.get('district', ''),
                 'gat_no':         specific.get('gat_no', ''),
-                'owner_names':    str(specific.get('owner_names', [])),
+                'owner_names':    ", ".join(specific.get('owner_names')) if isinstance(specific.get('owner_names'), list) else str(specific.get('owner_names') or ''),
                 'satbara_no':     specific.get('satbara_no', ''),
                 'raw_json': {
                     'language':        specific.get('language', ''),
@@ -1103,6 +1103,9 @@ def track_application(request, ref=None):
             gat_number = d.get('gat_no', '')
             applicant_name = d.get('owner_names', '')
 
+    if isinstance(applicant_name, str) and applicant_name.startswith('[') and applicant_name.endswith(']'):
+        applicant_name = applicant_name.strip("[]'\" ")
+
     status = app.get('status', 'pending_collector')
     submitted_at = app.get('submitted_at')
     reviewed_at = app.get('reviewed_at')
@@ -1287,4 +1290,152 @@ def citizen_applications(request):
     apps = p_select('na_applications', {'user_email': email})
     apps = apps if isinstance(apps, list) else []
     return Response({'applications': apps})
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def certificate_data(request, ref=None):
+    """
+    Returns structured certificate data with all 24 statutory conditions in Marathi and English.
+    """
+    reference = ref or request.GET.get('ref', '')
+    reference = reference.strip()
+    if not reference:
+        return Response({'error': 'Reference number is required.'}, status=400)
+
+    from portal.supabase_client import select as p_select
+    from portal.certificate_data import CERTIFICATE_CONDITIONS
+
+    apps = p_select('na_applications', {'reference_no': reference})
+    if not (isinstance(apps, list) and apps):
+        return Response({'error': f"No application found with Reference Number '{reference}'."}, status=404)
+
+    app = apps[0]
+    app_id = app.get('id')
+
+    docs = p_select('extracted_documents', {'application_id': app_id})
+    docs = docs if isinstance(docs, list) else []
+
+    applicant_name = ''
+    gat_number = ''
+    village = ''
+    taluka = ''
+    district = ''
+    area_sqmt = ''
+    order_no = ''
+    sanction_date = ''
+    officer_name = 'डॉ. एस. के. पाटील (भा.प्र.से.)'
+
+    for d in docs:
+        doc_name = d.get('document_name', '')
+        if doc_name == 'Application Form - e-District Maharashtra':
+            raw = d.get('raw_json') or {}
+            applicant_info = raw.get('applicant_details') or {}
+            land_info = raw.get('land_details') or {}
+            applicant_name = applicant_info.get('full_name') or d.get('owner_names', '')
+            gat_number = land_info.get('gat_number') or d.get('gat_no', '')
+            village = land_info.get('land_village') or d.get('village', '')
+            taluka = land_info.get('land_taluka') or d.get('taluka', '')
+            district = land_info.get('land_district') or d.get('district', '')
+            area_sqmt = land_info.get('area_sqmt', '')
+        elif 'Collector NA Sanction Order' in doc_name:
+            raw = d.get('raw_json') or {}
+            order_no = raw.get('order_no', '')
+            sanction_date = raw.get('sanction_date', '')
+            officer_name = raw.get('officer_name', officer_name)
+        elif not village and d.get('village'):
+            village = d.get('village', '')
+            taluka = d.get('taluka', '')
+            district = d.get('district', '')
+            gat_number = d.get('gat_no', '')
+            if not applicant_name:
+                applicant_name = d.get('owner_names', '')
+
+    applicant_name = applicant_name or app.get('user_email', 'अर्जदार / Registered Citizen')
+    if isinstance(applicant_name, str) and applicant_name.startswith('[') and applicant_name.endswith(']'):
+        applicant_name = applicant_name.strip("[]'\" ")
+    land_type = app.get('land_type', 'Residential - Individual')
+
+    lt_lower = land_type.lower()
+    if 'residential' in lt_lower:
+        purpose_mr = 'रहिवास प्रयोजनासाठी'
+        purpose_en = 'Residential Layout Development'
+    elif 'commercial' in lt_lower:
+        purpose_mr = 'वाणिज्यिक प्रयोजनासाठी'
+        purpose_en = 'Commercial Layout Development'
+    elif 'industrial' in lt_lower:
+        purpose_mr = 'औद्योगिक प्रयोजनासाठी'
+        purpose_en = 'Industrial Land Development'
+    elif 'educational' in lt_lower:
+        purpose_mr = 'शैक्षणिक प्रयोजनासाठी'
+        purpose_en = 'Educational Institutional Use'
+    else:
+        purpose_mr = f'{land_type} प्रयोजनासाठी'
+        purpose_en = f'{land_type} Development'
+
+    submitted_raw = app.get('submitted_at') or app.get('created_at')
+    reviewed_raw = app.get('reviewed_at')
+
+    app_date = str(submitted_raw)[:10] if submitted_raw else timezone.now().strftime('%d/%m/%Y')
+    if '-' in app_date:
+        parts = app_date.split('-')
+        if len(parts) == 3:
+            app_date = f"{parts[2]}/{parts[1]}/{parts[0]}"
+
+    if not sanction_date:
+        s_date = str(reviewed_raw)[:10] if reviewed_raw else timezone.now().strftime('%d/%m/%Y')
+        if '-' in s_date:
+            parts = s_date.split('-')
+            if len(parts) == 3:
+                s_date = f"{parts[2]}/{parts[1]}/{parts[0]}"
+        sanction_date = s_date
+
+    if not order_no:
+        clean_num = ''.join(c for c in reference if c.isdigit())[-4:] or '2026'
+        order_no = f"जा. क्र. / महसूल-नरवि / NA-{clean_num} / {timezone.now().year}"
+
+    # Build applicant address dynamically from user records
+    addr_parts = []
+    if village:
+        addr_parts.append(f"रा. {village}")
+    if taluka:
+        addr_parts.append(f"ता. {taluka}")
+    if district:
+        addr_parts.append(f"जि. {district}")
+    applicant_address = ", ".join(addr_parts) if addr_parts else "स्थानिक रहिवासी"
+
+    office_mr = f"कार्यालय जिल्हाधिकारी तथा सक्षम नियोजन प्राधिकरण, जिल्हा {district}" if district else "कार्यालय जिल्हाधिकारी तथा सक्षम नियोजन प्राधिकरण"
+    office_en = f"Office of the District Collector & Competent Planning Authority, District {district}" if district else "Office of the District Collector & Competent Planning Authority"
+
+    cert = {
+        'reference_no': reference,
+        'order_no': order_no,
+        'sanction_date': sanction_date,
+        'application_date': app_date,
+        'applicant_name': applicant_name,
+        'applicant_address': applicant_address,
+        'village': village or 'सदर मौजे',
+        'taluka': taluka or '',
+        'district': district or 'महाराष्ट्र',
+        'gat_no': gat_number or 'नोंदणीकृत गट / सर्व्हे क्र.',
+        'area_sqmt': area_sqmt or 'मंजूर क्षेत्र',
+        'land_type': land_type,
+        'purpose_mr': purpose_mr,
+        'purpose_en': purpose_en,
+        'office_name_mr': office_mr,
+        'office_name_en': office_en,
+        'dept_name_mr': 'नगर रचना व महसूल शाखा (Town Planning & Revenue Branch)',
+        'dept_name_en': 'Town Planning & District Revenue Adjudication Desk',
+        'signatory_name': officer_name,
+        'signatory_title_mr': 'सहाय्यक संचालक नगर रचना तथा सक्षम प्राधिकारी',
+        'signatory_title_en': 'Assistant Director Town Planning & Competent Authority',
+        'status': app.get('status'),
+    }
+
+
+    return Response({
+        'certificate': cert,
+        'conditions': CERTIFICATE_CONDITIONS,
+    })
+
 

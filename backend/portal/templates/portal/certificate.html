@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NA Sanction Order - {{ cert.reference_no }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #f1f5f9;
+            color: #1e293b;
+            font-family: 'Mukta', 'Inter', sans-serif;
+            line-height: 1.5;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        /* SCREEN TOP CONTROLS BAR */
+        .no-print-bar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: #0f172a;
+            color: #ffffff;
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .bar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .bar-badge {
+            background: #10b981;
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .bar-ref {
+            font-family: monospace;
+            font-weight: 700;
+            font-size: 15px;
+            color: #93c5fd;
+        }
+
+        .bar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .lang-toggle {
+            display: inline-flex;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .lang-btn {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            padding: 6px 14px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .lang-btn.active {
+            background: #3b82f6;
+            color: #ffffff;
+        }
+
+        .btn-print {
+            background: #10b981;
+            color: #ffffff;
+            border: none;
+            padding: 7px 18px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.2s;
+        }
+        .btn-print:hover {
+            background: #059669;
+        }
+
+        .btn-back {
+            background: #334155;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 7px 14px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 13px;
+            transition: 0.2s;
+        }
+        .btn-back:hover {
+            background: #475569;
+        }
+
+        /* PAPER A4 CONTAINER */
+        .paper-container {
+            max-width: 860px;
+            margin: 30px auto 60px;
+            background: #ffffff;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            position: relative;
+            padding: 45px 55px;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* WATERMARK */
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-35deg);
+            font-size: 52px;
+            font-weight: 900;
+            color: rgba(16, 185, 129, 0.05);
+            text-transform: uppercase;
+            letter-spacing: 6px;
+            white-space: nowrap;
+            pointer-events: none;
+            user-select: none;
+            z-index: 0;
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        .content-layer {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* HEADER */
+        .cert-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid #0f172a;
+            padding-bottom: 16px;
+            margin-bottom: 20px;
+        }
+
+        .header-emblem-wrap {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .emblem-svg {
+            width: 72px;
+            height: 72px;
+        }
+
+        .header-text h1 {
+            font-size: 21px;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1.2;
+            margin-bottom: 2px;
+        }
+
+        .header-text h2 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .header-text .sub-text {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .header-meta {
+            text-align: right;
+            font-size: 13.5px;
+            color: #1e293b;
+        }
+
+        .header-meta .outward-no {
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .header-meta .order-date {
+            font-weight: 600;
+        }
+
+        /* RECIPIENT & SUBJECT */
+        .cert-section {
+            margin-bottom: 14px;
+            font-size: 14px;
+        }
+
+        .recipient-box {
+            margin-bottom: 14px;
+            line-height: 1.4;
+        }
+
+        .recipient-title {
+            font-weight: 700;
+            display: block;
+        }
+
+        .recipient-name {
+            font-size: 15px;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .subject-box {
+            background: #f8fafc;
+            border-left: 4px solid #0f172a;
+            padding: 10px 14px;
+            margin-bottom: 14px;
+            font-size: 13.5px;
+            line-height: 1.45;
+        }
+
+        .subject-label {
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .reference-box {
+            font-size: 13px;
+            margin-bottom: 14px;
+            line-height: 1.4;
+            color: #334155;
+        }
+
+        .reference-label {
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .preamble-text {
+            font-size: 13.5px;
+            line-height: 1.5;
+            text-align: justify;
+            margin-bottom: 16px;
+        }
+
+        /* CONDITIONS LIST */
+        .conditions-header {
+            font-size: 14px;
+            font-weight: 800;
+            color: #0f172a;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #cbd5e1;
+            padding-bottom: 4px;
+        }
+
+        .conditions-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 24px;
+        }
+
+        .condition-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-size: 13px;
+            line-height: 1.45;
+            text-align: justify;
+            page-break-inside: avoid;
+        }
+
+        .condition-num {
+            font-weight: 800;
+            min-width: 26px;
+            color: #0f172a;
+        }
+
+        .condition-body {
+            flex: 1;
+            color: #1e293b;
+        }
+
+        /* SIGNATURE & FOOTER SECTION */
+        .cert-footer {
+            margin-top: 30px;
+            page-break-inside: avoid;
+        }
+
+        .sig-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 24px;
+        }
+
+        .qr-block {
+            text-align: center;
+        }
+
+        .qr-placeholder {
+            width: 100px;
+            height: 100px;
+            border: 1px solid #cbd5e1;
+            padding: 4px;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+        }
+
+        .qr-caption {
+            font-size: 10px;
+            color: #64748b;
+            margin-top: 4px;
+            font-weight: 600;
+        }
+
+        .official-seal-wrap {
+            text-align: center;
+            padding: 0 16px;
+        }
+
+        .round-seal {
+            width: 86px;
+            height: 86px;
+            border: 2px dashed #059669;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            font-weight: 800;
+            color: #047857;
+            text-transform: uppercase;
+            line-height: 1.1;
+            margin: 0 auto;
+        }
+
+        .signatory-box {
+            text-align: right;
+            min-width: 250px;
+        }
+
+        .signature-img-wrap {
+            height: 48px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-end;
+            margin-bottom: 4px;
+        }
+
+        .sig-svg {
+            height: 38px;
+        }
+
+        .signatory-name {
+            font-size: 14px;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .signatory-title {
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .signatory-dept {
+            font-size: 11px;
+            color: #64748b;
+        }
+
+        /* ENDORSEMENT / COPIES SECTION */
+        .endorsement-box {
+            border-top: 1px solid #cbd5e1;
+            padding-top: 12px;
+            font-size: 12px;
+            line-height: 1.4;
+            color: #475569;
+        }
+
+        .endorsement-title {
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+
+        .endorsement-list {
+            padding-left: 18px;
+        }
+
+        /* PRINT STYLES */
+        @media print {
+            .no-print-bar {
+                display: none !important;
+            }
+
+            body {
+                background: #ffffff !important;
+            }
+
+            .paper-container {
+                box-shadow: none !important;
+                border: none !important;
+                padding: 15mm 15mm !important;
+                margin: 0 !important;
+                max-width: 100% !important;
+                width: 100% !important;
+            }
+
+            @page {
+                size: A4;
+                margin: 10mm;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- STICKY SCREEN CONTROL BAR -->
+    <div class="no-print-bar">
+        <div class="bar-left">
+            <span class="bar-badge">Official Document</span>
+            <span class="bar-ref">{{ cert.reference_no }}</span>
+            <span style="font-size: 13px; color: #cbd5e1;">Maharashtra Land Revenue Code, 1966 • Sec 44</span>
+        </div>
+        <div class="bar-right">
+            <div class="lang-toggle">
+                <button type="button" class="lang-btn active" id="btn-mr" onclick="switchLanguage('mr')">मराठी</button>
+                <button type="button" class="lang-btn" id="btn-en" onclick="switchLanguage('en')">English</button>
+            </div>
+            <button type="button" class="btn-print" onclick="window.print()">
+                🖨️ Download / Print PDF
+            </button>
+            <a href="/track/?ref={{ cert.reference_no }}" class="btn-back">← Back to Tracking</a>
+        </div>
+    </div>
+
+    <!-- PRINTABLE A4 PAGE CONTAINER -->
+    <div class="paper-container">
+        <div class="watermark">
+            GOVERNMENT OF MAHARASHTRA<br>NA SANCTION ORDER
+        </div>
+
+        <div class="content-layer">
+
+            <!-- HEADER -->
+            <div class="cert-header">
+                <div class="header-emblem-wrap">
+                    <!-- Ashoka / Maharashtra Crest SVG -->
+                    <svg class="emblem-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="50" cy="50" r="46" stroke="#0f172a" stroke-width="2.5" fill="#f8fafc"/>
+                        <circle cx="50" cy="50" r="40" stroke="#0f172a" stroke-width="1"/>
+                        <path d="M50 16 L54 26 L64 27 L56 34 L58 44 L50 38 L42 44 L44 34 L36 27 L46 26 Z" fill="#0f172a"/>
+                        <rect x="36" y="48" width="28" height="14" rx="2" fill="#0f172a"/>
+                        <circle cx="50" cy="55" r="4" fill="#f8fafc"/>
+                        <path d="M30 68 C40 64, 60 64, 70 68 L66 74 C58 72, 42 72, 34 74 Z" fill="#0f172a"/>
+                        <text x="50" y="86" font-family="'Mukta', sans-serif" font-size="8.5" font-weight="bold" text-anchor="middle" fill="#0f172a">सत्यमेव जयते</text>
+                    </svg>
+                    <div class="header-text">
+                        <h1 class="lang-text" data-mr="{{ cert.office_name_mr }}" data-en="{{ cert.office_name_en }}">
+                            {{ cert.office_name_mr }}
+                        </h1>
+                        <h2 class="lang-text" data-mr="{{ cert.dept_name_mr }}" data-en="{{ cert.dept_name_en }}">
+                            {{ cert.dept_name_mr }}
+                        </h2>
+                        <div class="sub-text lang-text" data-mr="महाराष्ट्र शासन • नगर रचना व महसूल प्रशासन" data-en="Government of Maharashtra • Town Planning & Revenue Administration">
+                            महाराष्ट्र शासन • नगर रचना व महसूल प्रशासन
+                        </div>
+                    </div>
+                </div>
+
+                <div class="header-meta">
+                    <div class="outward-no">
+                        <span class="lang-text" data-mr="जा. क्र. : " data-en="Outward No. : ">जा. क्र. : </span>
+                        <span>{{ cert.order_no }}</span>
+                    </div>
+                    <div class="order-date">
+                        <span class="lang-text" data-mr="दिनांक : " data-en="Date : ">दिनांक : </span>
+                        <span>{{ cert.sanction_date }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RECIPIENT -->
+            <div class="recipient-box">
+                <span class="recipient-title lang-text" data-mr="प्रति," data-en="To,">प्रति,</span>
+                <div class="recipient-name">{{ cert.applicant_name }}</div>
+                <div class="recipient-address">{{ cert.applicant_address }}</div>
+            </div>
+
+            <!-- SUBJECT -->
+            <div class="subject-box">
+                <span class="subject-label lang-text" data-mr="विषय :- " data-en="Subject :- ">विषय :- </span>
+                <span class="lang-text"
+                    data-mr="मौ. {{ cert.village }} येथील गट नं. {{ cert.gat_no }} (पैकी) क्षेत्र {{ cert.area_sqmt }} चौ. मी. इतक्या जमिनीची {{ cert.purpose_mr }} अधिन्यास / अकृषिक (NA) परवानगी मिळणे बाबत."
+                    data-en="Regarding grant of Layout & Non-Agricultural (NA) Permission for land bearing Gat/Survey No. {{ cert.gat_no }} (Part), admeasuring {{ cert.area_sqmt }} Sq. Mtrs. situated at Village {{ cert.village }}, Taluka {{ cert.taluka }}, District {{ cert.district }} for {{ cert.purpose_en }}.">
+                    मौ. {{ cert.village }} येथील गट नं. {{ cert.gat_no }} (पैकी) क्षेत्र {{ cert.area_sqmt }} चौ. मी. इतक्या जमिनीची {{ cert.purpose_mr }} अधिन्यास / अकृषिक (NA) परवानगी मिळणे बाबत.
+                </span>
+            </div>
+
+            <!-- REFERENCE -->
+            <div class="reference-box">
+                <span class="reference-label lang-text" data-mr="संदर्भ :- " data-en="Reference :- ">संदर्भ :- </span>
+                <ol style="margin-left: 20px;">
+                    <li><span class="lang-text" data-mr="संचिका क्र. / अर्ज संदर्भ : " data-en="File / Application Reference : ">संचिका क्र. / अर्ज संदर्भ : </span><strong>{{ cert.reference_no }}</strong></li>
+                    <li><span class="lang-text" data-mr="आपला अर्ज दिनांक : " data-en="Citizen Application Date : ">आपला अर्ज दिनांक : </span>{{ cert.application_date }}</li>
+                    <li><span class="lang-text" data-mr="भूमी अभिलेख खात्याकडील छाननी व मोजणी अहवाल." data-en="Field Scrutiny & Mojani Survey Report by Department of Land Records (TILR).">भूमी अभिलेख खात्याकडील छाननी व मोजणी अहवाल.</span></li>
+                </ol>
+            </div>
+
+            <!-- PREAMBLE -->
+            <div class="preamble-text lang-text"
+                data-mr="महाशय,<br>विषयांकित प्रकरणी संदर्भीय विषयाच्या अनुषंगाने मौ. {{ cert.village }} येथील गट नं. {{ cert.gat_no }} (पैकी) क्षेत्र {{ cert.area_sqmt }} चौ. मी. इतक्या जमिनीचा {{ cert.purpose_mr }} अधिन्यास परवानगी सोबतच्या नकाशात हिरव्या रंगाने दुरुस्ती केले प्रमाणे रेखांकनास तात्पुरत्या / अंतिम स्वरुपाची मंजुरी खालील अटींनुसार देण्यात येत आहे."
+                data-en="Sir/Madam,<br>With reference to the captioned subject and the formal application submitted for the conversion of land situated at Village {{ cert.village }}, Taluka {{ cert.taluka }}, District {{ cert.district }} bearing Gat/Survey No. {{ cert.gat_no }} (Part) admeasuring {{ cert.area_sqmt }} Sq. Mtrs., Non-Agricultural (NA) Layout Sanction is hereby granted in accordance with the sanctioned demarcation layout plan subject to the following statutory terms and conditions:">
+                महाशय,<br>विषयांकित प्रकरणी संदर्भीय विषयाच्या अनुषंगाने मौ. {{ cert.village }} येथील गट नं. {{ cert.gat_no }} (पैकी) क्षेत्र {{ cert.area_sqmt }} चौ. मी. इतक्या जमिनीचा {{ cert.purpose_mr }} अधिन्यास परवानगी सोबतच्या नकाशात हिरव्या रंगाने दुरुस्ती केले प्रमाणे रेखांकनास तात्पुरत्या / अंतिम स्वरुपाची मंजुरी खालील अटींनुसार देण्यात येत आहे.
+            </div>
+
+            <!-- CONDITIONS HEADER -->
+            <div class="conditions-header lang-text" data-mr="—: अटी व शर्ती :—" data-en="—: STATUTORY TERMS & CONDITIONS :—">
+                —: अटी व शर्ती :—
+            </div>
+
+            <!-- 24 STATUTORY CONDITIONS LIST -->
+            <ol class="conditions-list">
+                {% for item in conditions %}
+                <li class="condition-item">
+                    <span class="condition-num">{{ item.id }}.</span>
+                    <span class="condition-body lang-text" data-mr="{{ item.mr }}" data-en="{{ item.en }}">
+                        {{ item.mr }}
+                    </span>
+                </li>
+                {% endfor %}
+            </ol>
+
+            <!-- FOOTER & SIGNATORY SECTION -->
+            <div class="cert-footer">
+                <div class="sig-row">
+                    <!-- QR Code -->
+                    <div class="qr-block">
+                        <div class="qr-placeholder">
+                            <svg width="86" height="86" viewBox="0 0 100 100">
+                                <rect width="100" height="100" fill="#ffffff" />
+                                <rect x="10" y="10" width="25" height="25" fill="#0f172a" />
+                                <rect x="15" y="15" width="15" height="15" fill="#ffffff" />
+                                <rect x="18" y="18" width="9" height="9" fill="#0f172a" />
+
+                                <rect x="65" y="10" width="25" height="25" fill="#0f172a" />
+                                <rect x="70" y="15" width="15" height="15" fill="#ffffff" />
+                                <rect x="73" y="18" width="9" height="9" fill="#0f172a" />
+
+                                <rect x="10" y="65" width="25" height="25" fill="#0f172a" />
+                                <rect x="15" y="70" width="15" height="15" fill="#ffffff" />
+                                <rect x="18" y="73" width="9" height="9" fill="#0f172a" />
+
+                                <circle cx="50" cy="50" r="4" fill="#0f172a" />
+                                <rect x="42" y="20" width="16" height="6" fill="#0f172a" />
+                                <rect x="42" y="32" width="6" height="16" fill="#0f172a" />
+                                <rect x="52" y="32" width="6" height="16" fill="#0f172a" />
+                                <rect x="42" y="60" width="16" height="6" fill="#0f172a" />
+                                <rect x="65" y="55" width="25" height="6" fill="#0f172a" />
+                                <rect x="65" y="68" width="10" height="10" fill="#0f172a" />
+                                <rect x="80" y="80" width="10" height="10" fill="#0f172a" />
+                            </svg>
+                        </div>
+                        <div class="qr-caption">Govt Portal Verification QR</div>
+                    </div>
+
+                    <!-- Official Circular Seal -->
+                    <div class="official-seal-wrap">
+                        <div class="round-seal">
+                            <span>★ DISTRICT ★</span>
+                            <span>COLLECTORATE</span>
+                            <span style="font-size: 7px; color: #065f46;">MAHARASHTRA</span>
+                            <span>OFFICIAL SEAL</span>
+                        </div>
+                    </div>
+
+                    <!-- Competent Authority Signature -->
+                    <div class="signatory-box">
+                        <div class="signature-img-wrap">
+                            <svg class="sig-svg" viewBox="0 0 160 40" fill="none">
+                                <path d="M10 28 C 30 10, 45 35, 60 18 C 75 5, 85 30, 105 15 C 120 5, 135 25, 150 12" stroke="#1e3a8a" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+                                <path d="M40 32 C 60 30, 100 28, 140 26" stroke="#1e3a8a" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+                            </svg>
+                        </div>
+                        <div class="signatory-name">{{ cert.signatory_name }}</div>
+                        <div class="signatory-title lang-text" data-mr="{{ cert.signatory_title_mr }}" data-en="{{ cert.signatory_title_en }}">
+                            {{ cert.signatory_title_mr }}
+                        </div>
+                        <div class="signatory-dept lang-text" data-mr="{{ cert.office_name_mr }}" data-en="{{ cert.office_name_en }}">
+                            {{ cert.office_name_mr }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ENDORSEMENT / DISTRIBUTION COPIES -->
+                <div class="endorsement-box">
+                    <div class="endorsement-title lang-text"
+                        data-mr="प्रतिलिपी माहितीस्तव व पुढील आवश्यक त्या कार्यवाहीस्तव :-"
+                        data-en="Copy forwarded for information and necessary compliance to :-">
+                        प्रतिलिपी माहितीस्तव व पुढील आवश्यक त्या कार्यवाहीस्तव :-
+                    </div>
+                    <ol class="endorsement-list">
+                        <li class="lang-text"
+                            data-mr="मा. जिल्हाधिकारी महोदय, जिल्हाधिकारी कार्यालय (District Collectorate)."
+                            data-en="Hon. District Collector & Executive Magistrate, District Collectorate.">
+                            मा. जिल्हाधिकारी महोदय, जिल्हाधिकारी कार्यालय (District Collectorate).
+                        </li>
+                        <li class="lang-text"
+                            data-mr="सहाय्यक संचालक, नगर रचना शाखा कार्यालय (Town Planning Branch)."
+                            data-en="Assistant Director, Town Planning Branch Office.">
+                            सहाय्यक संचालक, नगर रचना शाखा कार्यालय (Town Planning Branch).
+                        </li>
+                        <li class="lang-text"
+                            data-mr="तालुका निरीक्षक, भूमी अभिलेख (TILR) - अधिन्यासातील भूखंडांच्या अंतिम हद्दी व नकाशा नोंदीसाठी."
+                            data-en="Taluka Inspector of Land Records (TILR) - for demarcation records and cadastre entry.">
+                            तालुका निरीक्षक, भूमी अभिलेख (TILR) - अधिन्यासातील भूखंडांच्या अंतिम हद्दी व नकाशा नोंदीसाठी.
+                        </li>
+                        <li class="lang-text"
+                            data-mr="मालमत्ता व्यवस्थापक / कर विभाग, स्थानिक नियोजन प्राधिकरण - मोकळी जागा व रस्ते ताब्यात घेणे बाबत."
+                            data-en="Property Manager / Assessment Tax Dept, Local Authority - for taking possession of public spaces and roads.">
+                            मालमत्ता व्यवस्थापक / कर विभाग, स्थानिक नियोजन प्राधिकरण - मोकळी जागा व रस्ते ताब्यात घेणे बाबत.
+                        </li>
+                    </ol>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function switchLanguage(lang) {
+            const btnMr = document.getElementById('btn-mr');
+            const btnEn = document.getElementById('btn-en');
+            if (lang === 'mr') {
+                btnMr.classList.add('active');
+                btnEn.classList.remove('active');
+                document.documentElement.lang = 'mr';
+            } else {
+                btnEn.classList.add('active');
+                btnMr.classList.remove('active');
+                document.documentElement.lang = 'en';
+            }
+
+            const elements = document.querySelectorAll('.lang-text');
+            elements.forEach(el => {
+                const targetText = el.getAttribute('data-' + lang);
+                if (targetText) {
+                    el.innerHTML = targetText;
+                }
+            });
+        }
+    </script>
+</body>
+</html>

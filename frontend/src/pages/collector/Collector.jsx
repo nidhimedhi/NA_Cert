@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import ApplicationPdfModal from '../../components/ApplicationPdfModal';
+import CertificateModal from '../../components/CertificateModal';
 
 const cApi = axios.create({ baseURL: 'http://127.0.0.1:8000/api' });
 cApi.interceptors.request.use(c => {
@@ -382,6 +383,7 @@ export function CollectorDetail() {
   const [msg, setMsg] = useState('');
   const [activeDetailTab, setActiveDetailTab] = useState('applicant');
   const [showPdfModal, setShowPdfModal] = useState(false);
+  const [showCertModal, setShowCertModal] = useState(false);
 
   // Collector Sanction Dossier State
   const [orderNo, setOrderNo]                       = useState('');
@@ -1478,7 +1480,29 @@ export function CollectorDetail() {
                   Authorized under Section 44, 45 & 47 of Maharashtra Land Revenue Code, 1966.
                 </p>
               </div>
-              <span className="status-pill status-collector_approved">✓ Sanction Order Executed</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowCertModal(true)}
+                  style={{
+                    background: '#059669',
+                    color: '#ffffff',
+                    border: 'none',
+                    padding: '8px 16px',
+                    borderRadius: '6px',
+                    fontWeight: '700',
+                    fontSize: '13px',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    boxShadow: '0 2px 4px rgba(5, 150, 105, 0.25)',
+                  }}
+                >
+                  📜 View / Print Official NA Certificate (मराठी / EN)
+                </button>
+                <span className="status-pill status-collector_approved">✓ Sanction Order Executed</span>
+              </div>
             </div>
 
             <div style={{ background: '#ffffff', padding: '16px', borderRadius: '8px', border: '1px solid #bbf7d0', marginBottom: '16px' }}>
@@ -1543,6 +1567,14 @@ export function CollectorDetail() {
           app={app}
           formData={form_data}
           onClose={() => setShowPdfModal(false)}
+        />
+      )}
+
+      {showCertModal && (
+        <CertificateModal
+          isOpen={showCertModal}
+          onClose={() => setShowCertModal(false)}
+          referenceNumber={app?.reference_no}
         />
       )}
     </div>

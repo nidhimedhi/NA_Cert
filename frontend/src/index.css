@@ -1791,10 +1791,16 @@ img, video, canvas, svg {
     visibility: hidden;
   }
   .pdf-modal-overlay,
-  .pdf-modal-overlay * {
+  .pdf-modal-overlay *,
+  .cert-modal-backdrop,
+  .cert-modal-backdrop #print-certificate-area,
+  .cert-modal-backdrop #print-certificate-area *,
+  #print-area,
+  #print-area * {
     visibility: visible;
   }
-  .pdf-modal-overlay {
+  .pdf-modal-overlay,
+  .cert-modal-backdrop {
     position: absolute;
     left: 0;
     top: 0;
@@ -1803,11 +1809,15 @@ img, video, canvas, svg {
     padding: 0;
     background: transparent !important;
   }
-  .pdf-modal-container {
+  .pdf-modal-container,
+  #print-certificate-area,
+  #print-area {
     box-shadow: none !important;
     border: none !important;
     max-width: 100% !important;
     width: 100% !important;
+    padding: 10mm 15mm !important;
+    margin: 0 !important;
   }
   .no-print {
     display: none !important;
@@ -1815,4 +1825,9 @@ img, video, canvas, svg {
   .pdf-sheet {
     padding: 10mm 15mm !important;
   }
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
 }
+

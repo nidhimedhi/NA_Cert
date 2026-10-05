@@ -17,6 +17,8 @@ urlpatterns = [
     path('land-types/',  views.land_types),
     path('track/',       views.track_application),
     path('track/<str:ref>/', views.track_application),
+    path('certificate/', views.certificate_data),
+    path('certificate/<str:ref>/', views.certificate_data),
 
     # ── Citizen portal ────────────────────────────────────────────────
     path('apply/',       views.apply_na),

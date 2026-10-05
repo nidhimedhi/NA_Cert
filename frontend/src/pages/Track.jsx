@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import CertificateModal from '../components/CertificateModal';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 
@@ -17,6 +18,8 @@ export default function Track() {
   const [error, setError] = useState('');
   const [myApps, setMyApps] = useState([]);
   const [loadingMyApps, setLoadingMyApps] = useState(false);
+  const [showCertModal, setShowCertModal] = useState(false);
+  const [certRef, setCertRef] = useState(null);
 
   // Fetch tracking data for a given reference
   const fetchTracking = async (referenceNumber) => {
@@ -174,6 +177,72 @@ export default function Track() {
               <span style={{ fontSize: '20px' }}>{statusMeta.color === 'green' ? '🎉' : statusMeta.color === 'red' ? '⚠️' : 'ℹ️'}</span>
               <span>{statusMeta.summary}</span>
             </div>
+
+            {/* OFFICIAL SANCTION CERTIFICATE BANNER */}
+            {app.status === 'collector_approved' && (
+              <div style={{
+                margin: '24px 28px 0',
+                padding: '20px 24px',
+                borderRadius: '10px',
+                background: '#ecfdf5',
+                border: '1.5px solid #10b981',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: '16px',
+              }}>
+                <div>
+                  <div style={{ fontSize: '16px', fontWeight: '800', color: '#065f46', marginBottom: '3px' }}>
+                    🎉 Non-Agricultural (NA) Permission Sanctioned!
+                  </div>
+                  <div style={{ fontSize: '13.5px', color: '#047857' }}>
+                    Your official NA Layout Sanction Certificate has been digitally authorized and issued. Available in Marathi & English.
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button
+                    type="button"
+                    onClick={() => { setCertRef(app.reference_no); setShowCertModal(true); }}
+                    style={{
+                      background: '#059669',
+                      color: '#ffffff',
+                      border: 'none',
+                      padding: '10px 20px',
+                      borderRadius: '6px',
+                      fontWeight: '800',
+                      fontSize: '13.5px',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      boxShadow: '0 2px 6px rgba(5,150,105,0.25)',
+                    }}
+                  >
+                    📜 View & Print Official Certificate (मराठी / EN) →
+                  </button>
+                  <a
+                    href={`/certificate/${app.reference_no}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{
+                      background: '#ffffff',
+                      color: '#065f46',
+                      border: '1px solid #a7f3d0',
+                      padding: '10px 16px',
+                      borderRadius: '6px',
+                      fontWeight: '700',
+                      fontSize: '13px',
+                      textDecoration: 'none',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                    }}
+                  >
+                    ↗ Open Tab
+                  </a>
+                </div>
+              </div>
+            )}
 
             {/* 4-MILESTONE PROGRESS STEPPER */}
             <div style={{ padding: '30px 28px' }}>
@@ -346,7 +415,7 @@ export default function Track() {
                         <td style={{ padding: '12px' }}>
                           <span className={`status-pill status-${a.status}`}>{a.status}</span>
                         </td>
-                        <td style={{ padding: '12px', textAlign: 'right' }}>
+                        <td style={{ padding: '12px', textAlign: 'right', whiteSpace: 'nowrap' }}>
                           <button
                             onClick={() => handleSelectApp(a.reference_no)}
                             style={{
@@ -358,10 +427,28 @@ export default function Track() {
                               fontWeight: '700',
                               fontSize: '12px',
                               cursor: 'pointer',
+                              marginRight: '8px',
                             }}
                           >
                             Track Status →
                           </button>
+                          {a.status === 'collector_approved' && (
+                            <button
+                              onClick={() => { setCertRef(a.reference_no); setShowCertModal(true); }}
+                              style={{
+                                background: '#10b981',
+                                color: '#fff',
+                                border: 'none',
+                                padding: '6px 12px',
+                                borderRadius: '4px',
+                                fontWeight: '700',
+                                fontSize: '12px',
+                                cursor: 'pointer',
+                              }}
+                            >
+                              📜 Certificate
+                            </button>
+                          )}
                         </td>
                       </tr>
                     ))}
@@ -373,6 +460,14 @@ export default function Track() {
         )}
 
       </div>
+
+      {/* INTERACTIVE BILINGUAL CERTIFICATE MODAL */}
+      <CertificateModal
+        isOpen={showCertModal}
+        onClose={() => setShowCertModal(false)}
+        referenceNumber={certRef || app?.reference_no}
+      />
     </>
   );
 }
+

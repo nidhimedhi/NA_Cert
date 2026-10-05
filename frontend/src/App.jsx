@@ -9,6 +9,7 @@ import Register  from './pages/Register';
 import Upload    from './pages/Upload';
 import Apply     from './pages/Apply';
 import Track     from './pages/Track';
+import CertificatePage from './pages/CertificatePage';
 
 import TahsildarLogin     from './pages/tahsildar/TahsildarLogin';
 import TahsildarDashboard from './pages/tahsildar/TahsildarDashboard';
@@ -33,6 +34,7 @@ export default function App() {
           <Route path="/track"           element={<Track />} />
           <Route path="/track/:ref"      element={<Track />} />
           <Route path="/dashboard"      element={<Track />} />
+          <Route path="/certificate/:ref" element={<CertificatePage />} />
 
           {/* Maharashtra State Government Portal (Visa Design System) */}
           <Route path="/maharashtra-govt/login" element={<StateGovtLogin />} />
