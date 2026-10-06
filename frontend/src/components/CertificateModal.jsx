@@ -61,8 +61,16 @@ export default function CertificateModal({ isOpen, onClose, referenceNumber }) {
         boxShadow: '0 4px 15px rgba(0,0,0,0.3)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <span style={{ background: '#10b981', color: '#fff', padding: '3px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: '800', textTransform: 'uppercase' }}>
-            Official NA Sanction Order
+          <span style={{
+            background: cert.status === 'collector_approved' ? '#10b981' : '#f59e0b',
+            color: '#fff',
+            padding: '4px 10px',
+            borderRadius: '4px',
+            fontSize: '11px',
+            fontWeight: '800',
+            textTransform: 'uppercase'
+          }}>
+            {cert.status === 'collector_approved' ? 'Official NA Sanction Order (Issued)' : 'District Collector Pre-Sanction Certificate Preview'}
           </span>
           <span style={{ fontFamily: 'monospace', fontWeight: 'bold', fontSize: '14px', color: '#93c5fd' }}>
             {referenceNumber}

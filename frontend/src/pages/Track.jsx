@@ -74,6 +74,7 @@ export default function Track() {
   const dossier = data?.dossier || {};
   const statusMeta = data?.status_meta || {};
   const steps = data?.steps || [];
+  const isGrantedFlow = data?.is_granted_flow || false;
 
   return (
     <>
@@ -91,7 +92,7 @@ export default function Track() {
                 Track NA Certificate Application
               </h1>
               <p style={{ margin: 0, fontSize: '14px', color: '#64748b' }}>
-                Enter your official Application Reference Number to track real-time progress across Collectorate and Tahsildar stages.
+                Enter your official Application Reference Number to track real-time progress across Collectorate, Tahsildar, and State Government stages.
               </p>
             </div>
           </div>
@@ -153,6 +154,21 @@ export default function Track() {
                 <span style={{ fontSize: '12px', textTransform: 'uppercase', color: '#64748b', fontWeight: '700', letterSpacing: '0.5px' }}>Application Reference</span>
                 <div style={{ fontFamily: 'monospace', fontSize: '20px', fontWeight: '800', color: '#0f172a' }}>
                   {app.reference_no}
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px' }}>
+                  <span style={{
+                    background: isGrantedFlow ? '#e0e7ff' : '#ecfdf5',
+                    color: isGrantedFlow ? '#3730a3' : '#065f46',
+                    border: `1px solid ${isGrantedFlow ? '#c7d2fe' : '#a7f3d0'}`,
+                    padding: '3px 10px',
+                    borderRadius: '12px',
+                    fontSize: '11.5px',
+                    fontWeight: '700',
+                  }}>
+                    {isGrantedFlow
+                      ? '🏛️ Granted Route: Collector → State Government Secretariat (मंत्रालय) → Collector'
+                      : '🏡 Private Route: Collector → Jurisdictional Tahsildar → Collector'}
+                  </span>
                 </div>
               </div>
               <div>
@@ -247,7 +263,7 @@ export default function Track() {
             {/* 4-MILESTONE PROGRESS STEPPER */}
             <div style={{ padding: '30px 28px' }}>
               <div style={{ fontSize: '13px', fontWeight: '800', color: '#475569', textTransform: 'uppercase', marginBottom: '18px', letterSpacing: '0.5px' }}>
-                End-to-End Governance Progress Tracker
+                {isGrantedFlow ? '🏛️ Granted & Semi-Granted Governance Progress Tracker (State Secretariat Route)' : '🏡 Private Land Governance Progress Tracker (Tahsildar Field Route)'}
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
                 {steps.map(s => {

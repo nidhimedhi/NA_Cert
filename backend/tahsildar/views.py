@@ -11,9 +11,17 @@ from .supabase_client import (
 
 def tahsildar_login(request):
     if request.method == 'POST':
-        username = request.POST.get('username')
+        username = (request.POST.get('username') or '').strip()
         password = request.POST.get('password')
         user = authenticate(request, username=username, password=password)
+        if user is None:
+            try:
+                from django.contrib.auth.models import User
+                matching_user = User.objects.filter(username__iexact=username).first()
+                if matching_user:
+                    user = authenticate(request, username=matching_user.username, password=password)
+            except Exception:
+                pass
         if user is not None:
             login(request, user)
             return redirect('/tahsildar/dashboard/')

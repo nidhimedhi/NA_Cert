@@ -128,6 +128,9 @@
     .status-forwarded_to_tahsildar { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
     .status-tahsildar_verified { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
     .status-tahsildar_rejected { background: #fff1f2; color: #be123c; border: 1px solid #fecdd3; }
+    .status-forwarded_to_state_govt { background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe; }
+    .status-state_govt_approved { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+    .status-state_govt_rejected { background: #fff1f2; color: #be123c; border: 1px solid #fecdd3; }
     .status-collector_approved { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
     .status-collector_rejected { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
 
@@ -318,8 +321,17 @@
 
         <!-- 4-STEP TIMELINE -->
         <div class="stepper-wrap">
-            <div style="font-size: 13px; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 14px; letter-spacing: 0.5px;">
-                Workflow Progression Lifecycle
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
+                <div style="font-size: 13px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;">
+                    {% if is_granted_flow %}
+                    🏛️ Granted &amp; Semi-Granted Governance Progression (State Secretariat Route)
+                    {% else %}
+                    🏡 Private Land Governance Progression (Tahsildar Field Route)
+                    {% endif %}
+                </div>
+                <span style="font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 4px; {% if is_granted_flow %}background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe;{% else %}background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0;{% endif %}">
+                    {% if is_granted_flow %}🏛️ Collector → State Government (Mantralaya) → Collector{% else %}🏡 Collector → Tahsildar → Collector{% endif %}
+                </span>
             </div>
             <div class="stepper-steps">
                 {% for s in steps %}

@@ -643,91 +643,182 @@ def track_view(request):
             status = app.get('status', 'pending_collector')
             submitted_at = app.get('submitted_at')
             reviewed_at = app.get('reviewed_at')
+            land_type = app.get('land_type', '')
+            lt_lower = land_type.lower().strip()
+            is_granted_flow = (('granted' in lt_lower) or ('semi-granted' in lt_lower)) and ('private' not in lt_lower)
 
-            if status in ('pending_collector', 'pending'):
-                status_meta = {
-                    'label': 'Submitted to Collectorate',
-                    'stage': 'Step 1 of 4: Received at Collectorate',
-                    'badge_class': 'status-pending_collector',
-                    'summary': 'Application has been successfully filed and is undergoing preliminary intake review at the District Collectorate.',
-                }
-            elif status == 'forwarded_to_tahsildar':
-                status_meta = {
-                    'label': 'Under Tahsildar Field Inquiry',
-                    'stage': 'Step 2 of 4: Forwarded for Ground Inspection',
-                    'badge_class': 'status-forwarded_to_tahsildar',
-                    'summary': 'Forwarded by District Collector to the jurisdictional Tahsildar for on-site boundary verification and title check.',
-                }
-            elif status == 'tahsildar_verified':
-                status_meta = {
-                    'label': 'Tahsildar Verified — Pending Sanction',
-                    'stage': 'Step 3 of 4: Field Inquiry Passed',
-                    'badge_class': 'status-tahsildar_verified',
-                    'summary': 'Field verification completed by Tahsildar with positive recommendation. Returned to District Collector for final Sanction Order.',
-                }
-            elif status == 'tahsildar_rejected':
-                status_meta = {
-                    'label': 'Tahsildar Objections — Under Review',
-                    'stage': 'Step 3 of 4: Field Objections Raised',
-                    'badge_class': 'status-tahsildar_rejected',
-                    'summary': 'Tahsildar raised ground inspection objections. Application returned to District Collector for official determination.',
-                }
-            elif status == 'collector_approved':
-                status_meta = {
-                    'label': 'NA Permission Granted',
-                    'stage': 'Step 4 of 4: Final Sanction Order Issued',
-                    'badge_class': 'status-collector_approved',
-                    'summary': 'Congratulations! Non-Agricultural Permission has been officially granted under the Maharashtra Land Revenue Code, 1966.',
-                }
-            elif status == 'collector_rejected':
-                status_meta = {
-                    'label': 'Application Refused',
-                    'stage': 'Step 4 of 4: Final Rejection Order Issued',
-                    'badge_class': 'status-collector_rejected',
-                    'summary': 'The application for Non-Agricultural permission has been rejected with official statutory reasons.',
-                }
+            if is_granted_flow:
+                # ── GRANTED & SEMI-GRANTED WORKFLOW STATUS META (State Govt Route) ──
+                if status in ('pending_collector', 'pending'):
+                    status_meta = {
+                        'label': 'Submitted to Collectorate',
+                        'stage': 'Step 1 of 4: Received at Collectorate',
+                        'badge_class': 'status-pending_collector',
+                        'summary': 'Application has been successfully filed and is undergoing preliminary intake review at District Collectorate for referral to State Government.',
+                    }
+                elif status == 'forwarded_to_state_govt':
+                    status_meta = {
+                        'label': 'Under State Govt Scrutiny',
+                        'stage': 'Step 3 of 4: Secretariat GR Review',
+                        'badge_class': 'status-forwarded_to_state_govt',
+                        'summary': 'Referred by District Collector to Maharashtra State Government Secretariat (मंत्रालय, मुंबई) for Government Resolution (GR) concurrence.',
+                    }
+                elif status == 'state_govt_approved':
+                    status_meta = {
+                        'label': 'State Govt GR Sanctioned',
+                        'stage': 'Step 3 of 4: GR Concurrence Granted',
+                        'badge_class': 'status-state_govt_approved',
+                        'summary': 'State Government issued official Government Resolution (GR) concurrence. Returned to District Collector for final NA layout sanction decree.',
+                    }
+                elif status == 'state_govt_rejected':
+                    status_meta = {
+                        'label': 'State Govt Query / Refusal',
+                        'stage': 'Step 3 of 4: Secretariat Refusal',
+                        'badge_class': 'status-state_govt_rejected',
+                        'summary': 'Maharashtra State Government Secretariat raised statutory objections or refused concurrence under MLRC Section 44.',
+                    }
+                elif status == 'collector_approved':
+                    status_meta = {
+                        'label': 'NA Permission Granted',
+                        'stage': 'Step 4 of 4: Final Sanction Order Issued',
+                        'badge_class': 'status-collector_approved',
+                        'summary': 'Congratulations! Non-Agricultural Permission has been officially granted under the Maharashtra Land Revenue Code, 1966.',
+                    }
+                elif status == 'collector_rejected':
+                    status_meta = {
+                        'label': 'Application Refused',
+                        'stage': 'Step 4 of 4: Final Rejection Order Issued',
+                        'badge_class': 'status-collector_rejected',
+                        'summary': 'The application for Non-Agricultural permission has been rejected with official statutory reasons.',
+                    }
+                else:
+                    status_meta = {
+                        'label': status.replace('_', ' ').title(),
+                        'stage': 'Under Processing',
+                        'badge_class': 'status-pending',
+                        'summary': 'Application is currently under administrative processing.',
+                    }
+
+                steps = [
+                    {
+                        'step': 1,
+                        'title': 'Application Submission & Collector Intake',
+                        'subtitle': 'Direct to District Collector Desk',
+                        'status': 'completed',
+                        'timestamp': submitted_at,
+                        'desc': 'Application dossier and required documents filed online. Received at District Collector Desk.',
+                    },
+                    {
+                        'step': 2,
+                        'title': 'Collector Referral to State Govt',
+                        'subtitle': 'Secretariat Referral Memo Dispatched',
+                        'status': 'completed' if status in ('forwarded_to_state_govt', 'state_govt_approved', 'state_govt_rejected', 'collector_approved', 'collector_rejected') else 'active',
+                        'timestamp': reviewed_at if status in ('forwarded_to_state_govt', 'state_govt_approved', 'state_govt_rejected') else None,
+                        'desc': 'Collector reviewed preliminary dossier and dispatched referral memo to Maharashtra State Government Secretariat (मंत्रालय, मुंबई).' if status != 'pending_collector' else 'Under preliminary intake review by District Collectorate for referral to State Government.',
+                    },
+                    {
+                        'step': 3,
+                        'title': 'Maharashtra State Govt Secretariat',
+                        'subtitle': 'Government Resolution (GR) Sanction Desk (मंत्रालय)',
+                        'status': 'completed' if status in ('state_govt_approved', 'collector_approved') else ('rejected' if status == 'state_govt_rejected' else ('active' if status == 'forwarded_to_state_govt' else 'upcoming')),
+                        'timestamp': reviewed_at if status in ('state_govt_approved', 'state_govt_rejected') else None,
+                        'desc': 'State Government issued official Government Resolution (GR) concurrence and sanctioned conversion.' if status in ('state_govt_approved', 'collector_approved') else ('State Government raised statutory query or refused concurrence.' if status == 'state_govt_rejected' else ('Under ministerial scrutiny by Revenue & Forest Department Secretariat, Mantralaya Mumbai.' if status == 'forwarded_to_state_govt' else 'Awaiting State Government review and GR generation.')),
+                    },
+                    {
+                        'step': 4,
+                        'title': 'District Collector Final Sanction Decree',
+                        'subtitle': 'Final NA Sanction Order & Certificate Issuance',
+                        'status': 'completed' if status == 'collector_approved' else ('rejected' if status == 'collector_rejected' else ('active' if status == 'state_govt_approved' else 'upcoming')),
+                        'timestamp': reviewed_at if status in ('collector_approved', 'collector_rejected') else None,
+                        'desc': 'Final NA Sanction Order granted and authorized under Maharashtra Land Revenue Code, 1966. Bilingual certificate available.' if status == 'collector_approved' else ('Official rejection order issued by District Collector.' if status == 'collector_rejected' else ('District Collector executing final sanction decree upon receipt of State GR.' if status == 'state_govt_approved' else 'Pending State Government clearance.')),
+                    },
+                ]
             else:
-                status_meta = {
-                    'label': status.replace('_', ' ').title(),
-                    'stage': 'Under Processing',
-                    'badge_class': 'status-pending',
-                    'summary': 'Application is currently under administrative processing.',
-                }
+                # ── PRIVATE WORKFLOW STATUS META & STEPS (Tahsildar Route) ──
+                if status in ('pending_collector', 'pending'):
+                    status_meta = {
+                        'label': 'Submitted to Collectorate',
+                        'stage': 'Step 1 of 4: Received at Collectorate',
+                        'badge_class': 'status-pending_collector',
+                        'summary': 'Application has been successfully filed and is undergoing preliminary intake review at District Collectorate.',
+                    }
+                elif status == 'forwarded_to_tahsildar':
+                    status_meta = {
+                        'label': 'Under Tahsildar Field Inquiry',
+                        'stage': 'Step 2 of 4: Forwarded for Ground Inspection',
+                        'badge_class': 'status-forwarded_to_tahsildar',
+                        'summary': 'Forwarded by District Collector to jurisdictional Tahsildar for on-site boundary verification and title check.',
+                    }
+                elif status == 'tahsildar_verified':
+                    status_meta = {
+                        'label': 'Tahsildar Verified — Pending Sanction',
+                        'stage': 'Step 3 of 4: Field Inquiry Passed',
+                        'badge_class': 'status-tahsildar_verified',
+                        'summary': 'Field verification completed by Tahsildar with positive recommendation. Returned to District Collector for final Sanction Order.',
+                    }
+                elif status == 'tahsildar_rejected':
+                    status_meta = {
+                        'label': 'Tahsildar Objections — Under Review',
+                        'stage': 'Step 3 of 4: Field Objections Raised',
+                        'badge_class': 'status-tahsildar_rejected',
+                        'summary': 'Tahsildar raised ground inspection objections. Application returned to District Collector for official determination.',
+                    }
+                elif status == 'collector_approved':
+                    status_meta = {
+                        'label': 'NA Permission Granted',
+                        'stage': 'Step 4 of 4: Final Sanction Order Issued',
+                        'badge_class': 'status-collector_approved',
+                        'summary': 'Congratulations! Non-Agricultural Permission has been officially granted under the Maharashtra Land Revenue Code, 1966.',
+                    }
+                elif status == 'collector_rejected':
+                    status_meta = {
+                        'label': 'Application Refused',
+                        'stage': 'Step 4 of 4: Final Rejection Order Issued',
+                        'badge_class': 'status-collector_rejected',
+                        'summary': 'The application for Non-Agricultural permission has been rejected with official statutory reasons.',
+                    }
+                else:
+                    status_meta = {
+                        'label': status.replace('_', ' ').title(),
+                        'stage': 'Under Processing',
+                        'badge_class': 'status-pending',
+                        'summary': 'Application is currently under administrative processing.',
+                    }
 
-            steps = [
-                {
-                    'step': 1,
-                    'title': 'Application Submission',
-                    'subtitle': 'Citizen Filing & Collectorate Intake',
-                    'status': 'completed',
-                    'timestamp': submitted_at,
-                    'desc': 'Application dossier and required documents filed online. Registered at District Collectorate.',
-                },
-                {
-                    'step': 2,
-                    'title': 'Collector Intake & Referral',
-                    'subtitle': 'Forwarded to Local Revenue Office',
-                    'status': 'completed' if status in ('forwarded_to_tahsildar', 'tahsildar_verified', 'tahsildar_rejected', 'collector_approved', 'collector_rejected') else 'active',
-                    'timestamp': reviewed_at if status in ('forwarded_to_tahsildar', 'tahsildar_verified', 'tahsildar_rejected', 'collector_approved', 'collector_rejected') else None,
-                    'desc': 'Collector scrutinized documents and referred the case to the jurisdictional Tahsildar for field inspection.' if status in ('forwarded_to_tahsildar', 'tahsildar_verified', 'tahsildar_rejected', 'collector_approved', 'collector_rejected') else 'Under preliminary review by District Collectorate for dispatch to Tahsildar.',
-                },
-                {
-                    'step': 3,
-                    'title': 'Tahsildar Field Inquiry',
-                    'subtitle': 'Ground Verification & Boundary Demarcation',
-                    'status': 'completed' if status in ('tahsildar_verified', 'collector_approved') else ('rejected' if status == 'tahsildar_rejected' else ('active' if status == 'forwarded_to_tahsildar' else 'upcoming')),
-                    'timestamp': reviewed_at if status in ('tahsildar_verified', 'tahsildar_rejected') else None,
-                    'desc': 'Site inspected, boundaries verified, and verification report submitted to Collector.' if status in ('tahsildar_verified', 'collector_approved') else ('Tahsildar identified discrepancies or statutory objections during site inspection.' if status == 'tahsildar_rejected' else ('Tahsildar conducting physical site inspection, boundary verification, and title check.' if status == 'forwarded_to_tahsildar' else 'Awaiting local site verification by Tahsildar.')),
-                },
-                {
-                    'step': 4,
-                    'title': 'District Collector Final Determination',
-                    'subtitle': 'NA Sanction Order Issuance',
-                    'status': 'completed' if status == 'collector_approved' else ('rejected' if status == 'collector_rejected' else ('active' if status in ('tahsildar_verified', 'tahsildar_rejected') else 'upcoming')),
-                    'timestamp': reviewed_at if status in ('collector_approved', 'collector_rejected') else None,
-                    'desc': 'Final NA Sanction Order granted and authorized under Maharashtra Land Revenue Code, 1966.' if status == 'collector_approved' else ('Official rejection order issued by District Collector.' if status == 'collector_rejected' else ('Returned from Tahsildar. District Collector reviewing file for final order.' if status in ('tahsildar_verified', 'tahsildar_rejected') else 'Final order pending completion of field verification.')),
-                },
-            ]
+                steps = [
+                    {
+                        'step': 1,
+                        'title': 'Application Submission & Collector Intake',
+                        'subtitle': 'Direct to District Collector Desk',
+                        'status': 'completed',
+                        'timestamp': submitted_at,
+                        'desc': 'Application dossier and required documents submitted online. Received at District Collector Desk.',
+                    },
+                    {
+                        'step': 2,
+                        'title': 'Collector Referral to Tahsildar',
+                        'subtitle': 'Forwarded for Jurisdictional Field Verification',
+                        'status': 'completed' if status in ('forwarded_to_tahsildar', 'tahsildar_verified', 'tahsildar_rejected', 'collector_approved', 'collector_rejected') else ('active' if status in ('pending_collector', 'pending') else 'upcoming'),
+                        'timestamp': reviewed_at if status in ('forwarded_to_tahsildar', 'tahsildar_verified', 'tahsildar_rejected') else None,
+                        'desc': 'Collector reviewed preliminary dossier and dispatched to jurisdictional Tahsildar for field inspection.' if status != 'pending_collector' else 'Under preliminary intake review by District Collector.',
+                    },
+                    {
+                        'step': 3,
+                        'title': 'Tahsildar Field Inquiry & Panchnama',
+                        'subtitle': 'On-Site Inspection & Ground Verification Report',
+                        'status': 'completed' if status in ('tahsildar_verified', 'collector_approved') else ('rejected' if status == 'tahsildar_rejected' else ('active' if status == 'forwarded_to_tahsildar' else 'upcoming')),
+                        'timestamp': reviewed_at if status in ('tahsildar_verified', 'tahsildar_rejected') else None,
+                        'desc': 'Site inspected, boundaries verified, and verification dossier returned to Collector.' if status in ('tahsildar_verified', 'collector_approved') else ('Tahsildar identified discrepancies during ground inspection.' if status == 'tahsildar_rejected' else 'Tahsildar conducting physical site inspection, boundary verification, and title check.'),
+                    },
+                    {
+                        'step': 4,
+                        'title': 'District Collector Final Sanction Order',
+                        'subtitle': 'Final NA Sanction Order & Certificate Issuance',
+                        'status': 'completed' if status == 'collector_approved' else ('rejected' if status == 'collector_rejected' else ('active' if status in ('tahsildar_verified', 'tahsildar_rejected') else 'upcoming')),
+                        'timestamp': reviewed_at if status in ('collector_approved', 'collector_rejected') else None,
+                        'desc': 'Final NA Sanction Order granted and authorized under Maharashtra Land Revenue Code, 1966. Bilingual certificate available.' if status == 'collector_approved' else ('Official rejection order issued by District Collector.' if status == 'collector_rejected' else ('District Collector reviewing Tahsildar verification report for final decree.' if status == 'tahsildar_verified' else 'Pending Tahsildar ground verification completion.')),
+                    },
+                ]
         else:
             error = f"No application found with Reference Number '{query_ref}'."
 
@@ -739,6 +830,7 @@ def track_view(request):
         'dossier': dossier,
         'status_meta': status_meta,
         'steps': steps,
+        'is_granted_flow': is_granted_flow,
         'error': error,
         'user_apps': user_apps,
     })

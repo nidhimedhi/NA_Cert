@@ -150,10 +150,16 @@ export default function StateGovtLogin() {
       navigate('/state-govt');
     } catch (err) {
       setScanState('failed');
-      const errMsg = err.response?.data?.error || 'Authentication rejected: Invalid username or passkey.';
+      let errMsg = err.response?.data?.error;
+      if (!err.response) {
+        errMsg = 'Backend server is offline or unreachable (http://127.0.0.1:8000). Please ensure "python manage.py runserver" is running in the backend directory.';
+        setStatusMessage('⚠️ Backend Server Offline: Port 8000 is not reachable.');
+      } else {
+        errMsg = errMsg || 'Authentication rejected: Invalid username or passkey.';
+        setStatusMessage('⛔ Access Denied: Invalid credentials.');
+      }
       setError(errMsg);
       setFailedReason(errMsg);
-      setStatusMessage('⛔ Access Denied: Invalid credentials.');
     } finally {
       setBusy(false);
     }

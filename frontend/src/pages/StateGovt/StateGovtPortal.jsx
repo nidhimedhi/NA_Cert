@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import ApplicationPdfModal from '../../components/ApplicationPdfModal';
 import './StateGovt.css';
 
 const api = axios.create({ baseURL: 'http://127.0.0.1:8000/api' });
@@ -33,6 +34,7 @@ export default function StateGovtPortal() {
   const [modalTab, setModalTab] = useState('memo'); // 'memo' | 'docs' | 'issue_gr'
   const [dossierLoading, setDossierLoading] = useState(false);
   const [dossierData, setDossierData] = useState(null);
+  const [showPdfModal, setShowPdfModal] = useState(false);
 
   // GR Issuance form
   const [grNumber, setGrNumber] = useState('');
@@ -48,7 +50,7 @@ export default function StateGovtPortal() {
 
   const fetchApplications = () => {
     setLoading(true);
-    let url = `/state-govt/applications/?status=${statusFilter}&category=${categoryFilter}`;
+    let url = `/state-govt/applications/?status=${statusFilter}&category=${categoryFilter.toLowerCase()}`;
     if (search.trim()) url += `&search=${encodeURIComponent(search.trim())}`;
 
     api.get(url)
@@ -68,6 +70,20 @@ export default function StateGovtPortal() {
     const timer = setTimeout(() => fetchApplications(), 250);
     return () => clearTimeout(timer);
   }, [search]);
+
+  // Client-side safety filter matching active category and status
+  const displayedApps = apps.filter(app => {
+    if (categoryFilter !== 'all') {
+      const cat = categoryFilter.toLowerCase();
+      if (!app.land_type?.toLowerCase().includes(cat)) return false;
+    }
+    if (statusFilter !== 'all') {
+      if (statusFilter === 'forwarded_to_state_govt' && app.status !== 'forwarded_to_state_govt') return false;
+      if (statusFilter === 'state_govt_approved' && app.status !== 'state_govt_approved') return false;
+      if (statusFilter === 'state_govt_rejected' && app.status !== 'state_govt_rejected') return false;
+    }
+    return true;
+  });
 
   const openDossier = (app, initialTab = 'memo') => {
     setSelectedApp(app);
@@ -341,7 +357,7 @@ export default function StateGovtPortal() {
           <div className="gov-card-toolbar">
             <div className="gov-toolbar-left">
               <h2 className="gov-toolbar-title">Collector Referrals for State Sanction</h2>
-              <span className="gov-toolbar-count">{apps.length} Files</span>
+              <span className="gov-toolbar-count">{displayedApps.length} Files</span>
             </div>
 
             <div className="gov-filter-pill-group">
@@ -371,7 +387,7 @@ export default function StateGovtPortal() {
               <div style={{ textAlign: 'center', padding: '36px', color: '#64748b' }}>
                 Loading forwarded dossiers...
               </div>
-            ) : apps.length === 0 ? (
+            ) : displayedApps.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
                 <p style={{ margin: 0, fontWeight: 600 }}>No applications match the current filter.</p>
                 <span style={{ fontSize: '12px' }}>Forward Granted or Semi-Granted records from the Collector Desk to view them here.</span>
@@ -390,15 +406,15 @@ export default function StateGovtPortal() {
                   </tr>
                 </thead>
                 <tbody>
-                  {apps.map((app) => (
+                  {displayedApps.map((app) => (
                     <tr key={app.id}>
                       <td>
                         <div className="code-ref">{app.reference_no}</div>
-                        <div className="sub-meta">{new Date(app.submitted_at).toLocaleDateString('en-IN')}</div>
+                        <div className="sub-meta">{new Date(app.submitted_at || app.created_at).toLocaleDateString('en-IN')}</div>
                       </td>
 
                       <td>
-                        <div style={{ fontWeight: 600, color: 'var(--gov-navy-950)' }}>{app.applicant_name || 'Sanstha Name'}</div>
+                        <div style={{ fontWeight: 600, color: 'var(--gov-navy-950)' }}>{app.applicant_name || app.user_email || 'Registered Applicant'}</div>
                         <div className="sub-meta">{app.user_email}</div>
                       </td>
 
@@ -408,8 +424,8 @@ export default function StateGovtPortal() {
                       </td>
 
                       <td>
-                        <div style={{ fontWeight: 600 }}>Gut {app.gut_no || '74/2'}</div>
-                        <div className="sub-meta">{app.village || 'Vadgaon'}, {app.district || 'Pune'}</div>
+                        <div style={{ fontWeight: 600 }}>{app.gut_no ? `Gut / Survey ${app.gut_no}` : (app.village ? `Survey In ${app.village}` : 'Gat / Survey on File')}</div>
+                        <div className="sub-meta">{[app.village, app.taluka, app.district].filter(Boolean).join(', ') || 'Recorded Jurisdiction'}</div>
                       </td>
 
                       <td style={{ maxWidth: '240px' }}>
@@ -455,9 +471,35 @@ export default function StateGovtPortal() {
         <div className="gov-modal-backdrop" onClick={() => setSelectedApp(null)}>
           <div className="gov-modal-box" onClick={(e) => e.stopPropagation()}>
             
-            <div className="gov-modal-header">
-              <h3>Dossier Review: {selectedApp.reference_no}</h3>
-              <button className="gov-close-btn" onClick={() => setSelectedApp(null)}>✕</button>
+            <div className="gov-modal-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+              <div>
+                <h3 style={{ margin: 0 }}>Dossier Review: {selectedApp.reference_no}</h3>
+                <span style={{ fontSize: '12px', color: '#64748b' }}>{selectedApp.land_type}</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowPdfModal(true)}
+                  style={{
+                    background: '#093252',
+                    color: '#ffffff',
+                    padding: '7px 16px',
+                    borderRadius: '6px',
+                    fontSize: '12.5px',
+                    fontWeight: '700',
+                    border: 'none',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    boxShadow: '0 2px 4px rgba(9, 50, 82, 0.2)',
+                  }}
+                  title="View complete official application form PDF with citizen declaration"
+                >
+                  📄 View Full Application Form PDF
+                </button>
+                <button className="gov-close-btn" onClick={() => setSelectedApp(null)}>✕</button>
+              </div>
             </div>
 
             <div className="gov-modal-tabs">
@@ -465,13 +507,13 @@ export default function StateGovtPortal() {
                 className={`gov-modal-tab-btn ${modalTab === 'memo' ? 'active' : ''}`}
                 onClick={() => setModalTab('memo')}
               >
-                1. Collector & Tahsildar Report
+                1. Collector Referral & Grant Overview
               </button>
               <button 
                 className={`gov-modal-tab-btn ${modalTab === 'docs' ? 'active' : ''}`}
                 onClick={() => setModalTab('docs')}
               >
-                2. Statutory Documents (5/5)
+                2. Uploaded Documents & Dossier ({dossierData?.documents?.length || 0})
               </button>
               <button 
                 className={`gov-modal-tab-btn ${modalTab === 'issue_gr' ? 'active' : ''}`}
@@ -494,13 +536,13 @@ export default function StateGovtPortal() {
                 </div>
               ) : (
                 <>
-                  {/* TAB 1: Memo & Tahsildar report */}
+                  {/* TAB 1: Memo & Collector referral */}
                   {modalTab === 'memo' && (
                     <div>
                       <div className="gov-info-grid">
                         <div className="gov-info-card">
                           <div className="lbl">Applicant / Sanstha</div>
-                          <div className="val">{selectedApp.applicant_name || 'Sanstha Name'}</div>
+                          <div className="val">{selectedApp.applicant_name || selectedApp.user_email || 'Registered Applicant'}</div>
                         </div>
                         <div className="gov-info-card">
                           <div className="lbl">Classification</div>
@@ -508,26 +550,26 @@ export default function StateGovtPortal() {
                         </div>
                         <div className="gov-info-card">
                           <div className="lbl">Land Parcel</div>
-                          <div className="val">Gut No. {selectedApp.gut_no || '74/2'}, Area 1.20 Ha</div>
+                          <div className="val">{selectedApp.gut_no ? `Gut / Survey ${selectedApp.gut_no}` : 'On File'}{selectedApp.area_sqmt ? `, Area ${selectedApp.area_sqmt} Sq.m` : ''}</div>
                         </div>
                         <div className="gov-info-card">
                           <div className="lbl">Location</div>
-                          <div className="val">{selectedApp.village || 'Vadgaon'}, {selectedApp.taluka || 'Haveli'}, {selectedApp.district || 'Pune'}</div>
+                          <div className="val">{[selectedApp.village, selectedApp.taluka, selectedApp.district].filter(Boolean).join(', ') || 'Recorded Jurisdiction'}</div>
                         </div>
                       </div>
 
                       <div className="gov-memo-callout">
                         <strong>Collector Recommendation Memorandum:</strong><br />
-                        {dossierData?.collector_memo?.memo_text || selectedApp.collector_forward_memo || 'Applicant educational trust has occupied this granted land since 1984 with continuous bona fide educational usage. Ground verification by Tahsildar confirms compliance with original grant covenants. Recommended for State Government Resolution (GR) sanction.'}
+                        {dossierData?.collector_memo?.memo_text || selectedApp.collector_forward_memo || 'Applicant organization has occupied this granted land with continuous bona fide usage. District Collectorate inquiry confirms compliance with original grant covenants. Recommended for Maharashtra State Government Resolution (GR) concurrence.'}
                       </div>
 
                       <div className="gov-info-card" style={{ marginBottom: '14px' }}>
-                        <div className="lbl" style={{ marginBottom: '6px' }}>Tahsildar Site Verification</div>
+                        <div className="lbl" style={{ marginBottom: '6px' }}>District Collector Statutory Compliance Checklist</div>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '12px' }}>
-                          <div>• Encroachment: <strong style={{ color: '#15803d' }}>None (Clear)</strong></div>
-                          <div>• Public Notice: <strong>30-Day Completed</strong></div>
-                          <div>• Canal / Water NOC: <strong>Received</strong></div>
-                          <div>• Town Planning: <strong>Layout Cleared</strong></div>
+                          <div>• Grant Covenants: <strong style={{ color: '#15803d' }}>Complied & Verified</strong></div>
+                          <div>• Approach Road: <strong>Direct Public Access Available</strong></div>
+                          <div>• Revenue Arrears: <strong style={{ color: '#15803d' }}>Nil / Cleared</strong></div>
+                          <div>• Regional Plan: <strong>Permissible Conversion Zone</strong></div>
                         </div>
                       </div>
 
@@ -537,34 +579,145 @@ export default function StateGovtPortal() {
                     </div>
                   )}
 
-                  {/* TAB 2: Statutory documents */}
+                  {/* TAB 2: Uploaded Documents & Dossier Records */}
                   {modalTab === 'docs' && (
                     <div>
-                      <p style={{ fontSize: '12.5px', color: '#64748b', marginTop: 0 }}>
-                        5 mandatory statutory documents verified for Granted & Semi-Granted lands under MLRC 1966:
-                      </p>
-                      <div className="gov-doc-item">
-                        <span>1. Original Government Grant Sanction Letter</span>
-                        <span className="check">✓ Verified</span>
-                      </div>
-                      <div className="gov-doc-item">
-                        <span>2. Terms & Conditions Agreement</span>
-                        <span className="check">✓ Verified</span>
-                      </div>
-                      <div className="gov-doc-item">
-                        <span>3. Up-to-Date 7/12 Extract with Class-II Entry</span>
-                        <span className="check">✓ Verified</span>
-                      </div>
-                      <div className="gov-doc-item">
-                        <span>4. Nazrana Assessment Paid Challan</span>
-                        <span className="check">✓ Paid (₹ 12,50,000)</span>
-                      </div>
-                      <div className="gov-doc-item">
-                        <span>5. Town Planning Layout NOC</span>
-                        <span className="check">✓ Cleared</span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
+                        <div>
+                          <h4 style={{ margin: '0 0 4px', fontSize: '15px', color: '#0f172a' }}>
+                            Uploaded Dossier & Statutory Records ({dossierData?.documents?.length || 0})
+                          </h4>
+                          <p style={{ fontSize: '12.5px', color: '#64748b', margin: 0 }}>
+                            Statutory verification documents uploaded by applicant and endorsed by District Collectorate under MLRC 1966.
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setShowPdfModal(true)}
+                          style={{
+                            background: '#047857',
+                            color: '#ffffff',
+                            padding: '6px 14px',
+                            borderRadius: '5px',
+                            fontSize: '12px',
+                            fontWeight: '700',
+                            border: 'none',
+                            cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                          }}
+                        >
+                          📄 Open Complete Form PDF ↗
+                        </button>
                       </div>
 
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
+                      {(!dossierData?.documents || dossierData.documents.length === 0) ? (
+                        <div style={{ padding: '24px', textAlign: 'center', color: '#64748b', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                          No uploaded documents attached to this dossier.
+                        </div>
+                      ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                          {dossierData.documents.map((doc, idx) => (
+                            <div key={idx} style={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                              padding: '12px 16px',
+                              background: '#ffffff',
+                              border: '1px solid #e2e8f0',
+                              borderRadius: '6px',
+                              boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                              flexWrap: 'wrap',
+                              gap: '8px'
+                            }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <span style={{
+                                  width: '26px',
+                                  height: '26px',
+                                  borderRadius: '50%',
+                                  background: '#e0e7ff',
+                                  color: '#3730a3',
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  fontSize: '12px',
+                                  fontWeight: 'bold'
+                                }}>
+                                  {idx + 1}
+                                </span>
+                                <div>
+                                  <div style={{ fontSize: '13.5px', fontWeight: '700', color: '#0f172a' }}>
+                                    {doc.document_name}
+                                  </div>
+                                  {(doc.village || doc.gat_no) && (
+                                    <div style={{ fontSize: '11.5px', color: '#64748b' }}>
+                                      {doc.village && `Village: ${doc.village} `}
+                                      {doc.taluka && `| Taluka: ${doc.taluka} `}
+                                      {doc.gat_no && `| Gat: ${doc.gat_no}`}
+                                    </div>
+                                  )}
+                                  {doc.owner_names && (
+                                    <div style={{ fontSize: '11.5px', color: '#047857' }}>
+                                      Subject: {doc.owner_names}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+
+                              <div>
+                                {doc.document_name === 'Application Form - e-District Maharashtra' || (!doc.file_url && doc.raw_json && !doc.document_name?.includes('Resolution')) ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => setShowPdfModal(true)}
+                                    style={{
+                                      background: '#093252',
+                                      color: '#ffffff',
+                                      padding: '5px 12px',
+                                      borderRadius: '4px',
+                                      fontSize: '12px',
+                                      fontWeight: '700',
+                                      border: 'none',
+                                      cursor: 'pointer',
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '4px'
+                                    }}
+                                  >
+                                    📄 View Form PDF ↗
+                                  </button>
+                                ) : doc.file_url ? (
+                                  <a
+                                    href={doc.file_url}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    style={{
+                                      background: '#0f172a',
+                                      color: '#ffffff',
+                                      padding: '5px 12px',
+                                      borderRadius: '4px',
+                                      fontSize: '12px',
+                                      fontWeight: '700',
+                                      textDecoration: 'none',
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '4px'
+                                    }}
+                                  >
+                                    📄 View Original File ↗
+                                  </a>
+                                ) : (
+                                  <span style={{ fontSize: '11.5px', color: '#166534', fontWeight: '700', background: '#ecfdf5', padding: '3px 8px', borderRadius: '4px', border: '1px solid #a7f3d0' }}>
+                                    ✓ Official Record Verified
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '18px' }}>
                         <button className="btn-secondary" onClick={() => setModalTab('memo')}>← Back to Memo</button>
                         <button className="btn-primary-green" onClick={() => setModalTab('issue_gr')}>Next: Sanction GR →</button>
                       </div>
@@ -736,6 +889,15 @@ export default function StateGovtPortal() {
           </div>
         </div>
       </footer>
+
+      {/* ── 8. OFFICIAL CITIZEN APPLICATION FORM PDF MODAL ── */}
+      {showPdfModal && (
+        <ApplicationPdfModal
+          app={selectedApp}
+          formData={dossierData?.form_data}
+          onClose={() => setShowPdfModal(false)}
+        />
+      )}
 
     </div>
   );

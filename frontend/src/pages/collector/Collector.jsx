@@ -143,11 +143,13 @@ export function CollectorDashboard() {
   };
 
   const TABS = [
-    { key: 'pending_collector', label: '📥 New Submissions', count: counts.pending_collector, desc: 'Incoming citizen applications awaiting initial Collector review and referral to Tahsildar.' },
-    { key: 'forwarded_to_tahsildar', label: '⏳ With Tahsildar', count: counts.forwarded_to_tahsildar, desc: 'Forwarded to Tahsildar for physical site inspection and boundary validation.' },
+    { key: 'pending_collector', label: '📥 New Submissions', count: counts.pending_collector, desc: 'Incoming citizen applications awaiting initial Collector review and referral.' },
+    { key: 'forwarded_to_tahsildar', label: '⏳ With Tahsildar', count: counts.forwarded_to_tahsildar, desc: 'Private applications forwarded to Tahsildar for physical site inspection and boundary validation.' },
     { key: 'tahsildar_verified', label: '📋 Tahsildar Verified', count: counts.tahsildar_verified, desc: 'Field inquiry completed by Tahsildar. Ready for final NA Sanction Order.' },
+    { key: 'forwarded_to_state_govt', label: '🏛️ With State Govt', count: counts.forwarded_to_state_govt, desc: 'Granted & Semi-Granted applications referred to Maharashtra State Government Secretariat.' },
+    { key: 'state_govt_approved', label: '✅ State Govt Approved', count: counts.state_govt_approved, desc: 'Granted & Semi-Granted applications with approved State Government Resolution (GR). Ready for final Collector NA Sanction Order.' },
     { key: 'tahsildar_rejected', label: '⚠️ Tahsildar Objections', count: counts.tahsildar_rejected, desc: 'Tahsildar raised discrepancies or field objections. Requires Collector adjudication.' },
-    { key: 'state_govt_referral', label: '🏛️ State Referrals (Edu, Com, Ind)', count: counts.state_govt_referral, desc: 'Granted and Semi-Granted Educational, Commercial, and Industrial applications redirected to Maharashtra State Government.' },
+    { key: 'state_govt_referral', label: '🏛️ All State Cases', count: counts.state_govt_referral, desc: 'Granted and Semi-Granted Educational, Commercial, and Industrial applications redirected to Maharashtra State Government.' },
     { key: 'collector_approved', label: '📜 NA Granted', count: counts.collector_approved, desc: 'Final Non-Agricultural Sanction Orders issued by District Collector.' },
     { key: 'collector_rejected', label: '🚫 Final Rejected', count: counts.collector_rejected, desc: 'Applications rejected with official statutory findings.' },
     { key: 'all', label: '📊 All Applications', count: counts.all, desc: 'Complete registry of all NA permission requests across all workflow stages.' },
@@ -241,24 +243,24 @@ export function CollectorDashboard() {
             <div className="collector-metric-val">{counts.pending_collector}</div>
           </div>
           <div className={`collector-metric-card color-blue ${filter === 'forwarded_to_tahsildar' ? 'active-metric' : ''}`} onClick={() => setFilter('forwarded_to_tahsildar')}>
-            <div className="collector-metric-label">2. With Tahsildar</div>
+            <div className="collector-metric-label">2a. With Tahsildar (Private)</div>
             <div className="collector-metric-val">{counts.forwarded_to_tahsildar}</div>
           </div>
           <div className={`collector-metric-card color-teal ${filter === 'tahsildar_verified' ? 'active-metric' : ''}`} onClick={() => setFilter('tahsildar_verified')}>
-            <div className="collector-metric-label">3. Tahsildar Verified</div>
+            <div className="collector-metric-label">3a. Tahsildar Verified</div>
             <div className="collector-metric-val">{counts.tahsildar_verified}</div>
           </div>
-          <div className={`collector-metric-card color-red ${filter === 'tahsildar_rejected' ? 'active-metric' : ''}`} onClick={() => setFilter('tahsildar_rejected')}>
-            <div className="collector-metric-label">3b. Tahsildar Objections</div>
-            <div className="collector-metric-val">{counts.tahsildar_rejected}</div>
+          <div className={`collector-metric-card color-blue ${filter === 'forwarded_to_state_govt' ? 'active-metric' : ''}`} onClick={() => setFilter('forwarded_to_state_govt')}>
+            <div className="collector-metric-label">2b. With State Govt (Granted)</div>
+            <div className="collector-metric-val">{counts.forwarded_to_state_govt}</div>
+          </div>
+          <div className={`collector-metric-card color-teal ${filter === 'state_govt_approved' ? 'active-metric' : ''}`} onClick={() => setFilter('state_govt_approved')}>
+            <div className="collector-metric-label">3b. State GR Approved</div>
+            <div className="collector-metric-val">{counts.state_govt_approved}</div>
           </div>
           <div className={`collector-metric-card color-green ${filter === 'collector_approved' ? 'active-metric' : ''}`} onClick={() => setFilter('collector_approved')}>
             <div className="collector-metric-label">4. NA Granted</div>
             <div className="collector-metric-val">{counts.collector_approved}</div>
-          </div>
-          <div className={`collector-metric-card color-teal ${filter === 'state_govt_referral' ? 'active-metric' : ''}`} onClick={() => setFilter('state_govt_referral')} style={{ borderTop: '4px solid #f7b600' }}>
-            <div className="collector-metric-label" style={{ color: '#b45309', fontWeight: 'bold' }}>🏛️ State Referrals (Granted)</div>
-            <div className="collector-metric-val" style={{ color: '#b45309' }}>{counts.state_govt_referral}</div>
           </div>
         </div>
 
@@ -557,20 +559,29 @@ export function CollectorDetail() {
 
   const isGrantedOrSemiGranted = app?.land_type && (
     (app.land_type.toLowerCase().includes('granted') || app.land_type.toLowerCase().includes('semi-granted')) &&
-    (app.land_type.toLowerCase().includes('educational') || app.land_type.toLowerCase().includes('commercial') || app.land_type.toLowerCase().includes('industrial')) &&
     !app.land_type.toLowerCase().includes('private')
   );
 
   // Workflow progress flags
   const isStep1Done = true; // submitted
-  const isStep2Done = ['forwarded_to_tahsildar', 'tahsildar_verified', 'approved', 'tahsildar_rejected', 'collector_approved', 'collector_rejected'].includes(app?.status);
+  const isStep2Done = isGrantedOrSemiGranted
+    ? ['forwarded_to_state_govt', 'state_govt_approved', 'state_govt_rejected', 'collector_approved', 'collector_rejected'].includes(app?.status)
+    : ['forwarded_to_tahsildar', 'tahsildar_verified', 'approved', 'tahsildar_rejected', 'collector_approved', 'collector_rejected'].includes(app?.status);
   const isStep2Active = ['pending_collector', 'pending'].includes(app?.status);
-  const isStep3Done = ['tahsildar_verified', 'approved', 'collector_approved'].includes(app?.status);
-  const isStep3Rejected = ['tahsildar_rejected', 'rejected'].includes(app?.status);
-  const isStep3Active = app?.status === 'forwarded_to_tahsildar';
+  const isStep3Done = isGrantedOrSemiGranted
+    ? ['state_govt_approved', 'collector_approved'].includes(app?.status)
+    : ['tahsildar_verified', 'approved', 'collector_approved'].includes(app?.status);
+  const isStep3Rejected = isGrantedOrSemiGranted
+    ? app?.status === 'state_govt_rejected'
+    : ['tahsildar_rejected', 'rejected'].includes(app?.status);
+  const isStep3Active = isGrantedOrSemiGranted
+    ? app?.status === 'forwarded_to_state_govt'
+    : app?.status === 'forwarded_to_tahsildar';
   const isStep4Done = ['collector_approved'].includes(app?.status);
   const isStep4Rejected = ['collector_rejected'].includes(app?.status);
-  const isStep4Active = ['tahsildar_verified', 'approved', 'tahsildar_rejected'].includes(app?.status);
+  const isStep4Active = isGrantedOrSemiGranted
+    ? app?.status === 'state_govt_approved'
+    : ['tahsildar_verified', 'approved', 'tahsildar_rejected'].includes(app?.status);
 
   // Parse applicant and land data from form_data if available
   const applicant = form_data?.applicant_details || {};
@@ -580,12 +591,13 @@ export function CollectorDetail() {
 
   return (
     <div className="detail-page" style={{ maxWidth: '1240px', margin: '0 auto', padding: '36px 30px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
         <Link to="/collector/dashboard" className="back-btn" style={{ margin: 0 }}>
           ← Back to Collector Dashboard
         </Link>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
           <button
+            type="button"
             onClick={() => setShowPdfModal(true)}
             style={{
               background: '#0f766e',
@@ -604,6 +616,27 @@ export function CollectorDetail() {
           >
             📄 View Full Form PDF
           </button>
+          <button
+            type="button"
+            onClick={() => setShowCertModal(true)}
+            style={{
+              background: '#047857',
+              color: '#ffffff',
+              padding: '7px 16px',
+              borderRadius: '6px',
+              fontSize: '13px',
+              fontWeight: '700',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              boxShadow: '0 2px 4px rgba(4, 120, 87, 0.2)',
+            }}
+            title="Preview generated bilingual NA Certificate"
+          >
+            📜 Preview NA Certificate (मराठी / EN)
+          </button>
           <span style={{ fontSize: '13px', color: '#64748b' }}>Reference ID:</span>
           <code style={{ fontSize: '15px', fontWeight: 'bold', background: '#e2e8f0', padding: '4px 10px', borderRadius: '4px' }}>
             {app?.reference_no}
@@ -617,9 +650,20 @@ export function CollectorDetail() {
       {/* HEADER BAR */}
       <div className="detail-header" style={{ alignItems: 'flex-start' }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '6px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '6px', flexWrap: 'wrap' }}>
             <h1 style={{ margin: 0, fontSize: '26px', color: '#0f172a' }}>Application Dossier Review</h1>
             <span className={`status-pill ${meta.pill}`}>{meta.label}</span>
+            <span style={{
+              background: isGrantedOrSemiGranted ? '#e0e7ff' : '#ecfdf5',
+              color: isGrantedOrSemiGranted ? '#3730a3' : '#065f46',
+              border: `1px solid ${isGrantedOrSemiGranted ? '#c7d2fe' : '#a7f3d0'}`,
+              padding: '3px 10px',
+              borderRadius: '12px',
+              fontSize: '11.5px',
+              fontWeight: '700',
+            }}>
+              {isGrantedOrSemiGranted ? '🏛️ Granted Route (State Govt)' : '🏡 Private Route (Tahsildar)'}
+            </span>
           </div>
           <p style={{ margin: 0, color: '#64748b', fontSize: '14px' }}>
             Land Type: <strong>{app?.land_type}</strong> | Applicant: <strong>{app?.user_email}</strong> | Submitted: {new Date(app?.submitted_at || app?.created_at).toLocaleString('en-IN')}
@@ -629,27 +673,41 @@ export function CollectorDetail() {
 
       {/* 4-STEP WORKFLOW TRACKER */}
       <div className="workflow-tracker-wrap">
-        <div className="workflow-tracker-title">End-to-End Governance Lifecycle Tracker</div>
+        <div className="workflow-tracker-title">
+          End-to-End Governance Lifecycle Tracker — {isGrantedOrSemiGranted ? 'Granted / Semi-Granted Category' : 'Private Land Category'}
+        </div>
         <div className="workflow-steps">
           <div className={`workflow-step ${isStep1Done ? 'completed' : ''}`}>
             <div className="workflow-step-num">Step 1 • Citizen Submission</div>
-            <div className="workflow-step-title">Application Form & Docs</div>
+            <div className="workflow-step-title">Collector Desk Intake</div>
             <div className="workflow-step-sub">✅ Filed & Received at Collectorate</div>
           </div>
 
           <div className={`workflow-step ${isStep2Done ? 'completed' : isStep2Active ? 'active' : ''}`}>
-            <div className="workflow-step-num">Step 2 • Collector Review</div>
-            <div className="workflow-step-title">Refer to Tahsildar</div>
+            <div className="workflow-step-num">Step 2 • Collector Referral</div>
+            <div className="workflow-step-title">{isGrantedOrSemiGranted ? 'State Secretariat Referral' : 'Refer to Tahsildar'}</div>
             <div className="workflow-step-sub">
-              {isStep2Done ? '✅ Forwarded to Tahsildar' : '⏳ Awaiting Collector Direction'}
+              {isStep2Done
+                ? (isGrantedOrSemiGranted ? '✅ Forwarded to State Govt' : '✅ Forwarded to Tahsildar')
+                : (isGrantedOrSemiGranted ? '⏳ Awaiting Referral Memo' : '⏳ Awaiting Collector Direction')}
             </div>
           </div>
 
           <div className={`workflow-step ${isStep3Done ? 'completed' : isStep3Rejected ? 'rejected' : isStep3Active ? 'active' : ''}`}>
-            <div className="workflow-step-num">Step 3 • Ground Verification</div>
-            <div className="workflow-step-title">Tahsildar Field Inquiry</div>
+            <div className="workflow-step-num">
+              {isGrantedOrSemiGranted ? 'Step 3 • State Secretariat' : 'Step 3 • Ground Verification'}
+            </div>
+            <div className="workflow-step-title">
+              {isGrantedOrSemiGranted ? 'Government Resolution (GR)' : 'Tahsildar Field Inquiry'}
+            </div>
             <div className="workflow-step-sub">
-              {isStep3Done ? '✅ Verified by Tahsildar' : isStep3Rejected ? '❌ Objections Noted' : isStep3Active ? '⏳ Inspection in progress' : 'Upcoming'}
+              {isStep3Done
+                ? (isGrantedOrSemiGranted ? '✅ Sanctioned by State GR' : '✅ Verified by Tahsildar')
+                : isStep3Rejected
+                ? (isGrantedOrSemiGranted ? '❌ State Query Raised' : '❌ Objections Noted')
+                : isStep3Active
+                ? (isGrantedOrSemiGranted ? '⏳ Under Secretariat Review' : '⏳ Inspection in progress')
+                : 'Upcoming'}
             </div>
           </div>
 
@@ -657,7 +715,13 @@ export function CollectorDetail() {
             <div className="workflow-step-num">Step 4 • Final Collector Order</div>
             <div className="workflow-step-title">NA Permission Sanction</div>
             <div className="workflow-step-sub">
-              {isStep4Done ? '✅ Sanction Order Issued' : isStep4Rejected ? '❌ Sanction Refused' : isStep4Active ? '⚡ Ready for Order' : 'Awaiting Stage 3'}
+              {isStep4Done
+                ? '✅ Sanction Order Issued'
+                : isStep4Rejected
+                ? '❌ Sanction Refused'
+                : isStep4Active
+                ? '⚡ Ready for Final Order'
+                : 'Awaiting Stage 3'}
             </div>
           </div>
         </div>
@@ -1071,16 +1135,18 @@ export function CollectorDetail() {
           </div>
         )}
 
-        {/* CASE 2: RETURNED FROM TAHSILDAR (VERIFIED) -> COLLECTOR FINAL SANCTION DOSSIER */}
-        {['tahsildar_verified', 'approved'].includes(app?.status) && (
+        {/* CASE 2: RETURNED FROM TAHSILDAR (VERIFIED) OR STATE GOVERNMENT (GR ISSUED) -> COLLECTOR FINAL SANCTION DOSSIER */}
+        {['tahsildar_verified', 'approved', 'state_govt_approved'].includes(app?.status) && (
           <div style={{ background: '#f8fafc', border: '2px solid #0f766e', borderRadius: '10px', padding: '24px', marginTop: '10px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px', borderBottom: '2px solid #cbd5e1', paddingBottom: '12px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px', borderBottom: '2px solid #cbd5e1', paddingBottom: '12px', flexWrap: 'wrap', gap: '10px' }}>
               <div>
                 <h3 style={{ margin: 0, color: '#0f766e', fontSize: '20px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span>🏛️</span> District Collector Final NA Sanction & Statutory Approval Dossier
+                  <span>🏛️</span> {app?.status === 'state_govt_approved' ? 'District Collector Final NA Sanction Decree (Post State Govt Resolution / GR)' : 'District Collector Final NA Sanction & Statutory Approval Dossier'}
                 </h3>
                 <p style={{ margin: '4px 0 0', color: '#475569', fontSize: '13.5px' }}>
-                  Under Section 44, 45 & 47 of Maharashtra Land Revenue Code, 1966. Adjudicate all statutory factors and issue the final Sanction Decree.
+                  {app?.status === 'state_govt_approved'
+                    ? 'Maharashtra State Government Secretariat (मंत्रालय, मुंबई) has granted statutory GR concurrence. Execute Collector decree and issue bilingual Non-Agricultural Certificate.'
+                    : 'Under Section 44, 45 & 47 of Maharashtra Land Revenue Code, 1966. Adjudicate all statutory factors and issue the final Sanction Decree.'}
                 </p>
               </div>
               <div style={{ textAlign: 'right' }}>
@@ -1332,12 +1398,36 @@ export function CollectorDetail() {
               </div>
 
               {/* Action Buttons */}
-              <div style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: '14px', alignItems: 'center', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowCertModal(true)}
+                  style={{
+                    padding: '14px 22px',
+                    background: '#047857',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    boxShadow: '0 2px 4px rgba(4, 120, 87, 0.25)',
+                    whiteSpace: 'nowrap',
+                  }}
+                  title="Preview the exact bilingual certificate before issuing"
+                >
+                  👁️ Preview Generated Certificate Before Issuing
+                </button>
+
                 <button
                   type="submit"
                   disabled={busy}
                   style={{
                     flex: 2,
+                    minWidth: '280px',
                     padding: '14px 24px',
                     background: 'linear-gradient(135deg, #0f766e, #115e59)',
                     color: '#ffffff',

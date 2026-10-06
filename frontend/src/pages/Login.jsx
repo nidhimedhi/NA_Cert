@@ -18,7 +18,11 @@ export default function Login() {
       await login(form.email, form.password);
       navigate('/upload');
     } catch (err) {
-      setError(err.response?.data?.error || 'Login failed.');
+      if (!err.response) {
+        setError('Backend server is offline or unreachable (http://127.0.0.1:8000). Please ensure "python manage.py runserver" is running.');
+      } else {
+        setError(err.response?.data?.error || 'Login failed.');
+      }
     } finally { setBusy(false); }
   };
 
