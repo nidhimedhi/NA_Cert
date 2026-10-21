@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import ApplicationPdfModal from '../../components/ApplicationPdfModal';
+import { StateEmblem, ShieldCheckIcon, CheckCircleIcon, CheckIcon, AlertTriangleIcon, FileTextIcon, ScaleIcon, ArrowRightIcon, ArrowLeftIcon } from '../../components/Icons';
 
 const tApi = axios.create({ baseURL: 'http://127.0.0.1:8000/api' });
 tApi.interceptors.request.use(c => {
@@ -147,7 +148,7 @@ export default function TahsildarDetail() {
   const handleApprove = async (e) => {
     if (e) e.preventDefault();
     if (selectedFactors.length === 0) {
-      alert('⚠️ Please check and verify at least one statutory factor before submitting the report.');
+      alert('Please check and verify at least one statutory factor before submitting the report.');
       return;
     }
     setBusy(true);
@@ -175,7 +176,7 @@ export default function TahsildarDetail() {
       };
 
       await tApi.post(`/tahsildar/applications/${id}/approve/`, payload);
-      setMsg('✅ Statutory Verification Report & Findings successfully submitted to District Collector!');
+      setMsg('Statutory Verification Report & Findings successfully submitted to District Collector.');
       setBusy(false);
       setTimeout(() => navigate('/tahsildar/dashboard'), 1600);
     } catch (err) {
@@ -194,7 +195,7 @@ export default function TahsildarDetail() {
     setMsg('');
     try {
       await tApi.post(`/tahsildar/applications/${id}/reject/`, { reason: rejectionReason });
-      setMsg('❌ Discrepancies/Rejection recorded and file returned to Collector.');
+      setMsg('Discrepancies/Rejection recorded and file returned to Collector.');
       setBusy(false);
       setTimeout(() => navigate('/tahsildar/dashboard'), 1600);
     } catch (err) {
@@ -229,7 +230,7 @@ export default function TahsildarDetail() {
             marginLeft: 'auto',
           }}
         >
-          📄 View / Print Official Form PDF
+          View / Print Official Form PDF
         </button>
       </div>
 
@@ -279,7 +280,7 @@ export default function TahsildarDetail() {
                 <span className="doc-num">{i+1}</span>
                 <div>
                   <div className="doc-name" style={{ fontWeight: '700', color: d.document_name === 'Tahsildar Field Verification Report' ? '#166534' : '#0f172a' }}>
-                    {d.document_name === 'Tahsildar Field Verification Report' ? '📜 ' + d.document_name : d.document_name}
+                    d.document_name
                   </div>
                   {d.village && <div className="doc-meta">Village: {d.village} | Taluka: {d.taluka} | District: {d.district}</div>}
                   {d.owner_names && <div className="doc-meta" style={{ color: '#047857' }}>Recorded Subject: {d.owner_names}</div>}
@@ -303,7 +304,7 @@ export default function TahsildarDetail() {
                       gap: '4px',
                     }}
                   >
-                    📄 View / Print Form PDF ↗
+                    View / Print Form PDF ↗
                   </button>
                 ) : d.file_url ? (
                   <a href={d.file_url} target="_blank" rel="noreferrer" className="doc-link" style={{ background: '#0f172a', color: '#fff', padding: '5px 12px', borderRadius: '4px', textDecoration: 'none', fontSize: '12px' }}>
@@ -324,7 +325,7 @@ export default function TahsildarDetail() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <div>
               <h3 style={{ margin: 0, color: '#166534', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span>📋</span> Official Tahsildar Statutory Field Verification Findings
+                Official Tahsildar Statutory Field Verification Findings
               </h3>
               <p style={{ margin: '4px 0 0', color: '#475569', fontSize: '13px' }}>
                 Submitted under Section 44 of Maharashtra Land Revenue Code, 1966.
@@ -352,7 +353,7 @@ export default function TahsildarDetail() {
           {/* Checklist of Statutory Factors Verified */}
           <div style={{ background: '#ffffff', padding: '16px', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
             <h4 style={{ margin: '0 0 12px', color: '#0f172a', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span>✅</span> Statutory Factors Verified by Tahsildar (7/7 Confirmed)
+              Statutory Factors Verified by Tahsildar (7/7 Confirmed)
             </h4>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '10px' }}>
               {STATUTORY_FACTORS.map((f, i) => (
@@ -375,7 +376,7 @@ export default function TahsildarDetail() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px', borderBottom: '2px solid #e2e8f0', paddingBottom: '12px' }}>
             <div>
               <h2 style={{ margin: 0, color: '#093252', fontSize: '20px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span>⚖️</span> Tahsildar Statutory Field Verification & Inquiry Dossier
+                Tahsildar Statutory Field Verification & Inquiry Dossier
               </h2>
               <p style={{ margin: '4px 0 0', color: '#475569', fontSize: '13.5px' }}>
                 Under Section 44 of Maharashtra Land Revenue Code, 1966. Verify all statutory factors on ground before recommending conversion.
@@ -629,7 +630,7 @@ export default function TahsildarDetail() {
                   boxShadow: '0 2px 4px rgba(22, 101, 52, 0.2)',
                 }}
               >
-                {busy ? 'Processing Report…' : '✅ Submit Official Verification Report & Forward to Collector'}
+                {busy ? 'Processing Report…' : 'Submit Official Verification Report & Forward to Collector'}
               </button>
 
               <button
@@ -647,7 +648,7 @@ export default function TahsildarDetail() {
                   cursor: 'pointer',
                 }}
               >
-                {showRejectBox ? '▲ Hide Rejection Form' : '❌ Raise Objections / Reject Application'}
+                {showRejectBox ? 'Hide Rejection Form' : 'Raise Objections / Reject Application'}
               </button>
             </div>
           </form>

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import api from '../../services/api';
 import {
   extractBiometricVector,
@@ -9,6 +9,19 @@ import {
   clearEnrolledCollectorFace,
   MATCH_THRESHOLD,
 } from '../../services/biometricEngine';
+import {
+  StateEmblem,
+  ShieldCheckIcon,
+  KeyIcon,
+  CameraIcon,
+  FaceScanIcon,
+  LockIcon,
+  UserIcon,
+  CheckCircleIcon,
+  AlertCircleIcon,
+  RefreshCwIcon,
+  BuildingIcon,
+} from '../../components/Icons';
 
 export default function CollectorLogin() {
   const navigate = useNavigate();
@@ -30,7 +43,7 @@ export default function CollectorLogin() {
   const [cameraError, setCameraError] = useState('');
   const [scanState, setScanState] = useState('idle'); // 'idle' | 'scanning' | 'success' | 'failed'
   const [scanProgress, setScanProgress] = useState(0);
-  const [statusMessage, setStatusMessage] = useState('Position your face within the optical biometric frame');
+  const [statusMessage, setStatusMessage] = useState('Position your face within the optical alignment frame');
   const [capturedImage, setCapturedImage] = useState(null);
   const [matchScore, setMatchScore] = useState(null);
   const [failedReason, setFailedReason] = useState('');
@@ -72,7 +85,7 @@ export default function CollectorLogin() {
         videoRef.current.play().catch(() => {});
       }
       setCameraActive(true);
-      setStatusMessage('Camera sensor active. Align face inside reticle oval.');
+      setStatusMessage('Sensor online: Align face in frame and authorize access');
     } catch (err) {
       setCameraError(err.message || 'Unable to access optical sensor.');
       setCameraActive(false);
@@ -92,7 +105,7 @@ export default function CollectorLogin() {
 
   const handleInput = e => setForm(p => ({ ...p, [e.target.name]: e.target.value }));
 
-  // ── ENROLL OFFICIAL FACE BIOMETRIC ──
+  // ── ENROLL COLLECTOR OFFICER FACE BIOMETRIC ──
   const handleEnrollFace = () => {
     if (!videoRef.current || !canvasRef.current || !cameraActive) {
       alert('Camera is not active. Please ensure webcam access is granted.');
@@ -101,7 +114,7 @@ export default function CollectorLogin() {
 
     const extraction = extractBiometricVector(videoRef.current, canvasRef.current);
     if (!extraction.hasFace) {
-      setError(extraction.error || 'No face detected. Please position face clearly inside the reticle.');
+      setError(extraction.error || 'Face not detected in optical frame.');
       return;
     }
 
@@ -112,15 +125,15 @@ export default function CollectorLogin() {
       setAuthMode('dual');
       setScanState('idle');
       setError('');
-      alert('✅ Official Collector Biometric Profile Enrolled Successfully!\n\nDual security is now active: ONLY this face together with your official passkey will be authorized to access the Collector Portal.');
+      alert('Official District Collector Biometric Profile Enrolled Successfully!\n\nDual security is active: ONLY this face together with your official passkey will be authorized to access the Collectorate Portal.');
     } else {
-      setError('Failed to save biometric profile.');
+      setError('Failed to record biometric profile. Please try again.');
     }
   };
 
   // ── RESET / RE-ENROLL ──
   const handleClearEnrollment = () => {
-    if (window.confirm('Reset the enrolled Collector biometric face profile? A new face profile must be enrolled to enable Face ID Dual authentication.')) {
+    if (window.confirm('Reset enrolled District Collector biometric face profile? A new face profile must be enrolled to enable Dual-Factor authentication.')) {
       clearEnrolledCollectorFace();
       refreshEnrolledProfile();
       setScanState('idle');
@@ -153,10 +166,10 @@ export default function CollectorLogin() {
       let errMsg = err.response?.data?.error;
       if (!err.response) {
         errMsg = 'Backend server is offline or unreachable (http://127.0.0.1:8000). Please ensure "python manage.py runserver" is running in the backend directory.';
-        setStatusMessage('⚠️ Backend Server Offline: Port 8000 is not reachable.');
+        setStatusMessage('Backend Server Offline: Port 8000 is not reachable.');
       } else {
         errMsg = errMsg || 'Authentication rejected: Invalid username or passkey.';
-        setStatusMessage('⛔ Access Denied: Invalid credentials.');
+        setStatusMessage('Access Denied: Invalid credentials.');
       }
       setError(errMsg);
       setFailedReason(errMsg);
@@ -170,16 +183,14 @@ export default function CollectorLogin() {
     e.preventDefault();
     if (scanState === 'scanning' || busy) return;
 
-    // Check passkey
     if (!form.password.trim()) {
-      setError('Please enter your official Passkey / Password to proceed with Dual-Auth.');
+      setError('Please enter your official Collector Passkey / Password to proceed with Dual-Auth.');
       return;
     }
 
-    // Check biometric enrollment
     const enrolled = getEnrolledCollectorFace();
     if (!enrolled || !enrolled.vector) {
-      setError('⚠️ No authorized face enrolled yet. Please click "Enroll Face" to register the Collector face profile first.');
+      setError('No authorized face profile enrolled yet. Please select "Biometric Registration" tab to enroll your face first.');
       return;
     }
 
@@ -189,10 +200,10 @@ export default function CollectorLogin() {
     setFailedReason('');
 
     const steps = [
-      { at: 25, msg: '1/4 Optical Sensor Active: Detecting live face boundary…' },
-      { at: 50, msg: '2/4 Extracting 224-point luminance & gradient vector…' },
-      { at: 75, msg: '3/4 Matching live biometric with enrolled Collector profile…' },
-      { at: 100, msg: '4/4 Biometric analysis complete. Verifying passkey…' },
+      { at: 25, msg: 'Sensor active: Detecting live facial boundary…' },
+      { at: 50, msg: 'Extracting normalized biometric feature vector…' },
+      { at: 75, msg: 'Matching signature with enrolled Collector profile…' },
+      { at: 100, msg: 'Biometric verification complete. Verifying credentials…' },
     ];
 
     let currentProgress = 0;
@@ -206,170 +217,374 @@ export default function CollectorLogin() {
       if (currentProgress >= 100) {
         clearInterval(interval);
 
-        // Perform actual vector extraction on the live video frame
         const candidate = extractBiometricVector(videoRef.current, canvasRef.current);
         if (!candidate.hasFace) {
           setScanState('failed');
-          setFailedReason(candidate.error || 'No face detected in optical frame.');
-          setStatusMessage('❌ Face not detected in frame. Please try again.');
+          setFailedReason(candidate.error || 'Face boundary not detected in camera frame.');
+          setStatusMessage('Face not detected. Please reposition and try again.');
           return;
         }
 
         setCapturedImage(candidate.snapshotUrl);
 
-        // Compare candidate vector with enrolled Collector vector
         const result = compareBiometricVectors(candidate.vector, enrolled.vector);
         setMatchScore(result.similarity);
 
         if (result.match) {
-          // BIOMETRIC PASSED! Now verify Passkey
           setScanState('success');
-          setStatusMessage(`✅ Face Verified (${result.similarity}% ≥ ${MATCH_THRESHOLD}%). Authorizing Dual Session…`);
+          setStatusMessage(`Biometric Verified (${result.similarity}% match). Authorizing Session…`);
           await performLogin(true);
         } else {
-          // REJECTED - BIOMETRIC MISMATCH!
           setScanState('failed');
-          setFailedReason(`Biometric Mismatch: Match score is ${result.similarity}% (Security threshold required: ≥ ${MATCH_THRESHOLD}%). Unauthorized individual detected.`);
-          setStatusMessage('⛔ ACCESS DENIED: Biometric mismatch detected.');
+          setFailedReason(`Biometric Mismatch: Similarity score is ${result.similarity}% (Security threshold required: ≥ ${MATCH_THRESHOLD}%). Access denied.`);
+          setStatusMessage('Access Denied: Biometric verification failed.');
         }
       }
-    }, 300);
+    }, 280);
   };
 
-  // ── PASSKEY ONLY SUBMIT (Fallback) ──
   const handlePasswordOnlySubmit = e => {
     e.preventDefault();
     performLogin(false);
   };
 
   return (
-    <div className="auth-page collector-auth-page">
-      <div className="auth-card collector-auth-card">
-        {/* LEFT BRANDING PANEL */}
-        <div className="auth-left collector-auth-left">
-          <div className="auth-brand">🏛 LandScope • Revenue</div>
-          <div className="collector-crest-wrap">
-            <div className="collector-crest-icon">⚖️</div>
+    <div className="gov-auth-container">
+      {/* Top Institutional Banner */}
+      <header className="gov-auth-topbar">
+        <div className="gov-auth-topbar-inner">
+          <div className="gov-auth-brand-left">
+            <span className="gov-dot-live">●</span>
+            <span className="gov-auth-topbar-txt">
+              महाराष्ट्र शासन • Government of Maharashtra | Revenue & Forest Department
+            </span>
           </div>
-          <h2>District Collectorate</h2>
-          <div className="auth-divider" />
-          <p>Apex Competent Authority under Section 44 of Maharashtra Land Revenue Code, 1966.</p>
-
-          <div className="collector-security-tags">
-            <span className="sec-tag">🛡️ Face ID & Passkey Dual Security</span>
-            <span className="sec-tag">🔐 Biometric Vector Match (≥ 75%)</span>
-            <span className="sec-tag">👤 Authorized Officer Profile Lock</span>
+          <div className="gov-auth-security-info">
+            <span className="gov-badge-secure">
+              <ShieldCheckIcon size={14} /> 256-Bit TLS Encrypted Apex Gateway
+            </span>
+            <Link to="/" className="gov-return-home">
+              ← Public Portal
+            </Link>
           </div>
+        </div>
+      </header>
 
-          {/* ENROLLED OFFICER CARD */}
-          <div className="enrolled-officer-box">
-            <div className="enrolled-header">
-              <span style={{ fontSize: '13px', fontWeight: '800' }}>Official Profile Registry</span>
-              {enrolledProfile ? (
-                <span className="badge-enrolled-active">● Enrolled</span>
-              ) : (
-                <span className="badge-enrolled-none">○ Not Enrolled</span>
-              )}
+      {/* Main Authentic Terminal Layout */}
+      <main className="gov-auth-main">
+        <div className="gov-auth-card">
+          {/* LEFT: Institutional Authority Panel */}
+          <section className="gov-auth-left gov-auth-left-collector" aria-label="Official Authority Information">
+            <div className="gov-auth-emblem-wrap">
+              <StateEmblem size={56} color="#d97706" />
             </div>
 
-            {enrolledProfile ? (
-              <div className="enrolled-details">
-                {enrolledProfile.photo && (
-                  <img src={enrolledProfile.photo} alt="Enrolled Collector" className="enrolled-thumbnail" />
+            <div className="gov-auth-office-header">
+              <span className="gov-office-subtitle">GOVERNMENT OF MAHARASHTRA</span>
+              <h1 className="gov-office-title">District Collectorate</h1>
+              <p className="gov-office-jurisdiction">
+                Apex Competent Sanctioning Authority • MLRC 1966 §44
+              </p>
+            </div>
+
+            <div className="gov-auth-rule-divider" />
+
+            {/* Official Officer Smart Credential Box */}
+            <div className="gov-officer-credential-card">
+              <div className="gov-credential-header">
+                <span className="gov-credential-tag">
+                  <UserIcon size={13} /> Apex Officer Registry
+                </span>
+                {enrolledProfile ? (
+                  <span className="gov-badge-status-active">
+                    <span className="status-dot-pulse">●</span> Enrolled & Active
+                  </span>
+                ) : (
+                  <span className="gov-badge-status-pending">○ Not Enrolled</span>
                 )}
-                <div>
-                  <div style={{ fontWeight: 'bold', fontSize: '13px', color: '#fff' }}>
-                    {enrolledProfile.meta?.officerName || 'District Collector'}
-                  </div>
-                  <div style={{ fontSize: '11px', color: '#94a3b8' }}>
-                    Enrolled: {new Date(enrolledProfile.meta?.enrolledAt).toLocaleDateString('en-IN')}
+              </div>
+
+              {enrolledProfile ? (
+                <div className="gov-officer-profile-row">
+                  {enrolledProfile.photo ? (
+                    <div className="gov-officer-avatar-wrap">
+                      <img
+                        src={enrolledProfile.photo}
+                        alt="Enrolled Collector"
+                        className="gov-officer-avatar"
+                      />
+                      <span className="gov-avatar-check">✓</span>
+                    </div>
+                  ) : (
+                    <div className="gov-officer-avatar-placeholder">
+                      <UserIcon size={24} />
+                    </div>
+                  )}
+
+                  <div className="gov-officer-meta">
+                    <div className="gov-officer-name">
+                      {enrolledProfile.meta?.officerName || 'District Collector'}
+                    </div>
+                    <div className="gov-officer-submeta">
+                      District Revenue Jurisdiction
+                    </div>
+                    <div className="gov-officer-enrolled-date">
+                      Enrolled: {new Date(enrolledProfile.meta?.enrolledAt || Date.now()).toLocaleDateString('en-IN')}
+                    </div>
                   </div>
                 </div>
+              ) : (
+                <div className="gov-credential-empty">
+                  <p>No reference facial profile enrolled for this workstation.</p>
+                  <span className="gov-credential-hint">
+                    Use the Registration tab to record the Collector reference biometric.
+                  </span>
+                </div>
+              )}
+
+              <div className="gov-credential-actions">
+                <button
+                  type="button"
+                  className="gov-btn-credential-secondary"
+                  onClick={() => {
+                    setAuthMode('enroll');
+                    setScanState('idle');
+                    setError('');
+                  }}
+                >
+                  <CameraIcon size={14} /> {enrolledProfile ? 'Re-enroll Biometric' : 'Enroll Reference Face'}
+                </button>
+                {enrolledProfile && (
+                  <button
+                    type="button"
+                    className="gov-btn-credential-reset"
+                    onClick={handleClearEnrollment}
+                    title="Reset enrolled biometric signature"
+                  >
+                    Reset
+                  </button>
+                )}
               </div>
-            ) : (
-              <div style={{ fontSize: '12px', color: '#fde68a', margin: '6px 0' }}>
-                No face registered yet. Click "Enroll Face" to capture your official reference biometric.
+            </div>
+
+            {/* Official Security Standards Notice */}
+            <div className="gov-compliance-panel">
+              <div className="gov-compliance-item">
+                <ShieldCheckIcon size={15} className="gov-compliance-icon" />
+                <span>Multi-Factor Biometric Matching (Cosine 224-D)</span>
+              </div>
+              <div className="gov-compliance-item">
+                <LockIcon size={15} className="gov-compliance-icon" />
+                <span>District Magistrate Sanction Key Lock</span>
+              </div>
+              <div className="gov-compliance-item">
+                <BuildingIcon size={15} className="gov-compliance-icon" />
+                <span>Audit Logged under IT Act 2000 & MLRC 1966</span>
+              </div>
+            </div>
+          </section>
+
+          {/* RIGHT: Gateway Authentication Terminal */}
+          <section className="gov-auth-right" aria-label="Sign In Terminal">
+            <div className="gov-auth-terminal-header">
+              <div className="gov-terminal-badge">
+                <ShieldCheckIcon size={13} /> Official Apex Sanctioning Gateway
+              </div>
+              <h2 className="gov-terminal-title">Collectorate Sign In</h2>
+              <p className="gov-terminal-subtitle">
+                {authMode === 'enroll'
+                  ? 'Capture official officer reference facial biometric for dual-factor verification.'
+                  : 'Authorized clearance for final sanction orders, conversion fees, and NA certificate issuance.'}
+              </p>
+            </div>
+
+            {/* Clean Segmented Mode Selector */}
+            <div className="gov-segmented-tabs" role="tablist">
+              <button
+                type="button"
+                className={`gov-tab-btn ${authMode === 'dual' ? 'active' : ''}`}
+                onClick={() => { setAuthMode('dual'); setScanState('idle'); setError(''); }}
+              >
+                <FaceScanIcon size={16} /> Dual-Factor (Face + Passkey)
+              </button>
+              <button
+                type="button"
+                className={`gov-tab-btn ${authMode === 'password' ? 'active' : ''}`}
+                onClick={() => { setAuthMode('password'); setError(''); }}
+              >
+                <KeyIcon size={16} /> Passkey Only
+              </button>
+              <button
+                type="button"
+                className={`gov-tab-btn ${authMode === 'enroll' ? 'active' : ''}`}
+                onClick={() => { setAuthMode('enroll'); setScanState('idle'); setError(''); }}
+              >
+                <CameraIcon size={16} /> {enrolledProfile ? 'Re-enroll' : 'Enroll Face'}
+              </button>
+            </div>
+
+            {/* Error Message Alert */}
+            {error && (
+              <div className="gov-alert-error" role="alert">
+                <AlertCircleIcon size={18} />
+                <div>
+                  <strong>Authentication Notice:</strong> {error}
+                </div>
               </div>
             )}
 
-            <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
-              <button
-                type="button"
-                className="btn-enroll-toggle"
-                onClick={() => { setAuthMode('enroll'); setScanState('idle'); setError(''); }}
-              >
-                📸 {enrolledProfile ? 'Re-enroll Face' : 'Enroll Face Now'}
-              </button>
-              {enrolledProfile && (
-                <button
-                  type="button"
-                  className="btn-clear-enroll"
-                  onClick={handleClearEnrollment}
-                  title="Clear enrolled biometric"
-                >
-                  ✕ Reset
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
+            {/* ── MODE 1: DUAL-FACTOR AUTH (FACE + PASSKEY) ── */}
+            {authMode === 'dual' && (
+              <form onSubmit={handleDualAuthSubmit} className="gov-terminal-form">
+                <div className="gov-form-grid-2">
+                  <div className="gov-input-group">
+                    <label className="gov-label" htmlFor="col-user">Collector Username</label>
+                    <div className="gov-input-wrap">
+                      <span className="gov-input-icon"><UserIcon size={16} /></span>
+                      <input
+                        id="col-user"
+                        className="gov-input"
+                        name="username"
+                        placeholder="Official departmental username"
+                        value={form.username}
+                        onChange={handleInput}
+                        required
+                        autoComplete="username"
+                      />
+                    </div>
+                  </div>
 
-        {/* RIGHT INTERACTIVE LOGIN PANEL */}
-        <div className="auth-right collector-auth-right">
-          <div className="auth-header-row">
-            <div>
-              <span className="auth-badge">🔒 Dual-Factor Security Gateway</span>
-              <h2>Collector Sign In</h2>
-              <p className="auth-sub">
-                {authMode === 'enroll'
-                  ? 'Position your face within the frame and capture reference biometric profile.'
-                  : 'Requires both live facial biometric recognition and official secure passkey.'}
-              </p>
-            </div>
-          </div>
+                  <div className="gov-input-group">
+                    <label className="gov-label" htmlFor="col-pass">Official Secure Passkey</label>
+                    <div className="gov-input-wrap">
+                      <span className="gov-input-icon"><LockIcon size={16} /></span>
+                      <input
+                        id="col-pass"
+                        className="gov-input"
+                        type="password"
+                        name="password"
+                        placeholder="Enter official passkey"
+                        value={form.password}
+                        onChange={handleInput}
+                        required
+                        autoComplete="current-password"
+                      />
+                    </div>
+                  </div>
+                </div>
 
-          {/* AUTHENTICATION MODE TABS */}
-          <div className="collector-mode-tabs" role="tablist">
-            <button
-              type="button"
-              className={`mode-tab ${authMode === 'dual' ? 'active' : ''}`}
-              onClick={() => { setAuthMode('dual'); setScanState('idle'); setError(''); }}
-            >
-              🛡️ Face ID & Passkey Dual-Auth
-            </button>
-            <button
-              type="button"
-              className={`mode-tab ${authMode === 'password' ? 'active' : ''}`}
-              onClick={() => { setAuthMode('password'); setError(''); }}
-            >
-              🔑 Passkey Only
-            </button>
-            <button
-              type="button"
-              className={`mode-tab ${authMode === 'enroll' ? 'active' : ''}`}
-              onClick={() => { setAuthMode('enroll'); setScanState('idle'); setError(''); }}
-              style={{ color: '#d97706' }}
-            >
-              ⚙️ {enrolledProfile ? 'Re-enroll Face' : 'Enroll Face'}
-            </button>
-          </div>
+                {/* Biometric Camera Viewport */}
+                <div className="gov-sensor-box">
+                  <div className="gov-sensor-viewport">
+                    <video
+                      ref={videoRef}
+                      className={`gov-sensor-video ${cameraActive ? 'active' : 'hidden'}`}
+                      autoPlay
+                      playsInline
+                      muted
+                    />
+                    <canvas ref={canvasRef} style={{ display: 'none' }} />
 
-          {error && <div className="error-box">⚠️ {error}</div>}
+                    {!cameraActive && (
+                      <div className="gov-sensor-placeholder">
+                        <CameraIcon size={36} className="gov-sensor-off-icon" />
+                        <div className="gov-sensor-off-title">Optical Sensor Standby</div>
+                        <p className="gov-sensor-off-desc">
+                          {cameraError || 'Webcam access is required for real-time facial verification.'}
+                        </p>
+                        <button type="button" className="gov-btn-activate-cam" onClick={startCamera}>
+                          <RefreshCwIcon size={14} /> Initialize Webcam
+                        </button>
+                      </div>
+                    )}
 
-          {/* ══════════════════════════════════════════════════════════════
-              MODE 1: DUAL-FACTOR AUTH (FACE ID + PASSKEY)
-             ══════════════════════════════════════════════════════════════ */}
-          {authMode === 'dual' && (
-            <form onSubmit={handleDualAuthSubmit} className="auth-form">
-              {/* CREDENTIAL FIELDS */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div>
-                  <label className="input-label">Collector Username</label>
-                  <div className="input-wrap">
+                    {/* Clean HUD Viewfinder Reticle */}
+                    <div className={`gov-sensor-hud ${scanState === 'scanning' ? 'scanning' : ''} ${scanState === 'success' ? 'verified' : ''} ${scanState === 'failed' ? 'mismatch' : ''}`}>
+                      <div className="hud-corner-tl" />
+                      <div className="hud-corner-tr" />
+                      <div className="hud-corner-bl" />
+                      <div className="hud-corner-br" />
+
+                      <div className="hud-oval-guide">
+                        {scanState === 'scanning' && <div className="hud-scan-beam" />}
+                      </div>
+
+                      <div className="hud-telemetry-strip">
+                        <span className="hud-tag-live">● SENSOR ACTIVE</span>
+                        <span className="hud-tag">THRESHOLD: ≥ {MATCH_THRESHOLD}%</span>
+                      </div>
+
+                      <div className="hud-status-strip">
+                        {scanState === 'scanning' && (
+                          <div className="hud-progress-meter">
+                            <div className="hud-progress-fill" style={{ width: `${scanProgress}%` }} />
+                          </div>
+                        )}
+                        <span className="hud-status-msg">{statusMessage}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Verification Results Feedback */}
+                  {scanState === 'success' && (
+                    <div className="gov-verification-success">
+                      <CheckCircleIcon size={20} className="gov-success-icon" />
+                      <div className="gov-success-body">
+                        <strong>Biometric Identity Confirmed</strong>
+                        <div className="gov-success-score">
+                          Match Score: <strong>{matchScore}%</strong> (Threshold: ≥ {MATCH_THRESHOLD}%)
+                        </div>
+                      </div>
+                      {capturedImage && (
+                        <img src={capturedImage} alt="Verified Candidate" className="gov-success-thumb" />
+                      )}
+                    </div>
+                  )}
+
+                  {scanState === 'failed' && (
+                    <div className="gov-verification-failure">
+                      <AlertCircleIcon size={20} className="gov-failure-icon" />
+                      <div className="gov-failure-body">
+                        <strong>Biometric Verification Failed</strong>
+                        <div className="gov-failure-reason">{failedReason}</div>
+                      </div>
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    className="gov-btn-primary-action"
+                    disabled={scanState === 'scanning' || busy}
+                  >
+                    {scanState === 'scanning' ? (
+                      <span className="gov-loading-row">
+                        <RefreshCwIcon size={16} className="spin-icon" />
+                        Verifying Facial Biometric & Passkey ({scanProgress}%)…
+                      </span>
+                    ) : busy ? (
+                      'Authenticating Collector Session…'
+                    ) : (
+                      <span className="gov-btn-row">
+                        <ShieldCheckIcon size={18} /> Verify Biometric & Sign In
+                      </span>
+                    )}
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* ── MODE 2: PASSKEY ONLY (FALLBACK) ── */}
+            {authMode === 'password' && (
+              <form onSubmit={handlePasswordOnlySubmit} className="gov-terminal-form">
+                <div className="gov-input-group">
+                  <label className="gov-label" htmlFor="col-user-pwd">Collector Username</label>
+                  <div className="gov-input-wrap">
+                    <span className="gov-input-icon"><UserIcon size={16} /></span>
                     <input
-                      className="auth-input"
+                      id="col-user-pwd"
+                      className="gov-input"
                       name="username"
-                      placeholder="Official username"
+                      placeholder="Official departmental username"
                       value={form.username}
                       onChange={handleInput}
                       required
@@ -378,14 +593,16 @@ export default function CollectorLogin() {
                   </div>
                 </div>
 
-                <div>
-                  <label className="input-label">Official Secure Passkey</label>
-                  <div className="input-wrap">
+                <div className="gov-input-group">
+                  <label className="gov-label" htmlFor="col-pass-pwd">Official Secure Passkey</label>
+                  <div className="gov-input-wrap">
+                    <span className="gov-input-icon"><LockIcon size={16} /></span>
                     <input
-                      className="auth-input"
+                      id="col-pass-pwd"
+                      className="gov-input"
                       type="password"
                       name="password"
-                      placeholder="Enter passkey / password"
+                      placeholder="Enter official passkey"
                       value={form.password}
                       onChange={handleInput}
                       required
@@ -393,239 +610,97 @@ export default function CollectorLogin() {
                     />
                   </div>
                 </div>
-              </div>
 
-              {/* BIOMETRIC OPTICAL SCANNER */}
-              <div className="biometric-scanner-box" style={{ marginTop: '4px' }}>
-                <div className="scanner-feed-wrapper">
-                  <video
-                    ref={videoRef}
-                    className={`scanner-video ${cameraActive ? 'active' : 'hidden'}`}
-                    autoPlay
-                    playsInline
-                    muted
-                  />
-                  <canvas ref={canvasRef} style={{ display: 'none' }} />
+                <div className="gov-security-note">
+                  <LockIcon size={14} />
+                  <span>Passkey-only session will be logged for administrative compliance audit.</span>
+                </div>
 
-                  {!cameraActive && (
-                    <div className="camera-placeholder">
-                      <div className="placeholder-content">
-                        <span className="cam-icon">📷</span>
-                        <div className="cam-title">Optical Sensor Offline</div>
-                        <p className="cam-desc">
-                          {cameraError || 'Camera sensor access required for live facial verification.'}
-                        </p>
-                        <button type="button" className="btn-retry-cam" onClick={startCamera}>
-                          🔌 Activate Webcam
+                <button type="submit" className="gov-btn-primary-action" disabled={busy}>
+                  {busy ? 'Verifying Credentials…' : 'Sign In with Passkey'}
+                </button>
+              </form>
+            )}
+
+            {/* ── MODE 3: ENROLL FACE BIOMETRIC ── */}
+            {authMode === 'enroll' && (
+              <div className="gov-terminal-form">
+                <div className="gov-sensor-box">
+                  <div className="gov-sensor-viewport">
+                    <video
+                      ref={videoRef}
+                      className={`gov-sensor-video ${cameraActive ? 'active' : 'hidden'}`}
+                      autoPlay
+                      playsInline
+                      muted
+                    />
+                    <canvas ref={canvasRef} style={{ display: 'none' }} />
+
+                    {!cameraActive && (
+                      <div className="gov-sensor-placeholder">
+                        <CameraIcon size={36} className="gov-sensor-off-icon" />
+                        <div className="gov-sensor-off-title">Camera Sensor Standby</div>
+                        <p className="gov-sensor-off-desc">Activate webcam to capture reference facial biometric.</p>
+                        <button type="button" className="gov-btn-activate-cam" onClick={startCamera}>
+                          <RefreshCwIcon size={14} /> Initialize Webcam
                         </button>
                       </div>
-                    </div>
-                  )}
-
-                  {/* HUD OVERLAY */}
-                  <div className={`biometric-hud ${scanState === 'scanning' ? 'scanning' : ''} ${scanState === 'success' ? 'verified' : ''} ${scanState === 'failed' ? 'mismatch' : ''}`}>
-                    <span className="reticle top-left" />
-                    <span className="reticle top-right" />
-                    <span className="reticle bottom-left" />
-                    <span className="reticle bottom-right" />
-
-                    <div className="face-oval-guide">
-                      <div className="oval-crosshair" />
-                      {scanState === 'scanning' && <div className="laser-sweep" />}
-                    </div>
-
-                    <div className="hud-telemetry">
-                      <span className="hud-badge red-pulse">● LIVE SENSOR</span>
-                      <span className="hud-badge">THRESHOLD: ≥ {MATCH_THRESHOLD}%</span>
-                      <span className="hud-badge">{enrolledProfile ? 'ENROLLED: YES' : 'ENROLLED: NONE'}</span>
-                    </div>
-
-                    <div className="hud-status-bar">
-                      {scanState === 'scanning' && (
-                        <div className="hud-progress-wrap">
-                          <div className="hud-progress-bar" style={{ width: `${scanProgress}%` }} />
-                          <span className="hud-pct">{scanProgress}%</span>
-                        </div>
-                      )}
-                      <span className="hud-status-text">{statusMessage}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* SCANNER FEEDBACK */}
-                <div className="scanner-action-bar">
-                  {scanState === 'success' && (
-                    <div className="verified-success-box" style={{ marginBottom: '8px' }}>
-                      <div className="verified-badge-row">
-                        <span className="verified-check">✓</span>
-                        <div style={{ flex: 1 }}>
-                          <strong style={{ color: '#10b981', fontSize: '13.5px' }}>
-                            Face Biometric Confirmed
-                          </strong>
-                          <div className="officer-meta">
-                            Match Score: <strong>{matchScore}%</strong> (Security Threshold: ≥ {MATCH_THRESHOLD}%)
-                          </div>
-                        </div>
-                        {capturedImage && (
-                          <img src={capturedImage} alt="Verified Candidate" className="verified-thumb" />
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {scanState === 'failed' && (
-                    <div className="mismatch-box" style={{ marginBottom: '8px' }}>
-                      <div className="mismatch-header">
-                        <span className="mismatch-icon">⛔</span>
-                        <div>
-                          <strong style={{ color: '#ef4444', fontSize: '13.5px' }}>
-                            Access Denied: Biometric Mismatch
-                          </strong>
-                          <div style={{ fontSize: '12px', color: '#cbd5e1', marginTop: '2px' }}>
-                            {failedReason}
-                          </div>
-                          {matchScore !== null && (
-                            <div style={{ fontSize: '11px', color: '#fca5a5', marginTop: '4px' }}>
-                              Measured Match: <strong>{matchScore}%</strong> vs Required Threshold: <strong>≥ {MATCH_THRESHOLD}%</strong>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* UNIFIED DUAL-AUTH BUTTON */}
-                  <button
-                    type="submit"
-                    className="btn-biometric-scan"
-                    disabled={scanState === 'scanning' || busy}
-                  >
-                    {scanState === 'scanning' ? (
-                      <>
-                        <span className="spinner-dot" />
-                        Verifying Face & Passkey ({scanProgress}%)…
-                      </>
-                    ) : busy ? (
-                      'Authenticating Session…'
-                    ) : (
-                      '🛡️ Verify Face ID & Authorize Passkey Login →'
                     )}
-                  </button>
-                </div>
-              </div>
-            </form>
-          )}
 
-          {/* ══════════════════════════════════════════════════════════════
-              MODE 2: PASSKEY ONLY (FALLBACK)
-             ══════════════════════════════════════════════════════════════ */}
-          {authMode === 'password' && (
-            <form onSubmit={handlePasswordOnlySubmit} className="auth-form" style={{ marginTop: '14px' }}>
-              <div>
-                <label className="input-label">Collector Username</label>
-                <div className="input-wrap">
-                  <input
-                    className="auth-input"
-                    name="username"
-                    placeholder="Official username"
-                    value={form.username}
-                    onChange={handleInput}
-                    required
-                    autoComplete="username"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="input-label">Official Secure Passkey</label>
-                <div className="input-wrap">
-                  <input
-                    className="auth-input"
-                    type="password"
-                    name="password"
-                    placeholder="Enter passkey / password"
-                    value={form.password}
-                    onChange={handleInput}
-                    required
-                    autoComplete="current-password"
-                  />
-                </div>
-              </div>
-
-              <button type="submit" className="auth-submit" disabled={busy}>
-                {busy ? 'Verifying Credentials…' : 'Sign In with Passkey →'}
-              </button>
-            </form>
-          )}
-
-          {/* ══════════════════════════════════════════════════════════════
-              MODE 3: ENROLL FACE BIOMETRIC
-             ══════════════════════════════════════════════════════════════ */}
-          {authMode === 'enroll' && (
-            <div className="biometric-scanner-box" style={{ marginTop: '14px' }}>
-              <div className="scanner-feed-wrapper">
-                <video
-                  ref={videoRef}
-                  className={`scanner-video ${cameraActive ? 'active' : 'hidden'}`}
-                  autoPlay
-                  playsInline
-                  muted
-                />
-                <canvas ref={canvasRef} style={{ display: 'none' }} />
-
-                {!cameraActive && (
-                  <div className="camera-placeholder">
-                    <div className="placeholder-content">
-                      <span className="cam-icon">📷</span>
-                      <div className="cam-title">Optical Sensor Offline</div>
-                      <p className="cam-desc">Activate webcam to capture reference facial biometric.</p>
-                      <button type="button" className="btn-retry-cam" onClick={startCamera}>
-                        🔌 Activate Webcam
-                      </button>
+                    <div className="gov-sensor-hud">
+                      <div className="hud-corner-tl" />
+                      <div className="hud-corner-tr" />
+                      <div className="hud-corner-bl" />
+                      <div className="hud-corner-br" />
+                      <div className="hud-oval-guide" />
+                      <div className="hud-telemetry-strip">
+                        <span className="hud-tag-live">● ENROLLMENT APERTURE</span>
+                      </div>
+                      <div className="hud-status-strip">
+                        <span className="hud-status-msg">Align face inside the oval guide and click Capture</span>
+                      </div>
                     </div>
                   </div>
-                )}
 
-                <div className="biometric-hud">
-                  <span className="reticle top-left" />
-                  <span className="reticle top-right" />
-                  <span className="reticle bottom-left" />
-                  <span className="reticle bottom-right" />
-                  <div className="face-oval-guide">
-                    <div className="oval-crosshair" />
-                  </div>
-                  <div className="hud-telemetry">
-                    <span className="hud-badge red-pulse">● ENROLLMENT MODE</span>
-                    <span className="hud-badge">MH-COLL-REGISTRY</span>
-                  </div>
-                  <div className="hud-status-bar">
-                    <span className="hud-status-text">Position face inside oval reticle and click Capture below</span>
-                  </div>
+                  <button
+                    type="button"
+                    className="gov-btn-enroll-action"
+                    disabled={!cameraActive}
+                    onClick={handleEnrollFace}
+                  >
+                    <CameraIcon size={16} /> Capture & Record Collector Face Profile
+                  </button>
+                  <p className="gov-enroll-helper">
+                    Ensure face is clearly visible in proper lighting without glare or accessories.
+                  </p>
                 </div>
               </div>
+            )}
 
-              <div className="scanner-action-bar">
-                <button
-                  type="button"
-                  className="btn-enroll-action"
-                  disabled={!cameraActive}
-                  onClick={handleEnrollFace}
-                >
-                  📸 Capture & Enroll This Face as Official Collector
-                </button>
-                <p style={{ margin: '6px 0 0', fontSize: '11.5px', color: '#94a3b8', textAlign: 'center' }}>
-                  Look directly at camera in good lighting. Only this biometric profile will be authorized to access the Collector Portal.
-                </p>
+            {/* Departmental Portal Switcher */}
+            <div className="gov-portal-switcher">
+              <span className="gov-switcher-label">Switch Administrative Portal:</span>
+              <div className="gov-switcher-links">
+                <Link to="/tahsildar/login" className="gov-chip-link">Tahsildar Desk</Link>
+                <span className="gov-chip-active">District Collectorate</span>
+                <Link to="/state-govt/login" className="gov-chip-link">State Secretariat</Link>
               </div>
             </div>
-          )}
+          </section>
+        </div>
+      </main>
 
-          <div className="auth-switch">
-            <span style={{ color: '#64748b' }}>Switch portal: </span>
-            <a href="/login">Citizen Login</a> • <a href="/tahsildar/login">Tahsildar Desk</a>
+      {/* Official Government Footer */}
+      <footer className="gov-auth-footer">
+        <div className="gov-auth-footer-inner">
+          <div className="gov-footer-compliance">
+            National Informatics Centre (NIC) Security Framework • Certified ISO/IEC 27001 Gateway • End-to-End Encrypted (TLS 1.3)
+          </div>
+          <div className="gov-footer-copy">
+            © 2026 Government of Maharashtra. All Rights Reserved. Revenue & Forest Department.
           </div>
         </div>
-      </div>
+      </footer>
     </div>
   );
 }

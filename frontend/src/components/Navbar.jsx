@@ -1,53 +1,63 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useState, useRef, useEffect } from 'react';
+import { StateEmblem } from './Icons';
 
 const translations = {
   English: {
-    gov: "Government of Maharashtra",
-    skip: "Skip to Content",
+    gov: "Government of Maharashtra • महाराष्ट्र शासन",
+    dept: "Revenue & Forest Department",
+    skip: "Skip to Main Content",
     access: "Accessibility",
-    helpline: "Helpline: 1800-123-4567",
-    title: "NA Land Governance & Authorization",
-    subtitle: "Intelligent AI Platform for Non-Agricultural Land Governance",
+    helpline: "Toll-Free Helpline: 1800-120-8040",
+    title: "MahaLand NA Portal",
+    subtitle: "Non-Agricultural Land Conversion & Revenue Governance System (MLRC 1966 §44)",
     home: "Home",
     apply: "Apply for NA",
     track: "Track Application",
-    about: "About",
-    login: "Login",
-    signup: "Sign Up",
-    logout: "Logout",
+    statePortal: "State Secretariat",
+    officerDesk: "Officer Access",
+    about: "Guidelines & Rules",
+    login: "Citizen Sign In",
+    signup: "Register",
+    logout: "Sign Out",
     welcome: "Welcome"
   },
   'मराठी': {
-    gov: "महाराष्ट्र शासन",
-    skip: "मुख्य आशयावर जा",
+    gov: "महाराष्ट्र शासन • Government of Maharashtra",
+    dept: "महसूल व वन विभाग",
+    skip: "मुख्य मजकुरावर जा",
     access: "प्रवेशयोग्यता",
-    helpline: "हेल्पलाइन: १८००-१२३-४५६७",
-    title: "अकृषिक (NA) जमीन प्रशासन आणि अधिकृतता",
-    subtitle: "अकृषिक जमीन प्रशासनासाठी बुद्धिमान एआय प्लॅटफॉर्म",
+    helpline: "टोल-फ्री हेल्पलाईन: १८००-१२०-८०४०",
+    title: "महा-जमीन (MahaLand)",
+    subtitle: "अकृषिक (NA) जमीन रूपांतरण व महसूल परवाना प्रणाली (MLRC १९६६)",
     home: "मुख्य पृष्ठ",
     apply: "NA साठी अर्ज करा",
     track: "अर्जाचा मागोवा घ्या",
-    about: "आमच्याबद्दल",
-    login: "लॉगिन",
-    signup: "नोंदणी करा",
-    logout: "बाहेर पडा",
+    statePortal: "मंत्रालय कक्ष",
+    officerDesk: "अधिकारी पोर्टल",
+    about: "मार्गदर्शक तत्त्वे",
+    login: "नागरिक लॉगिन",
+    signup: "नोंदणी",
+    logout: "लॉग आउट",
     welcome: "स्वागत आहे"
   },
   'हिन्दी': {
-    gov: "महाराष्ट्र सरकार",
+    gov: "महाराष्ट्र सरकार • Government of Maharashtra",
+    dept: "राजस्व एवं वन विभाग",
     skip: "मुख्य सामग्री पर जाएं",
     access: "अभिगम्यता",
-    helpline: "हेल्पलाइन: १८००-१२३-४५६७",
-    title: "गैर-कृषि (NA) भूमि प्रशासन और प्राधिकरण",
-    subtitle: "गैर-कृषि भूमि प्रशासन के लिए बुद्धिमान एआई प्लेटफॉर्म",
+    helpline: "टोल-फ्री हेल्पलाइन: १८००-१२०-८०४०",
+    title: "महा-भूमि (MahaLand)",
+    subtitle: "गैर-कृषि (NA) भूमि रूपांतरण एवं राजस्व अनुमति प्रणाली (MLRC 1966)",
     home: "होम",
-    apply: "NA के लिए आवेदन करें",
-    track: "आवेदन ट्रैक करें",
-    about: "हमारे बारे में",
-    login: "लॉगिन",
-    signup: "साइन अप करें",
+    apply: "NA हेतु आवेदन",
+    track: "आवेदन स्थिति",
+    statePortal: "सचिवालय पोर्टल",
+    officerDesk: "अधिकारी लॉगिन",
+    about: "दिशानिर्देश",
+    login: "नागरिक लॉगिन",
+    signup: "पंजीकरण",
     logout: "लॉग आउट",
     welcome: "स्वागत है"
   }
@@ -67,7 +77,6 @@ export default function Navbar() {
 
   const handleLogout = () => { logout(); navigate('/'); };
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event) {
       if (langRef.current && !langRef.current.contains(event.target)) {
@@ -83,24 +92,37 @@ export default function Navbar() {
       {/* Top Government Strip */}
       <div className="gov-top-strip">
         <div className="strip-left">
-          <span>{t.gov}</span>
+          <span className="gov-seal-indicator">●</span>
+          <span>{t.gov} | {t.dept}</span>
         </div>
         <div className="strip-right">
-          <a href="#main-content">{t.skip}</a>
-          <a href="#accessibility">{t.access}</a>
+          <a href="#main-content" className="strip-link">{t.skip}</a>
+          <span className="strip-divider">|</span>
+          <a href="#accessibility" className="strip-link">{t.access}</a>
+          <span className="strip-divider">|</span>
           <span className="helpline">{t.helpline}</span>
         </div>
       </div>
 
-      {/* Main Logo Section */}
+      {/* Main Logo & Identity Section */}
       <div className="gov-logo-section">
         <div className="logo-content">
-          <div className="emblem-placeholder">
-            <span className="emblem-icon">🦁</span>
-          </div>
+          <Link to="/" className="emblem-link" title="Government of Maharashtra">
+            <div className="emblem-container">
+              <StateEmblem size={52} color="#b45309" />
+            </div>
+          </Link>
           <div className="site-titles">
+            <div className="site-supertitle">GOVERNMENT OF MAHARASHTRA • महसूल व वन विभाग</div>
             <h1 className="site-name">{t.title}</h1>
             <p className="site-subtitle">{t.subtitle}</p>
+          </div>
+          
+          <div className="gov-trust-badge">
+            <div className="trust-cert">
+              <span className="cert-code">MLRC 1966 §44</span>
+              <span className="cert-desc">Competent Revenue Authority</span>
+            </div>
           </div>
         </div>
       </div>
@@ -108,8 +130,10 @@ export default function Navbar() {
       {/* Navigation Bar */}
       <nav className="gov-navbar">
         <div className="nav-container">
-          <button className="hamburger" onClick={() => setMobileOpen(!mobileOpen)}>
-            ☰
+          <button className="hamburger" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Toggle navigation">
+            <span></span>
+            <span></span>
+            <span></span>
           </button>
 
           <div className={`nav-links ${mobileOpen ? 'open' : ''}`}>
@@ -121,21 +145,26 @@ export default function Navbar() {
             
             <Link to="/track" onClick={() => setMobileOpen(false)}>{t.track}</Link>
             
-            <Link to="/maharashtra-govt" onClick={() => setMobileOpen(false)} style={{ color: '#d97706', fontWeight: 'bold' }}>
-              🏛️ State Govt Portal
+            <Link to="/maharashtra-govt" onClick={() => setMobileOpen(false)} className="nav-link-highlight">
+              {t.statePortal}
             </Link>
-            
-            <Link to="/about" onClick={() => setMobileOpen(false)}>{t.about}</Link>
+
+            {/* Department Officer Portals */}
+            <div className="nav-officer-dropdown">
+              <Link to="/tahsildar/login" onClick={() => setMobileOpen(false)}>Tahsildar Desk</Link>
+              <Link to="/collector/login" onClick={() => setMobileOpen(false)}>Collectorate</Link>
+            </div>
             
             <div className="nav-spacer"></div>
 
-            {/* Custom Language Dropdown */}
+            {/* Language Selector */}
             <div className="lang-dropdown-wrapper" ref={langRef}>
               <button 
                 className="lang-dropdown-btn" 
                 onClick={() => setLangOpen(!langOpen)}
+                aria-expanded={langOpen}
               >
-                {lang} ▾
+                🌐 {lang} ▾
               </button>
               {langOpen && (
                 <div className="lang-dropdown-menu">
@@ -153,15 +182,15 @@ export default function Navbar() {
             </div>
 
             {user ? (
-              <>
-                <span className="nav-user">👤 {t.welcome}, {user.user_name}</span>
+              <div className="nav-user-area">
+                <span className="nav-user">{t.welcome}, <strong>{user.user_name}</strong></span>
                 <button onClick={handleLogout} className="nav-logout">{t.logout}</button>
-              </>
+              </div>
             ) : (
-              <>
-                <Link to="/login" onClick={() => setMobileOpen(false)}>{t.login}</Link>
+              <div className="nav-auth-actions">
+                <Link to="/login" className="nav-link-login" onClick={() => setMobileOpen(false)}>{t.login}</Link>
                 <Link to="/register" className="nav-btn-highlight" onClick={() => setMobileOpen(false)}>{t.signup}</Link>
-              </>
+              </div>
             )}
           </div>
         </div>
@@ -169,3 +198,4 @@ export default function Navbar() {
     </header>
   );
 }
+

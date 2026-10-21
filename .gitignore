@@ -20,3 +20,4 @@ frontend/*.local
 .idea/
 .DS_Store
 *.swp
+*.bak

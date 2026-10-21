@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import ApplicationPdfModal from '../../components/ApplicationPdfModal';
 import CertificateModal from '../../components/CertificateModal';
+import { StateEmblem, ShieldCheckIcon, CheckCircleIcon, CheckIcon, AlertTriangleIcon, FileTextIcon, ScaleIcon, ArrowRightIcon, ArrowLeftIcon, ExternalLinkIcon, BuildingIcon, LockIcon, SearchIcon, InboxIcon } from '../../components/Icons';
 
 const cApi = axios.create({ baseURL: 'http://127.0.0.1:8000/api' });
 cApi.interceptors.request.use(c => {
@@ -143,16 +144,16 @@ export function CollectorDashboard() {
   };
 
   const TABS = [
-    { key: 'pending_collector', label: '📥 New Submissions', count: counts.pending_collector, desc: 'Incoming citizen applications awaiting initial Collector review and referral.' },
+    { key: 'pending_collector', label: 'New Submissions', count: counts.pending_collector, desc: 'Incoming citizen applications awaiting initial Collector review and referral.' },
     { key: 'forwarded_to_tahsildar', label: '⏳ With Tahsildar', count: counts.forwarded_to_tahsildar, desc: 'Private applications forwarded to Tahsildar for physical site inspection and boundary validation.' },
-    { key: 'tahsildar_verified', label: '📋 Tahsildar Verified', count: counts.tahsildar_verified, desc: 'Field inquiry completed by Tahsildar. Ready for final NA Sanction Order.' },
-    { key: 'forwarded_to_state_govt', label: '🏛️ With State Govt', count: counts.forwarded_to_state_govt, desc: 'Granted & Semi-Granted applications referred to Maharashtra State Government Secretariat.' },
-    { key: 'state_govt_approved', label: '✅ State Govt Approved', count: counts.state_govt_approved, desc: 'Granted & Semi-Granted applications with approved State Government Resolution (GR). Ready for final Collector NA Sanction Order.' },
-    { key: 'tahsildar_rejected', label: '⚠️ Tahsildar Objections', count: counts.tahsildar_rejected, desc: 'Tahsildar raised discrepancies or field objections. Requires Collector adjudication.' },
-    { key: 'state_govt_referral', label: '🏛️ All State Cases', count: counts.state_govt_referral, desc: 'Granted and Semi-Granted Educational, Commercial, and Industrial applications redirected to Maharashtra State Government.' },
-    { key: 'collector_approved', label: '📜 NA Granted', count: counts.collector_approved, desc: 'Final Non-Agricultural Sanction Orders issued by District Collector.' },
-    { key: 'collector_rejected', label: '🚫 Final Rejected', count: counts.collector_rejected, desc: 'Applications rejected with official statutory findings.' },
-    { key: 'all', label: '📊 All Applications', count: counts.all, desc: 'Complete registry of all NA permission requests across all workflow stages.' },
+    { key: 'tahsildar_verified', label: 'Tahsildar Verified', count: counts.tahsildar_verified, desc: 'Field inquiry completed by Tahsildar. Ready for final NA Sanction Order.' },
+    { key: 'forwarded_to_state_govt', label: 'With State Govt', count: counts.forwarded_to_state_govt, desc: 'Granted & Semi-Granted applications referred to Maharashtra State Government Secretariat.' },
+    { key: 'state_govt_approved', label: 'State Govt Approved', count: counts.state_govt_approved, desc: 'Granted & Semi-Granted applications with approved State Government Resolution (GR). Ready for final Collector NA Sanction Order.' },
+    { key: 'tahsildar_rejected', label: 'Tahsildar Objections', count: counts.tahsildar_rejected, desc: 'Tahsildar raised discrepancies or field objections. Requires Collector adjudication.' },
+    { key: 'state_govt_referral', label: 'All State Cases', count: counts.state_govt_referral, desc: 'Granted and Semi-Granted Educational, Commercial, and Industrial applications redirected to Maharashtra State Government.' },
+    { key: 'collector_approved', label: 'NA Granted', count: counts.collector_approved, desc: 'Final Non-Agricultural Sanction Orders issued by District Collector.' },
+    { key: 'collector_rejected', label: 'Final Rejected', count: counts.collector_rejected, desc: 'Applications rejected with official statutory findings.' },
+    { key: 'all', label: 'All Applications', count: counts.all, desc: 'Complete registry of all NA permission requests across all workflow stages.' },
   ];
 
   const currentTab = TABS.find(t => t.key === filter) || TABS[0];
@@ -170,15 +171,13 @@ export function CollectorDashboard() {
   return (
     <div className="dashboard-page">
       {/* SIDEBAR */}
-      <aside className="sidebar" style={{ background: '#0b1b2b', width: '270px' }}>
-        <div style={{ padding: '24px 20px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ width: '38px', height: '38px', borderRadius: '8px', background: 'linear-gradient(135deg, #d97706, #b45309)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '20px' }}>
-              🏛
-            </div>
+      <aside className="sidebar">
+        <div className="sidebar-brand">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <StateEmblem size={38} color="#d97706" />
             <div>
-              <div style={{ color: '#fff', fontWeight: '800', fontSize: '16px', letterSpacing: '0.3px' }}>District Collector</div>
-              <div style={{ color: '#94a3b8', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>NA Revenue Authority</div>
+              <div style={{ color: '#fff', fontWeight: '800', fontSize: '15px', letterSpacing: '0.2px' }}>District Collectorate</div>
+              <div style={{ color: '#94a3b8', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: '600' }}>NA Sanctioning Authority</div>
             </div>
           </div>
         </div>
@@ -206,28 +205,7 @@ export function CollectorDashboard() {
           ))}
         </nav>
 
-        <div style={{ marginTop: 'auto', padding: '16px 20px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-          <Link
-            to="/maharashtra-govt"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              padding: '10px 14px',
-              marginBottom: '12px',
-              background: 'rgba(247, 182, 0, 0.15)',
-              border: '1px solid rgba(247, 182, 0, 0.4)',
-              color: '#f7b600',
-              textDecoration: 'none',
-              borderRadius: '6px',
-              fontSize: '12.5px',
-              fontWeight: '700',
-              textAlign: 'center',
-            }}
-          >
-            <span>🏛️</span> State Govt Portal ↗
-          </Link>
+        <div style={{ marginTop: 'auto', padding: '16px 20px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
           <button className="sidebar-logout" style={{ margin: 0, width: '100%', borderRadius: '6px' }} onClick={logout}>
             Sign Out Authority
           </button>
@@ -295,7 +273,7 @@ export function CollectorDashboard() {
           <p className="loading-txt">Loading applications from registry…</p>
         ) : filteredApps.length === 0 ? (
           <div style={{ background: '#ffffff', padding: '50px 20px', textAlign: 'center', border: '1px solid var(--border)', borderRadius: '8px' }}>
-            <div style={{ fontSize: '36px', marginBottom: '10px' }}>📂</div>
+            <div style={{ display: 'inline-flex', padding: '12px', background: '#f8fafc', color: '#94a3b8', borderRadius: '50%', marginBottom: '12px' }}><InboxIcon size={36} /></div>
             <p style={{ color: '#64748b', fontSize: '16px', fontWeight: '600', margin: 0 }}>No applications found in this stage.</p>
           </div>
         ) : (
@@ -463,7 +441,7 @@ export function CollectorDetail() {
     setBusy(true);
     try {
       await cApi.post(`/collector/applications/${id}/forward/`, { remarks: forwardRemarks });
-      setMsg('✅ Application forwarded to Tahsildar for field verification!');
+      setMsg('Application forwarded to Tahsildar for field verification.');
       setBusy(false);
       setTimeout(() => navigate('/collector/dashboard'), 1500);
     } catch {
@@ -475,7 +453,7 @@ export function CollectorDetail() {
   const grantNA = async (e) => {
     if (e) e.preventDefault();
     if (selectedColFactors.length === 0) {
-      alert('⚠️ Please check and adjudicate at least one statutory factor before issuing the sanction order.');
+      alert('Please check and adjudicate at least one statutory factor before issuing the sanction order.');
       return;
     }
     setBusy(true);
@@ -506,7 +484,7 @@ export function CollectorDetail() {
         owner_names: applicantObj.full_name || data?.application?.user_email || '',
       };
       await cApi.post(`/collector/applications/${id}/approve/`, payload);
-      setMsg(`🎉 Official NA Sanction Order No. ${orderNo} granted successfully by District Collector!`);
+      setMsg(`Official NA Sanction Order No. ${orderNo} granted successfully by District Collector!`);
       setBusy(false);
       setTimeout(() => navigate('/collector/dashboard'), 1800);
     } catch (err) {
@@ -524,7 +502,7 @@ export function CollectorDetail() {
     setBusy(true);
     try {
       await cApi.post(`/collector/applications/${id}/reject/`, { reason });
-      setMsg('❌ Application officially rejected by Collector.');
+      setMsg('Application officially rejected by Collector.');
       setBusy(false);
       setTimeout(() => navigate('/collector/dashboard'), 1500);
     } catch {
@@ -543,7 +521,7 @@ export function CollectorDetail() {
         memo: stateReferralMemo || `Statutory Referral under MLRC Section 44 for ${data?.application?.land_type}. Recommended for State Government Grant-in-aid concurrence.`,
         officer_name: collectorName || 'District Collector',
       });
-      setMsg('🏛️ Application successfully referred & dispatched to Maharashtra State Government Secretariat Portal!');
+      setMsg('Application successfully referred & dispatched to Maharashtra State Government Secretariat Portal.');
       setStateReferralBusy(false);
       setTimeout(() => navigate('/collector/dashboard'), 1800);
     } catch (err) {
@@ -614,7 +592,7 @@ export function CollectorDetail() {
               boxShadow: '0 2px 4px rgba(15, 118, 110, 0.2)',
             }}
           >
-            📄 View Full Form PDF
+            View Full Form PDF
           </button>
           <button
             type="button"
@@ -635,7 +613,7 @@ export function CollectorDetail() {
             }}
             title="Preview generated bilingual NA Certificate"
           >
-            📜 Preview NA Certificate (मराठी / EN)
+            Preview NA Certificate (मराठी / EN)
           </button>
           <span style={{ fontSize: '13px', color: '#64748b' }}>Reference ID:</span>
           <code style={{ fontSize: '15px', fontWeight: 'bold', background: '#e2e8f0', padding: '4px 10px', borderRadius: '4px' }}>
@@ -662,7 +640,7 @@ export function CollectorDetail() {
               fontSize: '11.5px',
               fontWeight: '700',
             }}>
-              {isGrantedOrSemiGranted ? '🏛️ Granted Route (State Govt)' : '🏡 Private Route (Tahsildar)'}
+              {isGrantedOrSemiGranted ? 'Granted Route (State Govt)' : 'Private Route (Tahsildar)'}
             </span>
           </div>
           <p style={{ margin: 0, color: '#64748b', fontSize: '14px' }}>
@@ -680,7 +658,7 @@ export function CollectorDetail() {
           <div className={`workflow-step ${isStep1Done ? 'completed' : ''}`}>
             <div className="workflow-step-num">Step 1 • Citizen Submission</div>
             <div className="workflow-step-title">Collector Desk Intake</div>
-            <div className="workflow-step-sub">✅ Filed & Received at Collectorate</div>
+            <div className="workflow-step-sub">Filed & Received at Collectorate</div>
           </div>
 
           <div className={`workflow-step ${isStep2Done ? 'completed' : isStep2Active ? 'active' : ''}`}>
@@ -688,7 +666,7 @@ export function CollectorDetail() {
             <div className="workflow-step-title">{isGrantedOrSemiGranted ? 'State Secretariat Referral' : 'Refer to Tahsildar'}</div>
             <div className="workflow-step-sub">
               {isStep2Done
-                ? (isGrantedOrSemiGranted ? '✅ Forwarded to State Govt' : '✅ Forwarded to Tahsildar')
+                ? (isGrantedOrSemiGranted ? 'Forwarded to State Govt' : 'Forwarded to Tahsildar')
                 : (isGrantedOrSemiGranted ? '⏳ Awaiting Referral Memo' : '⏳ Awaiting Collector Direction')}
             </div>
           </div>
@@ -702,9 +680,9 @@ export function CollectorDetail() {
             </div>
             <div className="workflow-step-sub">
               {isStep3Done
-                ? (isGrantedOrSemiGranted ? '✅ Sanctioned by State GR' : '✅ Verified by Tahsildar')
+                ? (isGrantedOrSemiGranted ? 'Sanctioned by State GR' : 'Verified by Tahsildar')
                 : isStep3Rejected
-                ? (isGrantedOrSemiGranted ? '❌ State Query Raised' : '❌ Objections Noted')
+                ? (isGrantedOrSemiGranted ? 'State Query Raised' : 'Objections Noted')
                 : isStep3Active
                 ? (isGrantedOrSemiGranted ? '⏳ Under Secretariat Review' : '⏳ Inspection in progress')
                 : 'Upcoming'}
@@ -716,11 +694,11 @@ export function CollectorDetail() {
             <div className="workflow-step-title">NA Permission Sanction</div>
             <div className="workflow-step-sub">
               {isStep4Done
-                ? '✅ Sanction Order Issued'
+                ? 'Sanction Order Issued'
                 : isStep4Rejected
-                ? '❌ Sanction Refused'
+                ? 'Sanction Refused'
                 : isStep4Active
-                ? '⚡ Ready for Final Order'
+                ? 'Ready for Final Order'
                 : 'Awaiting Stage 3'}
             </div>
           </div>
@@ -732,7 +710,7 @@ export function CollectorDetail() {
         <div className="tahsildar-findings-card verified" style={{ borderLeft: '5px solid #16a34a' }}>
           <div className="findings-header">
             <div className="findings-title">
-              <span style={{ fontSize: '20px' }}>📋</span> Tahsildar Ground Inquiry Dossier: Verified & Recommended
+              Tahsildar Ground Inquiry Dossier: Verified & Recommended
             </div>
             <span className="status-pill status-tahsildar_verified">Verified (Stage 3 Complete)</span>
           </div>
@@ -744,7 +722,7 @@ export function CollectorDetail() {
             {/* Verification Factors Checklist Display */}
             <div style={{ background: '#ffffff', padding: '14px', borderRadius: '6px', border: '1px solid #bbf7d0', marginBottom: '12px' }}>
               <div style={{ fontWeight: '700', fontSize: '13px', color: '#14532d', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span>✅</span> Statutory Factors Verified by Tahsildar:
+                Statutory Factors Verified by Tahsildar:
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '8px' }}>
                 {[
@@ -777,7 +755,7 @@ export function CollectorDetail() {
         <div className="tahsildar-findings-card rejected">
           <div className="findings-header">
             <div className="findings-title">
-              <span style={{ fontSize: '20px' }}>⚠️</span> Tahsildar Ground Inquiry Report: Field Discrepancy / Objection
+              Tahsildar Ground Inquiry Report: Field Discrepancy / Objection
             </div>
             <span className="status-pill status-tahsildar_rejected">Discrepancy Raised</span>
           </div>
@@ -815,10 +793,10 @@ export function CollectorDetail() {
       {/* DOSSIER SECTION NAVIGATION */}
       <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', borderBottom: '2px solid #e2e8f0', paddingBottom: '2px' }}>
         {[
-          { id: 'applicant', label: '👤 Applicant Profile' },
-          { id: 'land', label: '🗺 Land & Purpose' },
-          { id: 'statutory', label: '⚖ Statutory Clearances' },
-          { id: 'docs', label: `📁 Documents & OCR (${documents?.length || 0})` },
+          { id: 'applicant', label: 'Applicant Profile' },
+          { id: 'land', label: 'Land & Purpose' },
+          { id: 'statutory', label: 'Statutory Clearances' },
+          { id: 'docs', label: `Documents & Dossier (${documents?.length || 0})` },
         ].map(tab => (
           <button
             key={tab.id}
@@ -959,7 +937,7 @@ export function CollectorDetail() {
                       gap: '6px',
                     }}
                   >
-                    📄 View / Print Form PDF ↗
+                    View / Print Form PDF ↗
                   </button>
                 ) : d.file_url ? (
                   <a
@@ -1000,7 +978,7 @@ export function CollectorDetail() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
               <div>
                 <div style={{ fontSize: '17px', fontWeight: '800', color: '#1e40af', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span>🏛️</span> File Dispatched: Under Review at Maharashtra State Government Secretariat (मंत्रालय, मुंबई)
+                  File Dispatched: Under Review at Maharashtra State Government Secretariat (मंत्रालय, मुंबई)
                 </div>
                 <p style={{ margin: '6px 0 0', fontSize: '13.5px', color: '#1e3a8a', lineHeight: '1.5' }}>
                   This Granted/Semi-Granted application was forwarded with Collector recommendation memo. The State Revenue Secretariat is reviewing the reservation dossier for Government Resolution (GR) issuance.
@@ -1031,7 +1009,7 @@ export function CollectorDetail() {
         {app?.status === 'state_govt_approved' && (
           <div style={{ background: '#f0fdf4', border: '2px solid #22c55e', borderRadius: '8px', padding: '18px 20px', marginBottom: '20px' }}>
             <div style={{ fontSize: '16px', fontWeight: '800', color: '#166534', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span>✅</span> Maharashtra State Government Concurrence Granted (GR Executed)
+              Maharashtra State Government Concurrence Granted (GR Executed)
             </div>
             <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#15803d' }}>
               Official State Government Resolution (GR) has been sanctioned. District Collector may now execute the Final Sanction Order below!
@@ -1043,7 +1021,7 @@ export function CollectorDetail() {
         {isGrantedOrSemiGranted && app?.status !== 'forwarded_to_state_govt' && app?.status !== 'state_govt_approved' && (
           <div style={{ background: '#fffbeb', border: '2px solid #d97706', borderRadius: '8px', padding: '20px', marginBottom: '20px' }}>
             <h4 style={{ margin: '0 0 8px', color: '#92400e', fontSize: '16px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span>🏛️</span> Refer to Maharashtra State Government Secretariat (मंत्रालय मंजुरीसाठी पाठवा)
+              Refer to Maharashtra State Government Secretariat (मंत्रालय मंजुरीसाठी पाठवा)
             </h4>
             <p style={{ margin: '0 0 14px', fontSize: '13px', color: '#78350f', lineHeight: '1.5' }}>
               As per Section 44 of Maharashtra Land Revenue Code, 1966, this conversion for <strong>{app?.land_type}</strong> requires State Government Sanction & Resolution (GR). Enter Collector referral memorandum and dispatch this dossier to the Maharashtra State Government Website.
@@ -1081,7 +1059,7 @@ export function CollectorDetail() {
                   boxShadow: '0 2px 6px rgba(217, 119, 6, 0.3)',
                 }}
               >
-                {stateReferralBusy ? 'Dispatching to State Govt…' : '🏛️ Refer & Forward to Maharashtra State Government Portal →'}
+                {stateReferralBusy ? 'Dispatching to State Govt…' : 'Refer & Forward to Maharashtra State Government Portal →'}
               </button>
               <Link
                 to="/maharashtra-govt"
@@ -1097,7 +1075,7 @@ export function CollectorDetail() {
                   textDecoration: 'none',
                 }}
               >
-                🌐 Open State Government Portal ↗
+                Open State Government Portal ↗
               </Link>
             </div>
           </div>
@@ -1141,7 +1119,7 @@ export function CollectorDetail() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px', borderBottom: '2px solid #cbd5e1', paddingBottom: '12px', flexWrap: 'wrap', gap: '10px' }}>
               <div>
                 <h3 style={{ margin: 0, color: '#0f766e', fontSize: '20px', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <span>🏛️</span> {app?.status === 'state_govt_approved' ? 'District Collector Final NA Sanction Decree (Post State Govt Resolution / GR)' : 'District Collector Final NA Sanction & Statutory Approval Dossier'}
+                  {app?.status === 'state_govt_approved' ? 'District Collector Final NA Sanction Decree (Post State Govt Resolution / GR)' : 'District Collector Final NA Sanction & Statutory Approval Dossier'}
                 </h3>
                 <p style={{ margin: '4px 0 0', color: '#475569', fontSize: '13.5px' }}>
                   {app?.status === 'state_govt_approved'
@@ -1419,7 +1397,7 @@ export function CollectorDetail() {
                   }}
                   title="Preview the exact bilingual certificate before issuing"
                 >
-                  👁️ Preview Generated Certificate Before Issuing
+                  Preview Generated Certificate Before Issuing
                 </button>
 
                 <button
@@ -1443,7 +1421,7 @@ export function CollectorDetail() {
                     boxShadow: '0 2px 4px rgba(15, 118, 110, 0.2)',
                   }}
                 >
-                  {busy ? 'Issuing Sanction Order…' : '📜 Issue Official District Collector NA Sanction Order (MLRC Sec 44)'}
+                  {busy ? 'Issuing Sanction Order…' : 'Issue Official District Collector NA Sanction Order (MLRC Sec 44)'}
                 </button>
 
                 <button
@@ -1461,7 +1439,7 @@ export function CollectorDetail() {
                     cursor: 'pointer',
                   }}
                 >
-                  {showColRejectBox ? '▲ Hide Refusal Form' : '❌ Refuse NA Sanction (with Reason)'}
+                  {showColRejectBox ? 'Hide Refusal Form' : 'Refuse NA Sanction (with Reason)'}
                 </button>
               </div>
             </form>
@@ -1527,7 +1505,7 @@ export function CollectorDetail() {
                   disabled={busy}
                   style={{ width: '100%' }}
                 >
-                  ❌ Uphold Tahsildar Objection & Reject
+                  Uphold Tahsildar Objection & Reject
                 </button>
               </div>
 
@@ -1542,7 +1520,7 @@ export function CollectorDetail() {
                   disabled={busy}
                   style={{ width: '100%', background: '#0d9488' }}
                 >
-                  ⚡ Override & Issue Sanction Order
+                  Override & Issue Sanction Order
                 </button>
               </div>
             </div>
@@ -1564,7 +1542,7 @@ export function CollectorDetail() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid #bbf7d0', paddingBottom: '12px' }}>
               <div>
                 <div style={{ fontSize: '18px', fontWeight: '800', color: '#166534', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span>📜</span> Official District Collector NA Sanction Order Granted & Decreed
+                  Official District Collector NA Sanction Order Granted & Decreed
                 </div>
                 <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#15803d' }}>
                   Authorized under Section 44, 45 & 47 of Maharashtra Land Revenue Code, 1966.
@@ -1589,7 +1567,7 @@ export function CollectorDetail() {
                     boxShadow: '0 2px 4px rgba(5, 150, 105, 0.25)',
                   }}
                 >
-                  📜 View / Print Official NA Certificate (मराठी / EN)
+                  View / Print Official NA Certificate (मराठी / EN)
                 </button>
                 <span className="status-pill status-collector_approved">✓ Sanction Order Executed</span>
               </div>
@@ -1618,7 +1596,7 @@ export function CollectorDetail() {
             {/* Checklist of 7 Collector Factors Adjudicated */}
             <div style={{ background: '#ffffff', padding: '16px', borderRadius: '8px', border: '1px solid #bbf7d0' }}>
               <h4 style={{ margin: '0 0 12px', color: '#14532d', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span>✅</span> Collectorate Statutory Factors Adjudicated (7/7 Confirmed)
+                Collectorate Statutory Factors Adjudicated (7/7 Confirmed)
               </h4>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '10px' }}>
                 {COLLECTOR_STATUTORY_FACTORS.map((f, i) => (
@@ -1638,7 +1616,7 @@ export function CollectorDetail() {
         {app?.status === 'collector_rejected' && (
           <div style={{ background: '#fef2f2', padding: '18px', borderRadius: '6px', border: '1px solid #fca5a5' }}>
             <div style={{ fontSize: '16px', fontWeight: '800', color: '#991b1b', marginBottom: '6px' }}>
-              ❌ Application Officially Rejected
+              Application Officially Rejected
             </div>
             <p style={{ margin: '0 0 8px', fontSize: '13px', color: '#b91c1c' }}>
               Final rejection order issued by District Collector. Reviewed at: {app?.reviewed_at ? new Date(app.reviewed_at).toLocaleString('en-IN') : 'Completed'}

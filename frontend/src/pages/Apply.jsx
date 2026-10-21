@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import api from '../services/api';
+import { ShieldCheckIcon, CheckCircleIcon, CheckIcon, AlertTriangleIcon, FileTextIcon, ScaleIcon, ArrowRightIcon, ArrowLeftIcon, ExternalLinkIcon } from '../components/Icons';
 
 const UPI_PAYEE_ID = 'rajnandinijoshi402@okhdfcbank';
 const UPI_PAYEE_NAME = 'Maharashtra Revenue Department / Rajnandini Joshi';
@@ -67,11 +68,11 @@ export default function Apply() {
 
   // -------------------------------------------------------------
   // Cost Calculation Formulas (as mandated):
-  // 🗓 Government Application Fee: ₹500 – ₹5,000
+  // Statutory Government Application Fee: ₹500 – ₹5,000
   // 📊 Residential Conversion Premium: 50% of Ready Reckoner Rate Valuation
   // 📈 Commercial Conversion Premium: 75% of Market Value
   // 📉 Industrial/Other Premium: 20% of Market Value
-  // 🗒 Survey & Mapping Charges: ₹5,000 – ₹25,000
+  // Cadastral Survey & Mapping Charges: ₹5,000 – ₹25,000
   // -------------------------------------------------------------
   let conversionPremium = 0;
   let premiumRuleText = '';
@@ -209,7 +210,7 @@ export default function Apply() {
       <Navbar />
       <div className="success-page" style={{ maxWidth: '820px', margin: '30px auto', padding: '0 20px', fontFamily: "'Inter', sans-serif" }}>
         <div className="success-card" style={{ background: '#ffffff', borderRadius: '12px', border: '2px solid #86efac', padding: '36px', boxShadow: '0 8px 30px rgba(0,0,0,0.06)', textAlign: 'center' }}>
-          <div style={{ fontSize: '48px', marginBottom: '10px' }}>🎉</div>
+          <div style={{ display: 'inline-flex', padding: '14px', background: '#ecfdf5', borderRadius: '50%', color: '#059669', marginBottom: '16px' }}><CheckCircleIcon size={40} /></div>
           <h2 style={{ fontSize: '26px', fontWeight: '800', color: '#166534', margin: '0 0 10px' }}>
             Application & Statutory Fee Submitted Successfully!
           </h2>
@@ -229,7 +230,7 @@ export default function Apply() {
           <div style={{ background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '24px', textAlign: 'left', marginBottom: '26px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #e2e8f0', paddingBottom: '12px', marginBottom: '16px' }}>
               <div>
-                <strong style={{ fontSize: '16px', color: '#0f172a' }}>🏛️ E-Challan & Fee Receipt</strong>
+                <strong style={{ fontSize: '16px', color: '#0f172a' }}>Official E-Challan & Statutory Fee Receipt</strong>
                 <span style={{ display: 'block', fontSize: '12px', color: '#64748b' }}>Revenue & Forest Dept, Govt. of Maharashtra</span>
               </div>
               <span style={{ background: '#dcfce7', color: '#166534', border: '1px solid #86efac', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '800' }}>
@@ -261,17 +262,17 @@ export default function Apply() {
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                 <tbody>
                   <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
-                    <td style={{ padding: '8px 12px', color: '#475569' }}>🗓 Government Application Fee (Range ₹500 – ₹5,000)</td>
+                    <td style={{ padding: '8px 12px', color: '#475569' }}>Statutory Government Application Fee (Range ₹500 – ₹5,000)</td>
                     <td style={{ padding: '8px 12px', textAlign: 'right', fontWeight: '600' }}>{success.gov_app_fee}</td>
                   </tr>
                   <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
                     <td style={{ padding: '8px 12px', color: '#475569' }}>
-                      📊 Conversion Premium <span style={{ fontSize: '11px', color: '#0f766e' }}>({success.premium_rule})</span>
+                      Non-Agricultural Conversion Premium <span style={{ fontSize: '11px', color: '#0f766e' }}>({success.premium_rule})</span>
                     </td>
                     <td style={{ padding: '8px 12px', textAlign: 'right', fontWeight: '600' }}>{success.conversion_premium}</td>
                   </tr>
                   <tr style={{ borderBottom: '1px solid #e2e8f0' }}>
-                    <td style={{ padding: '8px 12px', color: '#475569' }}>🗒 Survey & Mapping Charges (Range ₹5,000 – ₹25,000)</td>
+                    <td style={{ padding: '8px 12px', color: '#475569' }}>Cadastral Survey & Mapping Charges (Range ₹5,000 – ₹25,000)</td>
                     <td style={{ padding: '8px 12px', textAlign: 'right', fontWeight: '600' }}>{success.survey_charges}</td>
                   </tr>
                   <tr style={{ background: '#f0fdf4' }}>
@@ -304,7 +305,7 @@ export default function Apply() {
                 gap: '8px',
               }}
             >
-              🖨️ Print Statutory Fee Challan
+              Print Statutory Fee Challan
             </button>
             <Link
               to={`/track/${success.reference_no}`}
@@ -318,7 +319,7 @@ export default function Apply() {
                 fontSize: '14px',
               }}
             >
-              🔍 Track Application Status →
+              Track Application Status →
             </Link>
             <Link
               to="/upload"
@@ -351,7 +352,7 @@ export default function Apply() {
         </div>
 
         <div className="apply-header" style={{ marginBottom: '24px' }}>
-          <div className="apply-icon" style={{ fontSize: '32px', marginBottom: '8px' }}>📋</div>
+          <div style={{ display: 'inline-flex', padding: '10px', background: '#eff6ff', color: '#1d4ed8', borderRadius: '8px', marginBottom: '12px' }}><FileTextIcon size={26} /></div>
           <h2 style={{ fontSize: '24px', fontWeight: '800', color: '#0f172a', margin: '0 0 6px' }}>
             Non-Agricultural (NA) Application Dossier & Fee Assessment
           </h2>
@@ -371,7 +372,7 @@ export default function Apply() {
             fontWeight: '600',
             marginTop: '8px'
           }}>
-            <span>{isGrantedEduComInd(landType) ? '🏛️' : '⚡'}</span>
+            <ScaleIcon size={14} />
             <span>
               {isGrantedEduComInd(landType)
                 ? 'Statutory Route: District Collector Desk → Maharashtra State Government Portal'
@@ -382,7 +383,7 @@ export default function Apply() {
 
         {error && (
           <div className="error-box" style={{ background: '#fef2f2', border: '1px solid #fca5a5', color: '#991b1b', padding: '12px 16px', borderRadius: '8px', marginBottom: '20px' }}>
-            ⚠️ {error}
+            {error}
           </div>
         )}
 
@@ -390,7 +391,7 @@ export default function Apply() {
           {/* 1. DOCUMENT UPLOAD SECTION */}
           <div style={{ marginBottom: '32px' }}>
             <h3 style={{ fontSize: '17px', fontWeight: '700', color: '#0f172a', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span>📁</span> Step 1: Upload Mandatory Statutory Documents ({uploaded}/{docs.length})
+              Step 1: Upload Mandatory Statutory Documents ({uploaded}/{docs.length})
             </h3>
 
             <div className="doc-upload-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
@@ -417,7 +418,7 @@ export default function Apply() {
                       </div>
                     </div>
                     <div className={`doc-status ${files[i+1] ? 'uploaded' : ''}`} style={{ fontSize: '12px', fontWeight: '600', color: files[i+1] ? '#16a34a' : '#94a3b8' }}>
-                      {files[i+1] ? '✅ Ready' : '⬜ Pending'}
+                      {files[i+1] ? 'Uploaded' : 'Pending'}
                     </div>
                   </div>
                   <label
@@ -438,7 +439,7 @@ export default function Apply() {
                       style={{ display: 'none' }}
                       onChange={e => handleFile(i+1, e.target.files[0])}
                     />
-                    <div className="duz-icon" style={{ fontSize: '20px', marginBottom: '4px' }}>📂</div>
+                    <div style={{ display: 'inline-flex', color: '#0f766e', marginBottom: '4px' }}><FileTextIcon size={20} /></div>
                     <p className="duz-text" style={{ margin: '2px 0', fontSize: '12px', color: files[i+1] ? '#166534' : '#475569', fontWeight: files[i+1] ? '600' : 'normal' }}>
                       {files[i+1] ? files[i+1].name : 'Click to select document'}
                     </p>
@@ -463,7 +464,7 @@ export default function Apply() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '10px', borderBottom: '2px solid #ccfbf1', paddingBottom: '14px', marginBottom: '20px' }}>
               <div>
                 <h3 style={{ margin: 0, fontSize: '19px', fontWeight: '800', color: '#0f766e', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span>🧮</span> Step 2: Statutory Fee & Conversion Premium Calculator
+                  Step 2: Statutory Fee & Conversion Premium Assessment
                 </h3>
                 <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#475569' }}>
                   Automatic calculation based on Maharashtra Land Revenue Code & Town Planning ready reckoner norms.
@@ -477,23 +478,23 @@ export default function Apply() {
             {/* Statutory Rate Card Reference Banner */}
             <div style={{ background: '#ffffff', border: '1px solid #99f6e4', borderRadius: '8px', padding: '14px 18px', marginBottom: '22px' }}>
               <div style={{ fontSize: '12.5px', fontWeight: '700', color: '#134e4a', marginBottom: '8px' }}>
-                📌 Statutory Cost Schedule Reference
+                Statutory Cost Schedule Reference
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '10px', fontSize: '12px' }}>
                 <div style={{ background: '#f0fdfa', padding: '8px 10px', borderRadius: '6px', border: '1px solid #ccfbf1' }}>
-                  🗓 <strong>Govt Application Fee:</strong> ₹500 – ₹5,000
+                  <strong>Govt Application Fee:</strong> ₹500 – ₹5,000
                 </div>
                 <div style={{ background: '#eff6ff', padding: '8px 10px', borderRadius: '6px', border: '1px solid #bfdbfe' }}>
-                  📊 <strong>Residential Premium:</strong> 50% of Ready Reckoner Rate
+                  <strong>Residential Premium:</strong> 50% of Ready Reckoner Rate
                 </div>
                 <div style={{ background: '#fffbeb', padding: '8px 10px', borderRadius: '6px', border: '1px solid #fde68a' }}>
-                  📈 <strong>Commercial Premium:</strong> 75% of Market Value
+                  <strong>Commercial Premium:</strong> 75% of Market Value
                 </div>
                 <div style={{ background: '#f5f3ff', padding: '8px 10px', borderRadius: '6px', border: '1px solid #ddd6fe' }}>
-                  📉 <strong>Industrial/Other:</strong> 20% of Market Value
+                  <strong>Industrial/Other:</strong> 20% of Market Value
                 </div>
                 <div style={{ background: '#f0fdf4', padding: '8px 10px', borderRadius: '6px', border: '1px solid #bbf7d0' }}>
-                  🗒 <strong>Survey & Mapping:</strong> ₹5,000 – ₹25,000
+                  <strong>Survey & Mapping:</strong> ₹5,000 – ₹25,000
                 </div>
               </div>
             </div>
@@ -605,21 +606,21 @@ export default function Apply() {
             <div style={{ background: '#ffffff', borderRadius: '10px', border: '2px solid #99f6e4', padding: '20px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px' }}>
                 <span style={{ fontSize: '14px', fontWeight: '700', color: '#134e4a' }}>
-                  📊 Real-Time Statutory Fee Breakdown
+                  Real-Time Statutory Fee Breakdown
                 </span>
                 <span style={{ fontSize: '12px', color: '#64748b' }}>Auto-recalculated upon input</span>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px', marginBottom: '18px' }}>
                 <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
-                  <span style={{ fontSize: '12px', color: '#64748b', display: 'block' }}>🗓 Govt Application Fee</span>
+                  <span style={{ fontSize: '12px', color: '#64748b', display: 'block' }}>Govt Application Fee</span>
                   <strong style={{ fontSize: '16px', color: '#0f172a' }}>₹ {safeGovFee.toLocaleString('en-IN')}</strong>
                   <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>Standard statutory filing tariff</div>
                 </div>
 
                 <div style={{ background: '#f0fdfa', padding: '12px', borderRadius: '6px', border: '1px solid #99f6e4' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ fontSize: '12px', color: '#0f766e', fontWeight: '700' }}>⚡ Conversion Premium</span>
+                    <span style={{ fontSize: '12px', color: '#0f766e', fontWeight: '700' }}>Conversion Premium</span>
                     <span style={{ fontSize: '10.5px', background: '#ccfbf1', color: '#0f766e', padding: '1px 6px', borderRadius: '4px', fontWeight: '700' }}>
                       {category === 'Residential' ? '50% RR' : category === 'Commercial' ? '75% MV' : '20% MV'}
                     </span>
@@ -631,7 +632,7 @@ export default function Apply() {
                 </div>
 
                 <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
-                  <span style={{ fontSize: '12px', color: '#64748b', display: 'block' }}>🗒 Survey & Mapping Charges</span>
+                  <span style={{ fontSize: '12px', color: '#64748b', display: 'block' }}>Cadastral Survey & Mapping Charges</span>
                   <strong style={{ fontSize: '16px', color: '#0f172a' }}>₹ {safeSurvey.toLocaleString('en-IN')}</strong>
                   <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '2px' }}>Cadastral ground demarcation</div>
                 </div>
@@ -674,7 +675,7 @@ export default function Apply() {
           {/* 3. DIGITAL SIGNATURE SECTION */}
           <div className="signature-section" style={{ background: '#ffffff', padding: '22px', borderRadius: '10px', border: '1px solid #e2e8f0', marginBottom: '28px' }}>
             <div className="signature-header" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-              <span style={{ fontSize: '20px' }}>✍️</span>
+              
               <h4 style={{ margin: 0, fontSize: '16px', fontWeight: '700', color: '#0f172a' }}>Step 3: Digital Signature & Declaration</h4>
               <span className="req-badge" style={{ fontSize: '11px', color: '#dc2626' }}>Required</span>
             </div>
@@ -696,7 +697,7 @@ export default function Apply() {
                     cursor: 'pointer',
                   }}
                 >
-                  {t === 'draw' ? '✏️ Draw Signature' : t === 'type' ? '⌨️ Type Full Name' : '📁 Upload Signature File'}
+                  {t === 'draw' ? 'Draw Signature' : t === 'type' ? 'Type Full Name' : 'Upload Signature File'}
                 </button>
               ))}
             </div>
@@ -716,7 +717,7 @@ export default function Apply() {
                   onClick={clearCanvas}
                   style={{ background: '#f1f5f9', border: '1px solid #cbd5e1', padding: '4px 12px', borderRadius: '4px', fontSize: '12px', cursor: 'pointer' }}
                 >
-                  ✕ Clear Canvas
+                  Clear Canvas
                 </button>
               </div>
             )}
@@ -746,9 +747,9 @@ export default function Apply() {
                     style={{ display: 'none' }}
                     onChange={e => setSigData(e.target.files[0]?.name || '')}
                   />
-                  🖊️ Click to upload signature image (PNG, JPG)
+                  Click to upload signature image (PNG, JPG)
                 </label>
-                {sigData && <p className="sig-status done" style={{ color: '#16a34a', fontSize: '13px', marginTop: '6px' }}>✅ {sigData}</p>}
+                {sigData && <p className="sig-status done" style={{ color: '#16a34a', fontSize: '13px', marginTop: '6px' }}>{sigData}</p>}
               </div>
             )}
           </div>
@@ -796,7 +797,7 @@ export default function Apply() {
                   boxShadow: '0 4px 12px rgba(15, 118, 110, 0.25)',
                 }}
               >
-                <span>💳 Proceed to Payment & QR Code (₹ {totalPayable.toLocaleString('en-IN')}) →</span>
+                <span>Proceed to Payment & QR Code (₹ {totalPayable.toLocaleString('en-IN')}) →</span>
               </button>
             </div>
           </div>
@@ -976,7 +977,7 @@ export default function Apply() {
                         transition: 'all 0.2s',
                       }}
                     >
-                      {copiedUpi ? '✓ Copied!' : '📋 Copy UPI ID'}
+                      {copiedUpi ? 'Copied!' : 'Copy UPI ID'}
                     </button>
                   </div>
 
@@ -997,7 +998,7 @@ export default function Apply() {
                         borderRadius: '20px',
                       }}
                     >
-                      📲 Click here to pay directly in Google Pay / UPI App
+                      Pay directly via Google Pay / UPI App
                     </a>
                   </div>
                 </div>
@@ -1076,7 +1077,7 @@ export default function Apply() {
                       boxShadow: '0 4px 12px rgba(22, 163, 74, 0.3)',
                     }}
                   >
-                    {busy ? 'Verifying & Submitting…' : '✅ Confirm Payment & Submit Application'}
+                    {busy ? 'Verifying & Submitting…' : 'Confirm Payment & Submit Application'}
                   </button>
                 </div>
               </div>

@@ -587,6 +587,7 @@ def track_view(request):
     dossier = {}
     steps = []
     status_meta = None
+    is_granted_flow = False
     error = None
     user_apps = []
 
