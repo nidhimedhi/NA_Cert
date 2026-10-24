@@ -646,7 +646,7 @@ def track_view(request):
             reviewed_at = app.get('reviewed_at')
             land_type = app.get('land_type', '')
             lt_lower = land_type.lower().strip()
-            is_granted_flow = (('granted' in lt_lower) or ('semi-granted' in lt_lower)) and ('private' not in lt_lower)
+            is_granted_flow = ((('granted' in lt_lower) or ('semi-granted' in lt_lower)) and ('private' not in lt_lower)) or status in ('forwarded_to_state_govt', 'state_govt_approved', 'state_govt_rejected')
 
             if is_granted_flow:
                 # ── GRANTED & SEMI-GRANTED WORKFLOW STATUS META (State Govt Route) ──
