@@ -2516,6 +2516,75 @@ img, video, canvas, svg {
     padding: 18px 14px;
   }
 
+  
+  /* Officer Gov Auth Layouts on Mobile */
+  .gov-auth-topbar {
+    padding: 8px 12px !important;
+  }
+  .gov-auth-topbar-inner {
+    flex-direction: column !important;
+    gap: 8px !important;
+    text-align: center !important;
+  }
+  .gov-auth-brand-left {
+    justify-content: center !important;
+    font-size: 11px !important;
+    line-height: 1.3 !important;
+  }
+  .gov-auth-security-info {
+    justify-content: center !important;
+    gap: 12px !important;
+  }
+  .gov-auth-main {
+    padding: 16px 10px 32px !important;
+  }
+  .gov-auth-card,
+  .gov-auth-card--wide {
+    flex-direction: column !important;
+    min-height: auto !important;
+    border-radius: 8px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  .gov-auth-left,
+  .gov-auth-left-collector,
+  .gov-auth-left-state {
+    width: 100% !important;
+    padding: 24px 18px !important;
+    border-right: none !important;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1) !important;
+  }
+  .gov-office-title {
+    font-size: 20px !important;
+  }
+  .gov-auth-right {
+    width: 100% !important;
+    padding: 24px 16px !important;
+  }
+  .gov-terminal-title {
+    font-size: 20px !important;
+  }
+  .gov-segmented-tabs {
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 4px !important;
+  }
+  .gov-tab-btn {
+    font-size: 11px !important;
+    padding: 7px 8px !important;
+  }
+  .gov-sensor-box {
+    max-width: 100% !important;
+  }
+  .gov-sensor-viewport {
+    aspect-ratio: 4 / 3 !important;
+    max-height: 220px !important;
+  }
+  .gov-auth-submit {
+    min-height: 44px !important;
+    font-size: 14px !important;
+  }
+
   /* Application Review / Dossier Detail Page */
   .detail-page {
     padding: 16px 10px !important;

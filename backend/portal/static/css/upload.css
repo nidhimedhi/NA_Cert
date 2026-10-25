@@ -509,3 +509,37 @@ body {
 /* UTILS */
 .text-success { color: var(--success); }
 .text-danger { color: var(--danger); }
+@media (max-width: 768px) {
+  .upload-hero {
+    padding: 35px 16px !important;
+  }
+  .upload-hero h1 {
+    font-size: 1.8rem !important;
+  }
+  .upload-hero p {
+    font-size: 14px !important;
+  }
+  .docs-container {
+    flex-direction: column !important;
+    margin: 20px auto 40px !important;
+    padding: 0 12px !important;
+    gap: 20px !important;
+  }
+  .docs-sidebar {
+    width: 100% !important;
+  }
+  .docs-main {
+    width: 100% !important;
+  }
+  .category-header h2 {
+    font-size: 1.4rem !important;
+  }
+  .doc-card {
+    padding: 16px 14px !important;
+  }
+  .btn-primary {
+    width: 100% !important;
+    text-align: center !important;
+    justify-content: center !important;
+  }
+}
