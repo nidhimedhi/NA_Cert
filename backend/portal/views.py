@@ -235,325 +235,335 @@ def apply_na(request):
     user_name  = request.session.get('user_name', '')
 
     if request.method == 'POST':
-        land_type  = request.POST.get('land_type', 'Residential - Individual').strip()
-        ref        = f"NA-2026-{random.randint(100000, 999999)}"
+        try:
+            land_type  = request.POST.get('land_type', 'Residential - Individual').strip()
+            ref        = f"NA-2026-{random.randint(100000, 999999)}"
 
-        # 1. Gather all form inputs
-        application_date = request.POST.get('application_date', '').strip()
-        if not application_date:
-            d_digits = [request.POST.get(f'app_date_{i}', '') for i in range(8)]
-            if any(d_digits):
-                application_date = f"{d_digits[0]}{d_digits[1]}/{d_digits[2]}{d_digits[3]}/{d_digits[4]}{d_digits[5]}{d_digits[6]}{d_digits[7]}"
+            # 1. Gather all form inputs
+            application_date = request.POST.get('application_date', '').strip()
+            if not application_date:
+                d_digits = [request.POST.get(f'app_date_{i}', '') for i in range(8)]
+                if any(d_digits):
+                    application_date = f"{d_digits[0]}{d_digits[1]}/{d_digits[2]}{d_digits[3]}/{d_digits[4]}{d_digits[5]}{d_digits[6]}{d_digits[7]}"
 
-        full_name       = request.POST.get('full_name', '').strip()
-        aadhaar_number  = request.POST.get('aadhaar_number', '').strip()
-        gender          = request.POST.get('gender', '').strip()
-        dob_day         = request.POST.get('dob_day', '').strip()
-        dob_month       = request.POST.get('dob_month', '').strip()
-        dob_year        = request.POST.get('dob_year', '').strip()
-        dob             = f"{dob_year}-{dob_month.zfill(2)}-{dob_day.zfill(2)}" if dob_year else ''
-        residence_address = request.POST.get('residence_address', '').strip()
-        res_village     = request.POST.get('res_village', '').strip()
-        res_taluka      = request.POST.get('res_taluka', '').strip()
-        res_district    = request.POST.get('res_district', '').strip()
-        res_pincode     = request.POST.get('res_pincode', '').strip()
-        mobile_no       = request.POST.get('mobile_no', '').strip()
-        landline        = request.POST.get('landline', '').strip()
-        email           = request.POST.get('email', user_email).strip()
+            full_name       = request.POST.get('full_name', '').strip()
+            aadhaar_number  = request.POST.get('aadhaar_number', '').strip()
+            gender          = request.POST.get('gender', '').strip()
+            dob_day         = request.POST.get('dob_day', '').strip()
+            dob_month       = request.POST.get('dob_month', '').strip()
+            dob_year        = request.POST.get('dob_year', '').strip()
+            dob             = f"{dob_year}-{dob_month.zfill(2)}-{dob_day.zfill(2)}" if dob_year else ''
+            residence_address = request.POST.get('residence_address', '').strip()
+            res_village     = request.POST.get('res_village', '').strip()
+            res_taluka      = request.POST.get('res_taluka', '').strip()
+            res_district    = request.POST.get('res_district', '').strip()
+            res_pincode     = request.POST.get('res_pincode', '').strip()
+            mobile_no       = request.POST.get('mobile_no', '').strip()
+            landline        = request.POST.get('landline', '').strip()
+            email           = request.POST.get('email', user_email).strip()
 
-        # Service specific details
-        assessment_type = request.POST.get('assessment_type', '').strip()
-        grant_type      = request.POST.get('grant_type', '').strip()
-        grant_condition = request.POST.get('grant_condition_detail', '').strip()
-        holder_type     = request.POST.get('holder_type', '').strip()
-        land_village    = request.POST.get('land_village', '').strip()
-        land_taluka     = request.POST.get('land_taluka', '').strip()
-        land_district   = request.POST.get('land_district', '').strip()
-        gat_number      = request.POST.get('gat_number', '').strip()
-        area_sqmt       = request.POST.get('area_sqmt', '').strip()
-        assessment_rent = request.POST.get('assessment_rent', '').strip()
+            # Service specific details
+            assessment_type = request.POST.get('assessment_type', '').strip()
+            grant_type      = request.POST.get('grant_type', '').strip()
+            grant_condition = request.POST.get('grant_condition_detail', '').strip()
+            holder_type     = request.POST.get('holder_type', '').strip()
+            land_village    = request.POST.get('land_village', '').strip()
+            land_taluka     = request.POST.get('land_taluka', '').strip()
+            land_district   = request.POST.get('land_district', '').strip()
+            gat_number      = request.POST.get('gat_number', '').strip()
+            area_sqmt       = request.POST.get('area_sqmt', '').strip()
+            assessment_rent = request.POST.get('assessment_rent', '').strip()
 
-        # Area breakdown
-        area_residential   = request.POST.get('area_residential', '').strip()
-        area_industrial    = request.POST.get('area_industrial', '').strip()
-        area_commercial    = request.POST.get('area_commercial', '').strip()
-        area_other_purpose = request.POST.get('area_other_purpose', '').strip()
+            # Area breakdown
+            area_residential   = request.POST.get('area_residential', '').strip()
+            area_industrial    = request.POST.get('area_industrial', '').strip()
+            area_commercial    = request.POST.get('area_commercial', '').strip()
+            area_other_purpose = request.POST.get('area_other_purpose', '').strip()
 
-        # Planning, jurisdiction & proximity
-        jurisdiction_municipal     = request.POST.get('jurisdiction_municipal', 'No')
-        city_survey_done           = request.POST.get('city_survey_done', 'No')
-        cantonment_jurisdiction    = request.POST.get('cantonment_jurisdiction', 'No')
-        regional_plan              = request.POST.get('regional_plan', 'No')
-        near_railway               = request.POST.get('near_railway', 'No')
-        near_airport               = request.POST.get('near_airport', 'No')
-        near_jail                  = request.POST.get('near_jail', 'No')
-        near_public_office         = request.POST.get('near_public_office', 'No')
-        near_cemetery              = request.POST.get('near_cemetery', 'No')
-        distance_from_proposed_land = request.POST.get('distance_from_proposed_land', '').strip()
-        near_ht_line               = request.POST.get('near_ht_line', 'No')
-        ht_line_distance           = request.POST.get('ht_line_distance', '').strip()
-        land_under_acquisition     = request.POST.get('land_under_acquisition', 'No')
-        present_land_use           = request.POST.get('present_land_use', '').strip()
-        approach_road_provision    = request.POST.get('approach_road_provision', '').strip()
-        prior_application_submitted = request.POST.get('prior_application_submitted', 'No')
-        prior_rejection_reason     = request.POST.get('prior_rejection_reason', '').strip()
+            # Planning, jurisdiction & proximity
+            jurisdiction_municipal     = request.POST.get('jurisdiction_municipal', 'No')
+            city_survey_done           = request.POST.get('city_survey_done', 'No')
+            cantonment_jurisdiction    = request.POST.get('cantonment_jurisdiction', 'No')
+            regional_plan              = request.POST.get('regional_plan', 'No')
+            near_railway               = request.POST.get('near_railway', 'No')
+            near_airport               = request.POST.get('near_airport', 'No')
+            near_jail                  = request.POST.get('near_jail', 'No')
+            near_public_office         = request.POST.get('near_public_office', 'No')
+            near_cemetery              = request.POST.get('near_cemetery', 'No')
+            distance_from_proposed_land = request.POST.get('distance_from_proposed_land', '').strip()
+            near_ht_line               = request.POST.get('near_ht_line', 'No')
+            ht_line_distance           = request.POST.get('ht_line_distance', '').strip()
+            land_under_acquisition     = request.POST.get('land_under_acquisition', 'No')
+            present_land_use           = request.POST.get('present_land_use', '').strip()
+            approach_road_provision    = request.POST.get('approach_road_provision', '').strip()
+            prior_application_submitted = request.POST.get('prior_application_submitted', 'No')
+            prior_rejection_reason     = request.POST.get('prior_rejection_reason', '').strip()
 
-        # Declaration & signature
-        decl_name           = request.POST.get('decl_name', full_name).strip()
-        decl_parent_name    = request.POST.get('decl_parent_name', '').strip()
-        decl_age            = request.POST.get('decl_age', '').strip()
-        decl_occupation     = request.POST.get('decl_occupation', '').strip()
-        decl_resident_of    = request.POST.get('decl_resident_of', '').strip()
-        decl_place          = request.POST.get('decl_place', '').strip()
-        decl_date           = request.POST.get('decl_date', '').strip()
-        decl_applicant_name = request.POST.get('decl_applicant_name', full_name).strip()
-        signature_data      = request.POST.get('signature_data', '').strip()
+            # Declaration & signature
+            decl_name           = request.POST.get('decl_name', full_name).strip()
+            decl_parent_name    = request.POST.get('decl_parent_name', '').strip()
+            decl_age            = request.POST.get('decl_age', '').strip()
+            decl_occupation     = request.POST.get('decl_occupation', '').strip()
+            decl_resident_of    = request.POST.get('decl_resident_of', '').strip()
+            decl_place          = request.POST.get('decl_place', '').strip()
+            decl_date           = request.POST.get('decl_date', '').strip()
+            decl_applicant_name = request.POST.get('decl_applicant_name', full_name).strip()
+            signature_data      = request.POST.get('signature_data', '').strip()
 
-        # Documents attached checkboxes
-        docs_checked = {
-            'Site report (7/12 & mutation)': bool(request.POST.get('check_site_report')),
-            'Certified copy of record of rights': bool(request.POST.get('check_record_of_rights')),
-            'Proposed building & site layout drawing': bool(request.POST.get('check_site_layout')),
-            'PWD NOC': bool(request.POST.get('check_noc_pwd')),
-            'Approach road owner NOC': bool(request.POST.get('check_noc_owner')),
-            'Tenant/occupant consent': bool(request.POST.get('check_tenant_consent')),
-            'Urban Ceiling Act NOC': bool(request.POST.get('check_urban_ceiling_noc')),
-        }
+            # Documents attached checkboxes
+            docs_checked = {
+                'Site report (7/12 & mutation)': bool(request.POST.get('check_site_report')),
+                'Certified copy of record of rights': bool(request.POST.get('check_record_of_rights')),
+                'Proposed building & site layout drawing': bool(request.POST.get('check_site_layout')),
+                'PWD NOC': bool(request.POST.get('check_noc_pwd')),
+                'Approach road owner NOC': bool(request.POST.get('check_noc_owner')),
+                'Tenant/occupant consent': bool(request.POST.get('check_tenant_consent')),
+                'Urban Ceiling Act NOC': bool(request.POST.get('check_urban_ceiling_noc')),
+            }
 
-        # Cost Component & Payment Details
-        total_amount       = request.POST.get('total_amount', '').strip()
-        gov_app_fee        = request.POST.get('gov_app_fee', '').strip()
-        conversion_premium = request.POST.get('conversion_premium', '').strip()
-        survey_charges     = request.POST.get('survey_charges', '').strip()
-        utr_number         = request.POST.get('utr_number', '').strip()
-        premium_rule       = request.POST.get('premium_rule', '').strip()
-        area_calc          = request.POST.get('area_calc', area_sqmt).strip()
-        rr_rate            = request.POST.get('rr_rate', '').strip()
-        market_val         = request.POST.get('market_val', '').strip()
+            # Cost Component & Payment Details
+            total_amount       = request.POST.get('total_amount', '').strip()
+            gov_app_fee        = request.POST.get('gov_app_fee', '').strip()
+            conversion_premium = request.POST.get('conversion_premium', '').strip()
+            survey_charges     = request.POST.get('survey_charges', '').strip()
+            utr_number         = request.POST.get('utr_number', '').strip()
+            premium_rule       = request.POST.get('premium_rule', '').strip()
+            area_calc          = request.POST.get('area_calc', area_sqmt).strip()
+            rr_rate            = request.POST.get('rr_rate', '').strip()
+            market_val         = request.POST.get('market_val', '').strip()
 
-        fee_summary = f"Statutory Fee: {total_amount} Paid via UPI (UTR: {utr_number or 'Pending'})" if total_amount else None
+            fee_summary = f"Statutory Fee: {total_amount} Paid via UPI (UTR: {utr_number or 'Pending'})" if total_amount else None
 
-        # 2. Insert Application Record into Supabase na_applications
-        app_result = insert('na_applications', {
-            'user_email':       user_email,
-            'land_type':        land_type,
-            'reference_no':     ref,
-            'status':           'pending_collector',
-            'rejection_reason': fee_summary,
-        })
-
-        application_id = None
-        if isinstance(app_result, list) and len(app_result) > 0:
-            application_id = app_result[0].get('id')
-
-        # 3. Insert Comprehensive Application Form into extracted_documents
-        service_specific_data = {
-            'assessment_type': assessment_type,
-            'grant_type': grant_type,
-            'grant_condition_detail': grant_condition,
-            'holder_type': holder_type,
-            'land_village': land_village,
-            'land_taluka': land_taluka,
-            'land_district': land_district,
-            'gat_number': gat_number,
-            'area_sqmt': area_sqmt,
-            'assessment_rent': assessment_rent,
-            'area_residential': area_residential,
-            'area_industrial': area_industrial,
-            'area_commercial': area_commercial,
-            'area_other_purpose': area_other_purpose,
-        }
-
-        form_payload = {
-            'application_date': application_date,
-            'applicant_details': {
-                'full_name': full_name,
-                'aadhaar_number': aadhaar_number,
-                'gender': gender,
-                'dob': dob,
-                'residence_address': residence_address,
-                'village': res_village,
-                'taluka': res_taluka,
-                'district': res_district,
-                'pincode': res_pincode,
-                'res_village': res_village,
-                'res_taluka': res_taluka,
-                'res_district': res_district,
-                'res_pincode': res_pincode,
-                'mobile_no': mobile_no,
-                'landline': landline,
-                'email': email,
-            },
-            'service_specific_details': service_specific_data,
-            'land_details': service_specific_data,
-            'statutory_and_proximity_clearances': {
-                'jurisdiction_municipal': jurisdiction_municipal,
-                'city_survey_done': city_survey_done,
-                'cantonment_jurisdiction': cantonment_jurisdiction,
-                'regional_plan': regional_plan,
-                'near_railway': near_railway,
-                'near_airport': near_airport,
-                'near_jail': near_jail,
-                'near_public_office': near_public_office,
-                'near_cemetery': near_cemetery,
-                'distance_from_proposed_land': distance_from_proposed_land,
-                'near_ht_line': near_ht_line,
-                'ht_line_distance': ht_line_distance,
-                'land_under_acquisition': land_under_acquisition,
-                'present_land_use': present_land_use,
-                'approach_road_provision': approach_road_provision,
-                'prior_application_submitted': prior_application_submitted,
-                'prior_rejection_reason': prior_rejection_reason,
-            },
-            'self_declaration': {
-                'name': decl_name,
-                'parent_name': decl_parent_name,
-                'age': decl_age,
-                'occupation': decl_occupation,
-                'resident_of': decl_resident_of,
-                'place': decl_place,
-                'date': decl_date,
-                'applicant_name': decl_applicant_name,
-                'signature_data': signature_data,
-            },
-            'attached_documents_checklist': docs_checked,
-        }
-
-        if application_id:
-            insert('extracted_documents', {
-                'application_id': application_id,
-                'document_name':  'Application Form - e-District Maharashtra',
-                'file_url':       '',
-                'village':        land_village,
-                'taluka':         land_taluka,
-                'district':       land_district,
-                'gat_no':         gat_number,
-                'owner_names':    full_name,
-                'satbara_no':     aadhaar_number or ref,
-                'raw_json':       form_payload,
+            # 2. Insert Application Record into Supabase na_applications
+            app_result = insert('na_applications', {
+                'user_email':       user_email,
+                'land_type':        land_type,
+                'reference_no':     ref,
+                'status':           'pending_collector',
+                'rejection_reason': fee_summary,
             })
 
-            # Archive Statutory Fee Assessment & Payment Challan
-            if total_amount:
-                from django.utils import timezone
+            application_id = None
+            if isinstance(app_result, list) and len(app_result) > 0:
+                application_id = app_result[0].get('id')
+
+            # 3. Insert Comprehensive Application Form into extracted_documents
+            service_specific_data = {
+                'assessment_type': assessment_type,
+                'grant_type': grant_type,
+                'grant_condition_detail': grant_condition,
+                'holder_type': holder_type,
+                'land_village': land_village,
+                'land_taluka': land_taluka,
+                'land_district': land_district,
+                'gat_number': gat_number,
+                'area_sqmt': area_sqmt,
+                'assessment_rent': assessment_rent,
+                'area_residential': area_residential,
+                'area_industrial': area_industrial,
+                'area_commercial': area_commercial,
+                'area_other_purpose': area_other_purpose,
+            }
+
+            form_payload = {
+                'application_date': application_date,
+                'applicant_details': {
+                    'full_name': full_name,
+                    'aadhaar_number': aadhaar_number,
+                    'gender': gender,
+                    'dob': dob,
+                    'residence_address': residence_address,
+                    'village': res_village,
+                    'taluka': res_taluka,
+                    'district': res_district,
+                    'pincode': res_pincode,
+                    'res_village': res_village,
+                    'res_taluka': res_taluka,
+                    'res_district': res_district,
+                    'res_pincode': res_pincode,
+                    'mobile_no': mobile_no,
+                    'landline': landline,
+                    'email': email,
+                },
+                'service_specific_details': service_specific_data,
+                'land_details': service_specific_data,
+                'statutory_and_proximity_clearances': {
+                    'jurisdiction_municipal': jurisdiction_municipal,
+                    'city_survey_done': city_survey_done,
+                    'cantonment_jurisdiction': cantonment_jurisdiction,
+                    'regional_plan': regional_plan,
+                    'near_railway': near_railway,
+                    'near_airport': near_airport,
+                    'near_jail': near_jail,
+                    'near_public_office': near_public_office,
+                    'near_cemetery': near_cemetery,
+                    'distance_from_proposed_land': distance_from_proposed_land,
+                    'near_ht_line': near_ht_line,
+                    'ht_line_distance': ht_line_distance,
+                    'land_under_acquisition': land_under_acquisition,
+                    'present_land_use': present_land_use,
+                    'approach_road_provision': approach_road_provision,
+                    'prior_application_submitted': prior_application_submitted,
+                    'prior_rejection_reason': prior_rejection_reason,
+                },
+                'self_declaration': {
+                    'name': decl_name,
+                    'parent_name': decl_parent_name,
+                    'age': decl_age,
+                    'occupation': decl_occupation,
+                    'resident_of': decl_resident_of,
+                    'place': decl_place,
+                    'date': decl_date,
+                    'applicant_name': decl_applicant_name,
+                    'signature_data': signature_data,
+                },
+                'attached_documents_checklist': docs_checked,
+            }
+
+            if application_id:
                 insert('extracted_documents', {
                     'application_id': application_id,
-                    'document_name':  'Statutory Fee Assessment & Payment Challan',
+                    'document_name':  'Application Form - e-District Maharashtra',
                     'file_url':       '',
                     'village':        land_village,
                     'taluka':         land_taluka,
                     'district':       land_district,
                     'gat_no':         gat_number,
                     'owner_names':    full_name,
-                    'satbara_no':     ref,
-                    'raw_json': {
-                        'challan_title':        'Statutory NA Fee Assessment & Payment Challan',
-                        'reference_no':         ref,
-                        'applicant_name':       full_name,
-                        'land_type':            land_type,
-                        'total_amount':         total_amount,
-                        'gov_app_fee':          gov_app_fee,
-                        'conversion_premium':   conversion_premium,
-                        'survey_charges':       survey_charges,
-                        'premium_rule':         premium_rule,
-                        'area_sqmt':            area_calc,
-                        'rr_rate':              rr_rate,
-                        'market_value':         market_val,
-                        'utr_number':           utr_number,
-                        'payment_mode':         'Google Pay / UPI',
-                        'payee_upi':            'rajnandinijoshi402@okhdfcbank',
-                        'payment_status':       'VERIFIED & PAID' if utr_number else 'PENDING',
-                        'paid_at':              timezone.now().isoformat(),
-                    }
+                    'satbara_no':     aadhaar_number or ref,
+                    'raw_json':       form_payload,
                 })
 
-            # 4. Handle file uploads for attached documents
-            upload_configs = [
-                ('doc_site_report', 'Site report including 7/12 Extract and mutation entries'),
-                ('doc_record_of_rights', 'Certified copy of record of rights'),
-                ('doc_site_layout', 'Proposed building and site layout drawing'),
-                ('doc_noc_pwd', 'No objection Certificate (NOC) from PWD'),
-                ('doc_noc_owner', 'NOC from other land owner for approach road'),
-                ('doc_tenant_consent', 'Written consent of tenant/superior holder/occupant'),
-                ('doc_urban_ceiling_noc', 'Urban Ceiling Act 1976 NOC'),
-            ]
+                # Archive Statutory Fee Assessment & Payment Challan
+                if total_amount:
+                    from django.utils import timezone
+                    insert('extracted_documents', {
+                        'application_id': application_id,
+                        'document_name':  'Statutory Fee Assessment & Payment Challan',
+                        'file_url':       '',
+                        'village':        land_village,
+                        'taluka':         land_taluka,
+                        'district':       land_district,
+                        'gat_no':         gat_number,
+                        'owner_names':    full_name,
+                        'satbara_no':     ref,
+                        'raw_json': {
+                            'challan_title':        'Statutory NA Fee Assessment & Payment Challan',
+                            'reference_no':         ref,
+                            'applicant_name':       full_name,
+                            'land_type':            land_type,
+                            'total_amount':         total_amount,
+                            'gov_app_fee':          gov_app_fee,
+                            'conversion_premium':   conversion_premium,
+                            'survey_charges':       survey_charges,
+                            'premium_rule':         premium_rule,
+                            'area_sqmt':            area_calc,
+                            'rr_rate':              rr_rate,
+                            'market_value':         market_val,
+                            'utr_number':           utr_number,
+                            'payment_mode':         'Google Pay / UPI',
+                            'payee_upi':            'rajnandinijoshi402@okhdfcbank',
+                            'payment_status':       'VERIFIED & PAID' if utr_number else 'PENDING',
+                            'paid_at':              timezone.now().isoformat(),
+                        }
+                    })
 
-            for field_name, doc_label in upload_configs:
-                file = request.FILES.get(field_name)
-                if file:
-                    ext = file.name.split('.')[-1]
-                    safe_label = re.sub(r'[^a-zA-Z0-9_-]', '_', doc_label)[:40]
-                    file_path = f"{application_id}/{safe_label}.{ext}"
-                    file_url = upload_file(file, file_path)
-                    file.seek(0)
+                # 4. Handle file uploads for attached documents
+                upload_configs = [
+                    ('doc_site_report', 'Site report including 7/12 Extract and mutation entries'),
+                    ('doc_record_of_rights', 'Certified copy of record of rights'),
+                    ('doc_site_layout', 'Proposed building and site layout drawing'),
+                    ('doc_noc_pwd', 'No objection Certificate (NOC) from PWD'),
+                    ('doc_noc_owner', 'NOC from other land owner for approach road'),
+                    ('doc_tenant_consent', 'Written consent of tenant/superior holder/occupant'),
+                    ('doc_urban_ceiling_noc', 'Urban Ceiling Act 1976 NOC'),
+                ]
 
-                    general = extract_any_pdf(file)
-                    file.seek(0)
-
-                    specific = {}
-                    if '7/12' in doc_label or 'mutation' in doc_label:
-                        specific = extract_712(file)
+                for field_name, doc_label in upload_configs:
+                    file = request.FILES.get(field_name)
+                    if file:
+                        ext = file.name.split('.')[-1]
+                        safe_label = re.sub(r'[^a-zA-Z0-9_-]', '_', doc_label)[:40]
+                        file_path = f"{application_id}/{safe_label}.{ext}"
+                        file_url = upload_file(file, file_path)
                         file.seek(0)
+
+                        general = extract_any_pdf(file)
+                        file.seek(0)
+
+                        specific = {}
+                        if '7/12' in doc_label or 'mutation' in doc_label:
+                            specific = extract_712(file)
+                            file.seek(0)
+
+                        insert('extracted_documents', {
+                            'application_id': application_id,
+                            'document_name':  doc_label,
+                            'file_url':       file_url or '',
+                            'village':        specific.get('village', land_village),
+                            'taluka':         specific.get('taluka', land_taluka),
+                            'district':       specific.get('district', land_district),
+                            'gat_no':         specific.get('gat_no', gat_number),
+                            'owner_names':    ", ".join(specific.get('owner_names')) if isinstance(specific.get('owner_names'), list) else str(specific.get('owner_names') or full_name),
+                            'satbara_no':     specific.get('satbara_no', ''),
+                            'raw_json': {
+                                'language':        specific.get('language', ''),
+                                'khata_no':        specific.get('khata_no', ''),
+                                'total_area':      specific.get('total_area', area_sqmt),
+                                'assessment':      specific.get('assessment', assessment_rent),
+                                'raw_text':        general.get('raw_text', ''),
+                                'key_value_pairs': general.get('key_value_pairs', {}),
+                            },
+                        })
+
+                # Extra uploaded files
+                extra_files = request.FILES.getlist('doc_extra_files')
+                for idx, extra_file in enumerate(extra_files, start=1):
+                    ext = extra_file.name.split('.')[-1]
+                    safe_name = re.sub(r'[^a-zA-Z0-9_-]', '_', extra_file.name)[:40]
+                    file_path = f"{application_id}/extra_{idx}_{safe_name}.{ext}"
+                    file_url = upload_file(extra_file, file_path)
+                    extra_file.seek(0)
+                    general = extract_any_pdf(extra_file)
+                    extra_file.seek(0)
 
                     insert('extracted_documents', {
                         'application_id': application_id,
-                        'document_name':  doc_label,
+                        'document_name':  f'Additional Document: {extra_file.name}',
                         'file_url':       file_url or '',
-                        'village':        specific.get('village', land_village),
-                        'taluka':         specific.get('taluka', land_taluka),
-                        'district':       specific.get('district', land_district),
-                        'gat_no':         specific.get('gat_no', gat_number),
-                        'owner_names':    ", ".join(specific.get('owner_names')) if isinstance(specific.get('owner_names'), list) else str(specific.get('owner_names') or full_name),
-                        'satbara_no':     specific.get('satbara_no', ''),
+                        'village':        land_village,
+                        'taluka':         land_taluka,
+                        'district':       land_district,
+                        'gat_no':         gat_number,
+                        'owner_names':    full_name,
+                        'satbara_no':     '',
                         'raw_json': {
-                            'language':        specific.get('language', ''),
-                            'khata_no':        specific.get('khata_no', ''),
-                            'total_area':      specific.get('total_area', area_sqmt),
-                            'assessment':      specific.get('assessment', assessment_rent),
-                            'raw_text':        general.get('raw_text', ''),
+                            'raw_text': general.get('raw_text', ''),
                             'key_value_pairs': general.get('key_value_pairs', {}),
-                        },
+                        }
                     })
 
-            # Extra uploaded files
-            extra_files = request.FILES.getlist('doc_extra_files')
-            for idx, extra_file in enumerate(extra_files, start=1):
-                ext = extra_file.name.split('.')[-1]
-                safe_name = re.sub(r'[^a-zA-Z0-9_-]', '_', extra_file.name)[:40]
-                file_path = f"{application_id}/extra_{idx}_{safe_name}.{ext}"
-                file_url = upload_file(extra_file, file_path)
-                extra_file.seek(0)
-                general = extract_any_pdf(extra_file)
-                extra_file.seek(0)
-
-                insert('extracted_documents', {
-                    'application_id': application_id,
-                    'document_name':  f'Additional Document: {extra_file.name}',
-                    'file_url':       file_url or '',
-                    'village':        land_village,
-                    'taluka':         land_taluka,
-                    'district':       land_district,
-                    'gat_no':         gat_number,
-                    'owner_names':    full_name,
-                    'satbara_no':     '',
-                    'raw_json': {
-                        'raw_text': general.get('raw_text', ''),
-                        'key_value_pairs': general.get('key_value_pairs', {}),
-                    }
-                })
-
-        return render(request, 'portal/apply.html', {
-            'land_type':          land_type,
-            'success':            True,
-            'reference':          ref,
-            'applicant_name':     full_name,
-            'total_amount':       total_amount,
-            'gov_app_fee':        gov_app_fee,
-            'conversion_premium': conversion_premium,
-            'survey_charges':     survey_charges,
-            'utr_number':         utr_number,
-            'premium_rule':       premium_rule,
-        })
+            return render(request, 'portal/apply.html', {
+                'land_type':          land_type,
+                'success':            True,
+                'reference':          ref,
+                'applicant_name':     full_name,
+                'total_amount':       total_amount,
+                'gov_app_fee':        gov_app_fee,
+                'conversion_premium': conversion_premium,
+                'survey_charges':     survey_charges,
+                'utr_number':         utr_number,
+                'premium_rule':       premium_rule,
+            })
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return render(request, 'portal/apply.html', {
+                'land_type':  request.POST.get('land_type', 'Residential - Individual'),
+                'error':      f"Error submitting application: {str(e)}",
+                'user_email': user_email,
+                'user_name':  user_name,
+            })
 
     # GET
     from django.utils import timezone
