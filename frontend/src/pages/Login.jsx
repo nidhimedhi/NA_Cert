@@ -28,7 +28,7 @@ export default function Login() {
       navigate('/upload');
     } catch (err) {
       if (!err.response) {
-        setError('Backend server is offline or unreachable (http://127.0.0.1:8000). Please ensure backend is running.');
+        setError('Backend server is temporarily unreachable. Please check your connection and try again.');
       } else {
         setError(err.response?.data?.error || 'Authentication rejected. Please check email and password.');
       }

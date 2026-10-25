@@ -5,8 +5,7 @@ from django.views.static import serve
 from django.shortcuts import redirect
 
 def state_govt_redirect(request):
-    # If React dev server is running, or deployed frontend
-    frontend_url = 'http://localhost:5173/state-govt/login'
+    frontend_url = 'https://na-cert.vercel.app/state-govt/login'
     return redirect(frontend_url)
 
 urlpatterns = [

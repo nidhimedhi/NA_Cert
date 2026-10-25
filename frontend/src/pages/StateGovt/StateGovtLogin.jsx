@@ -165,8 +165,8 @@ export default function StateGovtLogin() {
       setScanState('failed');
       let errMsg = err.response?.data?.error;
       if (!err.response) {
-        errMsg = 'Backend server is offline or unreachable (http://127.0.0.1:8000). Please ensure "python manage.py runserver" is running in the backend directory.';
-        setStatusMessage('Backend Server Offline: Port 8000 is not reachable.');
+        errMsg = 'Backend server is temporarily unreachable. Please check your network connection and try again.';
+        setStatusMessage('Backend Server Unreachable: Please check connection.');
       } else {
         errMsg = errMsg || 'Authentication rejected: Invalid username or passkey.';
         setStatusMessage('Access Denied: Invalid credentials.');
