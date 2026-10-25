@@ -2,6 +2,8 @@
 Django settings for na_cert_mp2 project.
 """
 
+import os
+import shutil
 from pathlib import Path
 from datetime import timedelta
 
@@ -69,12 +71,23 @@ TEMPLATES = [
 WSGI_APPLICATION = 'na_cert_mp2.wsgi.application'
 
 # ── Database (SQLite for Django auth / sessions) ─────────────────────
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if 'VERCEL' in os.environ:
+    tmp_db = Path('/tmp/db.sqlite3')
+    if not tmp_db.exists() and (BASE_DIR / 'db.sqlite3').exists():
+        shutil.copy2(BASE_DIR / 'db.sqlite3', tmp_db)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': tmp_db,
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # ── DRF ──────────────────────────────────────────────────────────────
 REST_FRAMEWORK = {
