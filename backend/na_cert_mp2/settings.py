@@ -16,12 +16,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ── Security ──────────────────────────────────────────────────────────
 SECRET_KEY   = 'django-insecure-)4t(@#s#mn-z!jv!^+^6e!z%nk(o6%p!$80e2!#kryx^+^z3)'
 DEBUG        = False
-ALLOWED_HOSTS = [
-    'localhost',
-    '127.0.0.1',
-    'testserver',
-    'na-cert-u5ud-tau.vercel.app',
-]
+ALLOWED_HOSTS = ['*']
 
 # ── Apps ──────────────────────────────────────────────────────────────
 INSTALLED_APPS = [
@@ -98,12 +93,8 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES':      ('Bearer',),
 }
 
-# ── CORS (allow React dev server) ─────────────────────────────────────
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
-    'https://YOUR-FRONTEND-DOMAIN.vercel.app',
-]
+# ── CORS ──────────────────────────────────────────────────────────────
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
 # ── Sessions ──────────────────────────────────────────────────────────
