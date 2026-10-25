@@ -1,9 +1,14 @@
 {
+  "version": 2,
   "builds": [
     {
       "src": "na_cert_mp2/wsgi.py",
       "use": "@vercel/python",
       "config": { "maxLambdaSize": "15mb", "runtime": "python3.11" }
+    },
+    {
+      "src": "static/**",
+      "use": "@vercel/static"
     }
   ],
   "routes": [
