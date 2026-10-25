@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_BASE } from '../services/api';
 
 export default function CertificateModal({ isOpen, onClose, referenceNumber }) {
   const [lang, setLang] = useState('mr'); // 'mr' | 'en'
@@ -11,7 +12,7 @@ export default function CertificateModal({ isOpen, onClose, referenceNumber }) {
     if (isOpen && referenceNumber) {
       setLoading(true);
       setError('');
-      axios.get(`http://127.0.0.1:8000/api/certificate/${encodeURIComponent(referenceNumber)}/`)
+      axios.get(`${API_BASE}/certificate/${encodeURIComponent(referenceNumber)}/`)
         .then(res => {
           setData(res.data);
         })

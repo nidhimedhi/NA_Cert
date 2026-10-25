@@ -21,3 +21,10 @@ frontend/*.local
 .DS_Store
 *.swp
 *.bak
+*.backup
+
+# Environment & Vercel
+.env
+.env.local
+.env*.local
+.vercel

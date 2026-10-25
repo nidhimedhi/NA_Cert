@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
+import { API_BASE } from '../services/api';
 
 export default function CertificatePage() {
   const { ref } = useParams();
@@ -14,7 +15,7 @@ export default function CertificatePage() {
     if (ref) {
       setLoading(true);
       setError('');
-      axios.get(`http://127.0.0.1:8000/api/certificate/${encodeURIComponent(ref)}/`)
+      axios.get(`${API_BASE}/certificate/${encodeURIComponent(ref)}/`)
         .then(res => {
           setData(res.data);
         })

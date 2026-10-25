@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { API_BASE } from '../../services/api';
 import { StateEmblem, InboxIcon, CheckIcon, XIcon, LockIcon, SearchIcon, ScaleIcon, ArrowRightIcon } from '../../components/Icons';
 
-const tApi = axios.create({ baseURL: 'http://127.0.0.1:8000/api' });
+const tApi = axios.create({ baseURL: API_BASE });
 tApi.interceptors.request.use(c => {
   const t = localStorage.getItem('tahsildar_token');
   if (t) c.headers.Authorization = `Bearer ${t}`;

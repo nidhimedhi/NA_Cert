@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { API_BASE } from '../../services/api';
 import ApplicationPdfModal from '../../components/ApplicationPdfModal';
 import './StateGovt.css';
 
-const api = axios.create({ baseURL: 'http://127.0.0.1:8000/api' });
+const api = axios.create({ baseURL: API_BASE });
 
 export default function StateGovtPortal() {
   const [apps, setApps] = useState([]);

@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
+import { API_BASE } from '../../services/api';
 import ApplicationPdfModal from '../../components/ApplicationPdfModal';
 import CertificateModal from '../../components/CertificateModal';
 import { StateEmblem, ShieldCheckIcon, CheckCircleIcon, CheckIcon, AlertTriangleIcon, FileTextIcon, ScaleIcon, ArrowRightIcon, ArrowLeftIcon, ExternalLinkIcon, BuildingIcon, LockIcon, SearchIcon, InboxIcon } from '../../components/Icons';
 
-const cApi = axios.create({ baseURL: 'http://127.0.0.1:8000/api' });
+const cApi = axios.create({ baseURL: API_BASE });
 cApi.interceptors.request.use(c => {
   const t = localStorage.getItem('collector_token');
   if (t) c.headers.Authorization = `Bearer ${t}`;

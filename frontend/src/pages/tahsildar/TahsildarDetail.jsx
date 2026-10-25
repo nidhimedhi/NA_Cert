@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import { API_BASE } from '../../services/api';
 import ApplicationPdfModal from '../../components/ApplicationPdfModal';
 import { StateEmblem, ShieldCheckIcon, CheckCircleIcon, CheckIcon, AlertTriangleIcon, FileTextIcon, ScaleIcon, ArrowRightIcon, ArrowLeftIcon } from '../../components/Icons';
 
-const tApi = axios.create({ baseURL: 'http://127.0.0.1:8000/api' });
+const tApi = axios.create({ baseURL: API_BASE });
 tApi.interceptors.request.use(c => {
   const t = localStorage.getItem('tahsildar_token');
   if (t) c.headers.Authorization = `Bearer ${t}`;
